@@ -1,0 +1,22 @@
+#autocreated file on Delllinux by hguo, Wed Mar 30 15:49:24 CST 2011"
+*.o
+*.d
+*.out
+*.map
+*.cmd
+*.bin
+.#*
+.tmp*
+.config*
+..tmp*
+cscope*
+CVS
+.version
+vmlinux*
+zvmlinux*
+.pc
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+patches
