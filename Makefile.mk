@@ -10,8 +10,7 @@ UPDATE                  := cvs -q update -CAPd $(CHECKOUT_OPTION)
 makefile_test:=echo "nothing todo"
 CONFIG_SDK_CONFIGDEF=build.config
 ifneq (,$(realpath $(CONFIG_SDK_CONFIGDEF)))
-    CONFIG_SDK_CONFIGFILE=$(realpath $(CONFIG_SDK_CONFIGDEF))
-    include $(CONFIG_SDK_CONFIGFILE)
+    include $(realpath $(CONFIG_SDK_CONFIGDEF))
 endif
 
 all: 

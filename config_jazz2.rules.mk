@@ -755,6 +755,13 @@ $(PKG_NAME_C2BOX_DEMO):$(TEST_ROOT_DIR)/$(PRODUCT)/work
 	@cd $(TEST_ROOT_DIR)/$(PRODUCT); \
 		tar cfz $(PKG_NAME_C2BOX_DEMO) work	
 	@touch $@
+$(PKG_NAME_BIN_TOOLS): $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS)
+	if [ -f $@ ]; then rm --interactive=never $@;fi
+	@echo Target folder $(@D) depend on $<
+	@mkdir -p $(@D)
+	@cd $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS); \
+		tar cfz $@ tools
+	@touch $@
 
 mission_jtag := help_jtag clean_jtag src_get_jtag  \
 	src_package_jtag src_install_jtag src_config_jtag src_build_jtag \
@@ -924,17 +931,13 @@ $(PKG_NAME_BIN_GOODIES):  $(TEST_ROOT_DIR)/c2_goodies
 		./c2_goodies/ethertool/install
 	@touch $@
 
-
-factory-udisk:
-	#rm -rf $(TEST_ROOT_DIR)
-	mkdir -p $(PKG_DIR)
-	mkdir -p $(TEST_ROOT_DIR)
+factory-udisk:sdk_folders
 	rm -rf $(TEST_ROOT_DIR)/home $(TEST_ROOT_DIR)/work
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_UBOOT) 
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_KERNEL_NAND)
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_C2BOX_DEMO) 
-	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_HDMIKO) 
-	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_GFX_2D) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_HDMI_JAZZ2)
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_VIVANTE)
 	cd $(TEST_ROOT_DIR) ; mkdir -p home; mv work home/
 	cd $(TEST_ROOT_DIR) ; cp -f jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko home/work/lib/
 	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/libGAL.so           home/work/lib/
@@ -959,16 +962,12 @@ factory-udisk:
 	cd $(TEST_ROOT_DIR) ; rm  -rf $(PKG_NAME_BIN_FACCN_UDISK)
 	cd $(TEST_ROOT_DIR) ; tar cfz $(PKG_NAME_BIN_FACCN_UDISK) $(FACUDISK_FILES)
 
-user-udisk:
-	#rm -rf $(TEST_ROOT_DIR)
-	mkdir -p $(PKG_DIR)
-	mkdir -p $(TEST_ROOT_DIR)
-	cd $(TEST_ROOT_DIR) ; cp -rf $(SOURCE_DIR)/$(CVS_SRC_SW_C2APPS)/tools/updateFileGenerate/* .
-	cd $(TEST_ROOT_DIR) ; make 
+user-udisk:sdk_folders
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_TOOLS)
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_KERNEL_NAND)
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_C2BOX_DEMO) 
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_UBOOT) 
-	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_HDMIKO) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_HDMI_JAZZ2)
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_GFX_2D) 
 	cd $(TEST_ROOT_DIR) ; cp -f jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib/
 	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/libGAL.so           work/lib/
@@ -977,7 +976,7 @@ user-udisk:
 	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
 	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/rootfs.image .
 	cd $(TEST_ROOT_DIR) ; $(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin uImage.bin
-	cd $(TEST_ROOT_DIR) ; ./createArchive uImage.bin rootfs.image work -v "the version no."
+	cd $(TEST_ROOT_DIR) ; ./tools/createArchive uImage.bin rootfs.image work -v "the version no."
 	cd $(TEST_ROOT_DIR) ; cp -f c2_update.tar $(PKG_NAME_BIN_USER_UDISK)
 
 mission_facudisk := help_facudisk clean_facudisk src_get_facudisk  \

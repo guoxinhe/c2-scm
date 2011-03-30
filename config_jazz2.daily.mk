@@ -33,19 +33,41 @@ SOURCE_DIR			:= $(TOP_DIR)/source
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
 
-SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
-KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
+# build installation configures
 TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
+SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
+KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
 
+# DEVTOOLS package
+CVS_SRC_BUILDROOT       	:= projects/sw/devtools/buildroot
+CVS_SRC_3RDPARTY        	:= projects/sw/devtools/3rdParty
+CVS_SRC_BINUTILS        	:= projects/sw/devtools/binutils/binutils
+CVS_SRC_GCC             	:= projects/sw/devtools/gcc/gcc
+CVS_SRC_GCC_4_3_5       	:= projects/sw/devtools/gcc-4.3.5
+CVS_SRC_KERNEL_HEADERS  	:= projects/sw/kernel/$(LINUXDIR)
+CVS_SRC_UCLIBC          	:= projects/sw/devtools/uClibc
+CVS_SRC_DIRECTFB        	:= projects/sw/directfb/DirectFB-1.4.5
+STANDALONE_BUILD        	:= projects/sw/sdk/sdk_tools
+BUILDROOT_FILE          	:= $(TEMP_DIR)/devtools/tarballs/buildroot-c2.snapshot.tar.bz2
+BUSYBOX_1_5_1_FILE      	:= $(TEMP_DIR)/devtools/tarballs/busybox-1.5.1.tar.bz2
+BUSYBOX_1_13_3_FILE     	:= $(TEMP_DIR)/devtools/tarballs/busybox-1.13.3.tar.bz2
+I2CTOOLS_FILE           	:= $(TEMP_DIR)/devtools/tarballs/i2c-tools-3.0.1.tar.bz2
+OPROFILE_FILE           	:= $(TEMP_DIR)/devtools/tarballs/oprofile-0.9.1.tar.bz2
+BINUTILS_FILE           	:= $(TEMP_DIR)/devtools/tarballs/binutils-c2.snapshot.tar.bz2
+GCC_FILE                	:= $(TEMP_DIR)/devtools/tarballs/gcc-c2.snapshot.tar.bz2
+KERNEL_FILE      		:= $(TEMP_DIR)/devtools/tarballs/linux-libc-headers-$(SDK_KERNEL_VERSION).0.tar.bz2
+UCLIBC_FILE             	:= $(TEMP_DIR)/devtools/tarballs/uClibc-0.9.27.tar.bz2
+DIRECTFB_FILE           	:= $(TEMP_DIR)/devtools/tarballs/DirectFB-1.4.5.tar.bz2
+PKG_NAME_SRC_DEVTOOLS   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-src.tar.gz
+PKG_NAME_BIN_DEVTOOLS		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-bin.tar.gz
 DEVTOOLS_BUILD_PATH		:= $(TEST_ROOT_DIR)/devtools_build_folder/devtools
 DEVTOOLS_DIR			:= $(TOP_DIR)/c2/daily
 
 # QT 4.7 package
-QT_INSTALL_DIR470		:= $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic
 CVS_SRC_QT470			:= sw/Qt/qt-everywhere-opensource-src-4.7.0
 PKG_NAME_SRC_QT470		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-src.tar.gz
 PKG_NAME_BIN_QT470		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-bin.tar.gz
@@ -62,71 +84,55 @@ PKG_NAME_BIN_SW_MEDIA_QA   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-bin-QA.
 PKG_NAME_TEST_BIN_SW_MEDIA 	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-test-bin.tar.gz
 PKG_NAME_DOC_SW_MEDIA		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-doc.tar.gz
 
+#kernel package
 CVS_SRC_KERNEL			:= sw/kernel
 PKG_NAME_SRC_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-src.tar.gz
 PKG_NAME_BIN_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-bin.tar.gz
 PKG_NAME_BIN_KERNEL_NAND	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-nand-bin.tar.gz
 
+# vivante package
 CVS_SRC_VIVANTE         	:= projects/sw/bsp/vivante/VIVANTE_GAL2D_Unified
 PKG_NAME_SRC_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-src.tar.gz
 PKG_NAME_BIN_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-bin.tar.gz
 
+# hdmi package
 CVS_SRC_HDMI_JAZZ2      	:= projects/sw/bsp/hdmi/jazz2hdmi
 PKG_NAME_SRC_HDMI_JAZZ2   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-hdmi-src.tar.gz
 PKG_NAME_BIN_HDMI_JAZZ2   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-hdmi-bin.tar.gz
 
+# c2box package
 CVS_SRC_SW_C2APPS		:= sw_c2apps
 PKG_NAME_SRC_C2BOX_ALL		:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-src-all.tar.gz
 PKG_NAME_C2BOX_DEMO		:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-bin.tar.gz
+PKG_NAME_BIN_TOOLS		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-tools-bin.tar.gz
 
 # SPI package
-CVS_SRC_SPI		:= sw/prom/spirom
-PKG_NAME_SRC_SPI_B1	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-250-src.tar.gz
-PKG_NAME_SRC_SPI_B2	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-350-src.tar.gz
-PKG_NAME_BIN_SPI_B1	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-250-bin.tar.gz
-PKG_NAME_BIN_SPI_B2	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-350-bin.tar.gz
+CVS_SRC_SPI			:= sw/prom/spirom
+PKG_NAME_SRC_SPI_B1		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-250-src.tar.gz
+PKG_NAME_SRC_SPI_B2		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-350-src.tar.gz
+PKG_NAME_BIN_SPI_B1		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-250-bin.tar.gz
+PKG_NAME_BIN_SPI_B2		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-spi_rom-cc1100-350-bin.tar.gz
+                        	
+# diag package
+CVS_SRC_DIAG            	:= sw/prom/diag
+PKG_NAME_SRC_DIAG       	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-diag_rom-src.tar.gz
+PKG_NAME_BIN_DIAG       	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-diag_rom-bin.tar.gz
 
-#diag package
-CVS_SRC_DIAG            := sw/prom/diag
-PKG_NAME_SRC_DIAG       := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-diag_rom-src.tar.gz
-PKG_NAME_BIN_DIAG       := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-diag_rom-bin.tar.gz
-
-CVS_SRC_JTAG            := sw/jtag
-PKG_NAME_SRC_JTAG       := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jtag-src.tar.gz
-PKG_NAME_BIN_JTAG       := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jtag-bin.tar.gz
+CVS_SRC_JTAG            	:= sw/jtag
+PKG_NAME_SRC_JTAG       	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jtag-src.tar.gz
+PKG_NAME_BIN_JTAG       	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jtag-bin.tar.gz
 
 # U-BOOT package
-uboot_utilities=u-boot-utilities
-UBOOT_BOARDTYPE         := jazz2evb_config
-UBOOT_MAKECONFIG        := MPUCLK=400 MEMCLK=400 DDR_DEVICE=MT47H64M16-25E
-CVS_SRC_UBOOT		:= sw/prom/u-boot-1.3.0
-PKG_NAME_SRC_UBOOT	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-src.tar.gz
-PKG_NAME_BIN_UBOOT	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-bin.tar.gz
-
-# DEVTOOLS package
-CVS_SRC_BUILDROOT       := projects/sw/devtools/buildroot
-CVS_SRC_3RDPARTY        := projects/sw/devtools/3rdParty
-CVS_SRC_BINUTILS        := projects/sw/devtools/binutils/binutils
-CVS_SRC_GCC             := projects/sw/devtools/gcc/gcc
-CVS_SRC_GCC_4_3_5       := projects/sw/devtools/gcc-4.3.5
-CVS_SRC_KERNEL_HEADERS  := projects/sw/kernel/$(LINUXDIR)
-CVS_SRC_UCLIBC          := projects/sw/devtools/uClibc
-CVS_SRC_DIRECTFB        := projects/sw/directfb/DirectFB-1.4.5
-STANDALONE_BUILD        := projects/sw/sdk/sdk_tools
-BUILDROOT_FILE          := $(TEMP_DIR)/devtools/tarballs/buildroot-c2.snapshot.tar.bz2
-BUSYBOX_1_5_1_FILE      := $(TEMP_DIR)/devtools/tarballs/busybox-1.5.1.tar.bz2
-BUSYBOX_1_13_3_FILE     := $(TEMP_DIR)/devtools/tarballs/busybox-1.13.3.tar.bz2
-I2CTOOLS_FILE           := $(TEMP_DIR)/devtools/tarballs/i2c-tools-3.0.1.tar.bz2
-OPROFILE_FILE           := $(TEMP_DIR)/devtools/tarballs/oprofile-0.9.1.tar.bz2
-BINUTILS_FILE           := $(TEMP_DIR)/devtools/tarballs/binutils-c2.snapshot.tar.bz2
-GCC_FILE                := $(TEMP_DIR)/devtools/tarballs/gcc-c2.snapshot.tar.bz2
-KERNEL_FILE      	:= $(TEMP_DIR)/devtools/tarballs/linux-libc-headers-$(SDK_KERNEL_VERSION).0.tar.bz2
-UCLIBC_FILE             := $(TEMP_DIR)/devtools/tarballs/uClibc-0.9.27.tar.bz2
-DIRECTFB_FILE           := $(TEMP_DIR)/devtools/tarballs/DirectFB-1.4.5.tar.bz2
-PKG_NAME_SRC_DEVTOOLS   := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-src.tar.gz
-PKG_NAME_BIN_DEVTOOLS	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-bin.tar.gz
+uboot_utilities			:=u-boot-utilities
+UBOOT_BOARDTYPE         	:= jazz2evb_config
+UBOOT_MAKECONFIG        	:= MPUCLK=400 MEMCLK=400 DDR_DEVICE=MT47H64M16-25E
+CVS_SRC_UBOOT			:= sw/prom/u-boot-1.3.0
+PKG_NAME_SRC_UBOOT		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-src.tar.gz
+PKG_NAME_BIN_UBOOT		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-bin.tar.gz
 
 # C2 Goodies package
+PKG_NAME_SRC_GOODIES	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-c2_goodies-src.tar.gz
+PKG_NAME_BIN_GOODIES	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-c2_goodies-bin.tar.gz
 CVS_SRC_BUSYBOX_1.5.1   := sw/cmd/busybox-1.5.1
 CVS_SRC_BUSYBOX_1.13.3  := sw/cmd/busybox-1.13.3
 CVS_SRC_I2CTOOLS        := sw/cmd/i2c-tools
@@ -159,28 +165,19 @@ NTFSPROGS_PKG           := $(CVS_SRC_APP_3RDPARTY)/ntfsprogs-2.0.0-c2.tar.gz
 LIBUSB_PKG              := $(CVS_SRC_APP_3RDPARTY)/libusb-0.1.12.tar.bz2
 LIBPTP_PKG              := $(CVS_SRC_APP_3RDPARTY)/libptp2-1.1.10.tar.gz
 
-# goodies
-PKG_NAME_SRC_GOODIES	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-c2_goodies-src.tar.gz
-PKG_NAME_BIN_GOODIES	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-c2_goodies-bin.tar.gz
+PKG_NAME_BIN_FACEN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-en.tar.gz
+PKG_NAME_BIN_FACCN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-cn.tar.gz
+PKG_NAME_BIN_USER_UDISK := $(PKG_DIR)/c2_update.tar
 
 FACUDISK_FILES := 	updating.bmp	updatefail.bmp	updatesucc.bmp	logo.bmp	\
 			kernel.img	rootfs.img	home.img			\
 			u-boot.rom	u-boot-factory.rom
-
 uboot_file		:= $(uboot_utilities)/u-boot-jazz2-autodetect.rom
 uboot_factory_file	:= $(uboot_utilities)/u-boot-jazz2-factory-autodetect.rom
-PKG_NAME_C2BOX_DEMO	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-bin.tar.gz
-PKG_NAME_BIN_KERNEL_NAND:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-nand-bin.tar.gz
-PKG_NAME_BIN_HDMIKO     := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-hdmi-bin.tar.gz
-PKG_NAME_BIN_GFX_2D     := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-bin.tar.gz
-PKG_NAME_BIN_FACEN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-en.tar.gz
-PKG_NAME_BIN_FACCN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-cn.tar.gz
-PKG_NAME_BIN_USER_UDISK := $(PKG_DIR)/c2_update.tar
 BIN_MKIMAGE  		:= $(TEST_ROOT_DIR)/$(uboot_utilities)/mkimage
 BIN_MKYAFFS2 		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
 BIN_MKJFFS2  		:= $(TOOLCHAIN_PATH)/mkfs.jffs2
 BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
-CVS_SRC_SW_C2APPS       := sw_c2apps
 
 override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
 
