@@ -718,7 +718,7 @@ src_build_c2box: sdk_folders  $(TEST_ROOT_DIR)/$(PRODUCT)/work \
 	
 	@echo $@ done
 	@touch $(TEST_ROOT_DIR)/$(PRODUCT)/work
-bin_package_c2box: sdk_folders $(PKG_NAME_C2BOX_DEMO)
+bin_package_c2box: sdk_folders $(PKG_NAME_C2BOX_DEMO) $(PKG_NAME_BIN_TOOLS)
 	@echo $@ done
 bin_install_c2box: sdk_folders
 	@echo $@ done
