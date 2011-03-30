@@ -67,7 +67,7 @@ log=`pwd`/resultofbuild/`date +%y%m%d`
 mkdir -p $log $log.log
 make  mktest >$log.log/mktest.log
 make  help   >$log.log/help.log
-make  bin_install_devtools
+#make  bin_install_devtools
 for i in ${modules}; do
   nr_merr=0
   tm_module=`date +%s`

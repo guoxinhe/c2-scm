@@ -163,6 +163,24 @@ LIBPTP_PKG              := $(CVS_SRC_APP_3RDPARTY)/libptp2-1.1.10.tar.gz
 PKG_NAME_SRC_GOODIES	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-c2_goodies-src.tar.gz
 PKG_NAME_BIN_GOODIES	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-c2_goodies-bin.tar.gz
 
+FACUDISK_FILES := 	updating.bmp	updatefail.bmp	updatesucc.bmp	logo.bmp	\
+			kernel.img	rootfs.img	home.img			\
+			u-boot.rom	u-boot-factory.rom
+
+uboot_file		:= $(uboot_utilities)/u-boot-jazz2-autodetect.rom
+uboot_factory_file	:= $(uboot_utilities)/u-boot-jazz2-factory-autodetect.rom
+PKG_NAME_C2BOX_DEMO	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-bin.tar.gz
+PKG_NAME_BIN_KERNEL_NAND:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-nand-bin.tar.gz
+PKG_NAME_BIN_HDMIKO     := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-hdmi-bin.tar.gz
+PKG_NAME_BIN_GFX_2D     := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-bin.tar.gz
+PKG_NAME_BIN_FACEN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-en.tar.gz
+PKG_NAME_BIN_FACCN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-cn.tar.gz
+PKG_NAME_BIN_USER_UDISK := $(PKG_DIR)/c2_update.tar
+BIN_MKIMAGE  		:= $(TEST_ROOT_DIR)/$(uboot_utilities)/mkimage
+BIN_MKYAFFS2 		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
+BIN_MKJFFS2  		:= $(TOOLCHAIN_PATH)/mkfs.jffs2
+BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
+CVS_SRC_SW_C2APPS       := sw_c2apps
 
 override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
 

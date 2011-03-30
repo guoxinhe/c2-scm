@@ -925,6 +925,60 @@ $(PKG_NAME_BIN_GOODIES):  $(TEST_ROOT_DIR)/c2_goodies
 	@touch $@
 
 
+factory-udisk:
+	#rm -rf $(TEST_ROOT_DIR)
+	mkdir -p $(PKG_DIR)
+	mkdir -p $(TEST_ROOT_DIR)
+	rm -rf $(TEST_ROOT_DIR)/home $(TEST_ROOT_DIR)/work
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_UBOOT) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_KERNEL_NAND)
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_C2BOX_DEMO) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_HDMIKO) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_GFX_2D) 
+	cd $(TEST_ROOT_DIR) ; mkdir -p home; mv work home/
+	cd $(TEST_ROOT_DIR) ; cp -f jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko home/work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/libGAL.so           home/work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/galcore.ko          home/work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/libdirectfb_gal.so  home/work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f home/work/updat*.bmp . ; cp -f home/work/logo.bmp .
+	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
+	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/rootfs.image .
+	cd $(TEST_ROOT_DIR) ; $(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin kernel.img
+	cd $(TEST_ROOT_DIR) ; $(BIN_MKIMAGE) -A c2 -O linux -n rootfs -d rootfs.image rootfs.img
+	cd $(TEST_ROOT_DIR) ; $(BIN_MKYAFFS2) home home.image ;
+	cd $(TEST_ROOT_DIR) ; $(BIN_MKIMAGE) -A c2 -O linux -n home   -d home.image   home.img
+	cd $(TEST_ROOT_DIR) ; cp -f $(uboot_file) u-boot.rom; cp -f $(uboot_factory_file) u-boot-factory.rom
+	cd $(TEST_ROOT_DIR) ; cp -f updatingEN.bmp updating.bmp
+	cd $(TEST_ROOT_DIR) ; cp -f updateFailEN.bmp updatefail.bmp
+	cd $(TEST_ROOT_DIR) ; cp -f updateSuccEN.bmp updatesucc.bmp
+	cd $(TEST_ROOT_DIR) ; rm  -rf $(PKG_NAME_BIN_FACEN_UDISK)
+	cd $(TEST_ROOT_DIR) ; tar cfz $(PKG_NAME_BIN_FACEN_UDISK) $(FACUDISK_FILES)
+	cd $(TEST_ROOT_DIR) ; cp -f updatingCH.bmp updating.bmp
+	cd $(TEST_ROOT_DIR) ; cp -f updateFailCH.bmp updatefail.bmp
+	cd $(TEST_ROOT_DIR) ; cp -f updateSuccCH.bmp updatesucc.bmp
+	cd $(TEST_ROOT_DIR) ; rm  -rf $(PKG_NAME_BIN_FACCN_UDISK)
+	cd $(TEST_ROOT_DIR) ; tar cfz $(PKG_NAME_BIN_FACCN_UDISK) $(FACUDISK_FILES)
+
+user-udisk:
+	#rm -rf $(TEST_ROOT_DIR)
+	mkdir -p $(PKG_DIR)
+	mkdir -p $(TEST_ROOT_DIR)
+	cd $(TEST_ROOT_DIR) ; cp -rf $(SOURCE_DIR)/$(CVS_SRC_SW_C2APPS)/tools/updateFileGenerate/* .
+	cd $(TEST_ROOT_DIR) ; make 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_KERNEL_NAND)
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_C2BOX_DEMO) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_UBOOT) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_HDMIKO) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_GFX_2D) 
+	cd $(TEST_ROOT_DIR) ; cp -f jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/libGAL.so           work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/galcore.ko          work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/libdirectfb_gal.so  work/lib/
+	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
+	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/rootfs.image .
+	cd $(TEST_ROOT_DIR) ; $(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin uImage.bin
+	cd $(TEST_ROOT_DIR) ; ./createArchive uImage.bin rootfs.image work -v "the version no."
+	cd $(TEST_ROOT_DIR) ; cp -f c2_update.tar $(PKG_NAME_BIN_USER_UDISK)
 
 mission_facudisk := help_facudisk clean_facudisk src_get_facudisk  \
 	src_package_facudisk src_install_facudisk src_config_facudisk src_build_facudisk \
