@@ -12,7 +12,7 @@ mkdir -p configs
 [ -h br.mk        ] || ln -s configs/config_jazz2.rules.mk br.mk
 
 modules="
-xxx
+devtools 
 "
 modules_jump="
 devtools 
@@ -55,6 +55,14 @@ recho_time_consumed()
     echo "$@" "$tm_c seconds / $tm_h:$tm_m:$tm_s consumed."
 }
 
+if [ "$1" == "init" ]; then
+  make clean
+  rm -rf log
+  lcp /sdk/jazz2/dev/weekly/110330 jazz2-sdk-110330
+  make bin_install_devtools
+  shift
+fi
+
 config_enable_clean=
 config_enable_src_get=
 config_enable_src_package=
@@ -63,10 +71,10 @@ config_enable_src_config=y
 config_enable_src_build=y
 config_enable_bin_package=y
 config_enable_bin_install=y
-log=`pwd`/resultofbuild/`date +%y%m%d`
-mkdir -p $log $log.log
-make  mktest >$log.log/mktest.log
-make  help   >$log.log/help.log
+log=`pwd`/log   #/`date +%y%m%d`
+mkdir -p $log 
+make  mktest >$log/mktest.log
+make  help   >$log/help.log
 #make  bin_install_devtools
 for i in ${modules}; do
   nr_merr=0
@@ -84,21 +92,20 @@ for i in ${modules}; do
 
       echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$i
       tm_a=`date +%s`
-      echo `date +"%Y-%m-%d %H:%M:%S"` Start build  ${s}_$i >>$log.log/progress.log
+      echo `date +"%Y-%m-%d %H:%M:%S"` Start build  ${s}_$i >>$log/progress.log
       if [ "$jump" == "y" ]; then
-          echo "make ${s}_$i jumped" >>$log.log/$i.log 2>&1
+          echo "make ${s}_$i jumped" >>$log/$i.log 2>&1
       else
-          make ${s}_$i        >>$log.log/$i.log 2>&1
+          make ${s}_$i        >>$log/$i.log 2>&1
       fi
       if [ $? -ne 0 ];then
         nr_merr=$((nr_merr+1))
 	iserror=$((iserror+1))
-	tail $log.log/$i.log
       fi
-      echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$i, $nr_merr error >>$log.log/progress.log
-      recho_time_consumed $tm_a " $iserror error(s). "
+      echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$i, $nr_merr error >>$log/progress.log
+      recho_time_consumed $tm_a "$s: $iserror error(s). "  
   done
-  echo "$i:$nr_merr:$log.log/$i.log" >>$log.txt
+  echo "$i:$nr_merr:$log/$i.log" >>$log/r.txt
   recho_time_consumed $tm_module "Build module $i $nr_merr error(s). "
 done
 

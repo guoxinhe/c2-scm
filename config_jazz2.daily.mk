@@ -4,7 +4,8 @@
 # level 1: has immediate value
 # level 2: direct get value from level, does not get from another level 2
 # make scence settings
-TODAY                   	:= $(shell date +%y%m%d)
+#TODAY                   	:= $(shell date +%y%m%d)
+TODAY                   	:= 110330
 TOP_DIR				?= $(shell /bin/pwd)
 SDK_KERNEL_VERSION		:= 2.6.23
 SDK_GCC_VERSION			:= 4.0.3

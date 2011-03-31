@@ -931,7 +931,7 @@ $(PKG_NAME_BIN_GOODIES):  $(TEST_ROOT_DIR)/c2_goodies
 		./c2_goodies/ethertool/install
 	@touch $@
 
-factory-udisk:sdk_folders
+factory_udisk:sdk_folders
 	rm -rf $(TEST_ROOT_DIR)/home $(TEST_ROOT_DIR)/work
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_UBOOT) 
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_KERNEL_NAND)
@@ -962,13 +962,13 @@ factory-udisk:sdk_folders
 	cd $(TEST_ROOT_DIR) ; rm  -rf $(PKG_NAME_BIN_FACCN_UDISK)
 	cd $(TEST_ROOT_DIR) ; tar cfz $(PKG_NAME_BIN_FACCN_UDISK) $(FACUDISK_FILES)
 
-user-udisk:sdk_folders
+user_udisk:sdk_folders
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_TOOLS)
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_KERNEL_NAND)
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_C2BOX_DEMO) 
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_UBOOT) 
 	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_HDMI_JAZZ2)
-	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_GFX_2D) 
+	cd $(TEST_ROOT_DIR) ; tar xzf $(PKG_NAME_BIN_VIVANTE)
 	cd $(TEST_ROOT_DIR) ; cp -f jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib/
 	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/libGAL.so           work/lib/
 	cd $(TEST_ROOT_DIR) ; cp -f build/sdk/drivers/galcore.ko          work/lib/
@@ -976,7 +976,7 @@ user-udisk:sdk_folders
 	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
 	cd $(TEST_ROOT_DIR) ; cp -f sw/kernel/rootfs.image .
 	cd $(TEST_ROOT_DIR) ; $(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin uImage.bin
-	cd $(TEST_ROOT_DIR) ; ./tools/createArchive uImage.bin rootfs.image work -v "the version no."
+	cd $(TEST_ROOT_DIR) ; ./tools/updateFileGenerate/createArchive uImage.bin rootfs.image work -v "the version no."
 	cd $(TEST_ROOT_DIR) ; cp -f c2_update.tar $(PKG_NAME_BIN_USER_UDISK)
 
 mission_facudisk := help_facudisk clean_facudisk src_get_facudisk  \
@@ -995,7 +995,7 @@ src_config_facudisk: sdk_folders
 	@echo $@ done
 src_build_facudisk: sdk_folders
 	@echo $@ done
-bin_package_facudisk: sdk_folders factory-udisk
+bin_package_facudisk: sdk_folders factory_udisk
 	@echo $@ done
 bin_install_facudisk: sdk_folders
 	@echo $@ done
@@ -1021,7 +1021,7 @@ src_config_usrudisk: sdk_folders
 	@echo $@ done
 src_build_usrudisk: sdk_folders
 	@echo $@ done
-bin_package_usrudisk: sdk_folders user-udisk
+bin_package_usrudisk: sdk_folders user_udisk
 	@echo $@ done
 bin_install_usrudisk: sdk_folders
 	@echo $@ done
