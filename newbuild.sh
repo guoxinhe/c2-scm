@@ -2,17 +2,15 @@
 
 . ~/.bash_profile
 
-mkdir -p configs
-#cvs co -d configs projects/sw/sdk/configs
-[ -h build.config ] || ln -s configs/config_jazz2.daily.mk build.config
-[ -h build.rules  ] || ln -s configs/config_jazz2.rules.mk build.rules
-[ -h Makefile     ] || ln -s configs/Makefile.mk           Makefile
-[ -h newbuild.sh  ] || ln -s configs/newbuild.sh           newbuild.sh
-[ -h bc.mk        ] || ln -s configs/config_jazz2.daily.mk bc.mk
-[ -h br.mk        ] || ln -s configs/config_jazz2.rules.mk br.mk
+[ -h build.config ] || ln -s sdkmake/config_jazz2.daily.mk build.config
+[ -h build.rules  ] || ln -s sdkmake/config_jazz2.rules.mk build.rules
+[ -h Makefile     ] || ln -s sdkmake/Makefile.mk           Makefile
+[ -h newbuild.sh  ] || ln -s sdkmake/newbuild.sh           newbuild.sh
+[ -h bc.mk        ] || ln -s sdkmake/config_jazz2.daily.mk bc.mk
+[ -h br.mk        ] || ln -s sdkmake/config_jazz2.rules.mk br.mk
 
 modules="
-devtools 
+xxx
 "
 modules_jump="
 devtools 
