@@ -210,14 +210,14 @@ $(DEVTOOLS_BUILD_PATH)/c2: $(DEVTOOLS_BUILD_PATH)
 	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
 	# judge if the devtools is compiled successfully
 	@cd  $(DEVTOOLS_BUILD_PATH); \
-	if test $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.$(TODAY) |wc -l) = 1; then \
+	if test $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.* |wc -l) = 1; then \
 	   echo "Devtools compile successfully"; \
 	else \
 	   echo "Devtools compile failed"; \
 	   exit 1; \
 	fi 
 	@cd  $(DEVTOOLS_BUILD_PATH)/c2; \
-	    ln -s $(TODAY) daily; \
+	    for i in  `ls 1* -d`;do echo $$i;done; ln -s $$i daily;\
 	    ln -s daily sw; 
 	@touch $@
 $(TEST_ROOT_DIR)/c2:
