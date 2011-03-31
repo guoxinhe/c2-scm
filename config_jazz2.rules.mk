@@ -210,7 +210,7 @@ $(DEVTOOLS_BUILD_PATH)/c2: $(DEVTOOLS_BUILD_PATH)
 	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
 	# judge if the devtools is compiled successfully
 	@cd  $(DEVTOOLS_BUILD_PATH); \
-	if test $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.* |wc -l) = 1; then \
+	if [ $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.* |wc -l) -gt 0 ]; then \
 	   echo "Devtools compile successfully"; \
 	else \
 	   echo "Devtools compile failed"; \
