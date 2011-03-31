@@ -6,22 +6,28 @@ mission_modules += mission_devtools
 mission_targets += $(mission_devtools)
 .PHONY: $(mission_devtools)
 
-buildroot:
-	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUILDROOT)
-	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/buildroot $(TEMP_DIR)/devtools
-	cd $(TEMP_DIR)/devtools/buildroot; \
-	cp $(DEVTOOLS_AUTOBUILD_CONFIG) autobuild_config; \
-		rm autobuild_config_*
-	cd $(TEMP_DIR)/devtools; \
-	    tar jcf $(BUILDROOT_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
-		buildroot
+
+devtools_list += thirdparty
 thirdparty:
+	@mkdir -p $(TEMP_DIR)/devtools
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_3RDPARTY)
 	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/3rdParty $(TEMP_DIR)/devtools
 	@cd $(TEMP_DIR)/devtools ; \
 	    mv 3rdParty tarballs
+devtools_list += buildroot
+buildroot:
+	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUILDROOT)
+	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/buildroot $(TEMP_DIR)/
+	cd $(TEMP_DIR)/buildroot; \
+	cp $(DEVTOOLS_AUTOBUILD_CONFIG) autobuild_config; \
+		rm autobuild_config_*
+	cd $(TEMP_DIR)/; \
+	    tar jcf $(BUILDROOT_FILE) \
+		--exclude=CVS     \
+		--exclude=CVSROOT \
+		buildroot; \
+	    rm -rf buildroot;
+devtools_list += busybox151
 busybox151:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.5.1)
 	@cd $(SOURCE_DIR)/sw/cmd; \
@@ -29,6 +35,7 @@ busybox151:
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		busybox-1.5.1
+devtools_list += busybox1131
 busybox1131:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.13.3)
 	@cd $(SOURCE_DIR)/sw/cmd; \
@@ -36,14 +43,16 @@ busybox1131:
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		busybox-1.13.3
+devtools_list += i2ctools301
 i2ctools301:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_I2CTOOLS) 
-	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/i2c-tools-3.0.1; \
+	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/i2c-tools-3.0.1; \
 	    cd $(TEMP_DIR) && tar jcf $(I2CTOOLS_FILE) \
 	        --exclude=CVS     \
 	        --exclude=CVSROOT \
 	        i2c-tools-3.0.1; \
 	    rm -rf i2c-tools-3.0.1
+devtools_list += oprofile
 oprofile:
 	@echo Checkout $(CVS_SRC_OPROFILE)
 	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_OPROFILE)
@@ -53,6 +62,7 @@ oprofile:
 	        --exclude=CVSROOT \
 	        oprofile-0.9.1; \
 	    rm -rf oprofile-0.9.1
+devtools_list += directfb
 directfb:
 	@#checkout directfb
 	@echo Checkout $(CVS_SRC_DIRECTFB)
@@ -62,28 +72,31 @@ directfb:
 	        --exclude=CVS      \
 	        --exclude=CVSROOT  \
 	        DirectFB-1.4.5
+devtools_list += binutils
 binutils:	
 	@# checkout binutils
 	@echo Checkout $(CVS_SRC_BINUTILS)
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BINUTILS)	
 	@cd $(SOURCE_DIR)/projects/sw/devtools/binutils; \
-	    cp -rf binutils binutils-c2.snapshot
-	@cd $(SOURCE_DIR)/projects/sw/devtools/binutils; \
+	    cp -rf binutils $(TEMP_DIR)/binutils-c2.snapshot
+	@cd $(TEMP_DIR); \
 	    tar jcf $(BINUTILS_FILE) \
 		--exclude=CVS \
 		--exclude=CVSROOT \
 		binutils-c2.snapshot; \
 	    rm -rf binutils-c2.snapshot
+devtools_list += gccsrc
 gccsrc:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_GCC)
 	@cd $(SOURCE_DIR)/projects/sw/devtools/gcc; \
-	    cp -rf gcc gcc-c2.snapshot
-	@cd $(SOURCE_DIR)/projects/sw/devtools/gcc; \
+	    cp -rf gcc $(TEMP_DIR)/gcc-c2.snapshot
+	@cd $(TEMP_DIR); \
 	    tar jcf $(GCC_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		gcc-c2.snapshot ; \
 	    rm -rf gcc-c2.snapshot
+devtools_list += standalone_build_script
 standalone_build_script:
 	@# Get the standalone build scripts (alternate/checkout) 
 	@echo Checkout $(STANDALONE_BUILD)
@@ -99,6 +112,7 @@ standalone_build_script:
 	    cp -f gcc-uclibc-3.x.mk.64 $(TEMP_DIR)/devtools; \
 	    cp -f gcc-uclibc-3.x.mk $(TEMP_DIR)/devtools; \
 	    cp -f binutils.mk.64 $(TEMP_DIR)/devtools
+devtools_list += kernel_include
 kernel_include:
 	@-echo Checkout $(CVS_SRC_KERNEL)
 	@-cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_KERNEL)
@@ -116,26 +130,24 @@ kernel_include:
 			--exclude=CVSROOT \
 			linux-libc-headers-$(SDK_KERNEL_VERSION).0 ; \
 		rm -rf linux-libc-headers-$(SDK_KERNEL_VERSION).0
+devtools_list += uclibc
 uclibc:
 	@# checkout uClibc
 	@echo Checkout $(CVS_SRC_UCLIBC)
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_UCLIBC)
 	@cd $(SOURCE_DIR)/projects/sw/devtools/; \
-	    cp -rf uClibc uClibc-0.9.27
-	@cd $(SOURCE_DIR)/projects/sw/devtools/; \
+	    cp -rf uClibc $(TEMP_DIR)/uClibc-0.9.27
+	@cd $(TEMP_DIR); \
 	    tar jcf $(UCLIBC_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		uClibc-0.9.27 ; \
 	    rm -rf uClibc-0.9.27
+devtools_list += mxtool
 mxtool:	
 	@# mxtool needs to be built and installed in tarballs/bin
 	@echo Checkout sw_media components for mxtool
-	@if test -d "$(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)" ; then \
-	     cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA); $(UPDATE); \
-	 else \
-	     cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_SW_MEDIA); \
-	 fi
+	cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_SW_MEDIA); 
 	@rm -rf $(TEMP_DIR)/mxtool_tmp/
 	@mkdir -p $(TEMP_DIR)/mxtool_tmp
 	@cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA); \
@@ -162,10 +174,11 @@ mxtool:
             TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) \
             MXTOOL_INSTALL_DIR=$(TEMP_DIR)/devtools/tarballs \
             install
+devtools_list += clean_oldfiles
 clean_oldfiles:
 	@# Also remove tar files that are part of c2_goodies-src package
 	@cd $(TEMP_DIR)/devtools/tarballs; rm -rf $(devtools-tarballs-remove)
-$(PKG_NAME_SRC_DEVTOOLS):
+$(PKG_NAME_SRC_DEVTOOLS): $(devtools_list)
 	@echo Creating $(PKG_NAME_SRC_DEVTOOLS)
 	@cd $(TOP_DIR)
 	@mkdir -p $(PKG_DIR)
@@ -179,7 +192,7 @@ $(PKG_NAME_SRC_DEVTOOLS):
 
 src_get_devtools:  sdk_folders
 	@echo $@ done
-src_package_devtools: sdk_folders
+src_package_devtools: sdk_folders $(PKG_NAME_SRC_DEVTOOLS)
 	@echo $@ done
 src_install_devtools: sdk_folders $(DEVTOOLS_BUILD_PATH)
 	@echo $@ done
@@ -1083,9 +1096,11 @@ sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR)
 sdk_folders: $(sdkautodirs)
 $(sdkautodirs):
 	@mkdir -p $@
-config menuconfig mc help: mktest
-	@echo
-	@echo support mission : $(shell echo $(subst _xxx,,"$(mission_xxx)") test)
-	@echo support mission modules: $(subst mission_,,"$(mission_modules)")
-	@echo
+ls:
 	@echo support mission targets: $(mission_targets) 
+mc help: mktest
+	@echo
+	@echo "support mission        :" $(shell echo $(subst _xxx,,"$(mission_xxx)") test)
+	@echo "support mission modules:" $(subst mission_,,"$(mission_modules)")
+	@echo "support mission test   :" $(subst mission_,test_,"$(mission_modules)")
+	@echo

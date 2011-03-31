@@ -34,6 +34,14 @@ SOURCE_DIR			:= $(TOP_DIR)/source
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
 
+ifneq ($(CVS_TAG),)
+CHECKOUT_OPTION         := -r $(CVS_TAG)
+endif
+#CHECKOUT                := cvs -q co -AP $(CHECKOUT_OPTION)
+#UPDATE                  := cvs -q update -CAPd $(CHECKOUT_OPTION)
+CHECKOUT                := echo "cvs -q co -AP $(CHECKOUT_OPTION)"
+UPDATE                  := echo "cvs -q update -CAPd $(CHECKOUT_OPTION)"
+
 # build installation configures
 TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
@@ -166,6 +174,31 @@ NTFSPROGS_PKG           := $(CVS_SRC_APP_3RDPARTY)/ntfsprogs-2.0.0-c2.tar.gz
 LIBUSB_PKG              := $(CVS_SRC_APP_3RDPARTY)/libusb-0.1.12.tar.bz2
 LIBPTP_PKG              := $(CVS_SRC_APP_3RDPARTY)/libptp2-1.1.10.tar.gz
 
+devtools-tarballs-remove +=    \
+	cups-1.1.23-source.tar.bz2 	\
+	djmount-0.71.tar.gz        	\
+	fusepod-0.5.1.tar          	\
+	fuse-2.6.3.tar.gz          	\
+	fuse-2.7.1-c2.tar.gz       	\
+	glib-2.12.9-c2.tar         	\
+	libgpod-0.4.2-c2.tar       	\
+	libgpod-0.5.2.tar.gz       	\
+	libptp2-1.1.0-c2.tar.bz2   	\
+	libptp2-1.1.10.tar.gz      	\
+	libusb-0.1.12.tar.bz2      	\
+	ntfs-3g-1.1120-c2.tgz      	\
+	ntfs-3g-1.710-c2.tgz       	\
+	oprofile-0.9.2.tar.gz      	\
+	perl-5.8.8.tar.gz          	\
+	samba-3.0.28a-c2.tar.bz2   	\
+	samba-2.2.12-c2.tar.bz2    	\
+	taglib-1.4.tar             	\
+	gcc-core-4.3.5.tar.bz2  	\
+	gcc-g++-4.3.5.tar.bz2  		\
+	gcc-testsuite-4.3.5.tar.bz2 	\
+	gmp-4.3.2.tar.bz2  mpc-0.8.1.tar.gz  mpfr-2.4.2.tar.bz2   \
+	linux-2.6.32.tar.bz2		\
+
 PKG_NAME_BIN_FACEN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-en.tar.gz
 PKG_NAME_BIN_FACCN_UDISK:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-factory-udisk-cn.tar.gz
 PKG_NAME_BIN_USER_UDISK := $(PKG_DIR)/c2_update.tar
@@ -183,35 +216,40 @@ BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
 override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
 
 define makefile_test
-    echo "   TODAY                           = "$(TODAY)
-    echo "   TOP_DIR                         = "$(TOP_DIR)
-    echo "   SDK_KERNEL_VERSION              = "$(SDK_KERNEL_VERSION)
-    echo "   SDK_GCC_VERSION                 = "$(SDK_GCC_VERSION)
-    echo "   SDK_QT_VERSION                  = "$(SDK_QT_VERSION)
-    echo "   SDK_TARGET_ARCH                 = "$(SDK_TARGET_ARCH)
-    echo "   SDK_TARGET_GCC_ARCH             = "$(SDK_TARGET_GCC_ARCH)
-    echo "   LINUXDIR                        = "$(LINUXDIR)
-    echo "   LINUX_CONFIG                    = "$(LINUX_CONFIG)
-    echo "   QTINSTALL_NAME                  = "$(QTINSTALL_NAME)
-    echo "   GNU_TARBALL_PATH                = "$(GNU_TARBALL_PATH)
-    echo "   MAJOR                           = "$(MAJOR)
-    echo "   MINOR                           = "$(MINOR)
-    echo "   BRANCH                          = "$(BRANCH)
-    echo "   BUILDTIMES                      = "$(BUILDTIMES)
-    echo "   VERSION                         = "$(VERSION)
-    echo "   CANDIDATE                       = "$(CANDIDATE)
-    echo "   CVS_TAG                         = "$(CVS_TAG)
-    echo "   SDK_VERSION_ALL                 = "$(SDK_VERSION_ALL)
-    echo "   DEVTOOLS_AUTOBUILD_CONFIG       = "$(DEVTOOLS_AUTOBUILD_CONFIG)
-    echo "   TEST_ROOT_DIR                   = "$(TEST_ROOT_DIR)
-    echo "   SOURCE_DIR                      = "$(SOURCE_DIR)
-    echo "   TEMP_DIR                        = "$(TEMP_DIR)
-    echo "   PKG_DIR                         = "$(PKG_DIR)
-    echo "   KERNEL_PATH                     = "$(KERNEL_PATH)
-    echo "   TOOLCHAIN_PATH                  = "$(TOOLCHAIN_PATH)
-    echo "   SW_MEDIA_PATH                   = "$(SW_MEDIA_PATH)
-    echo "   QT_INSTALL_DIR                  = "$(QT_INSTALL_DIR)
-    echo "   INSTALL_DIR                     = "$(INSTALL_DIR)
-    echo "   PUBLISH_DIR                     = "$(PUBLISH_DIR)
+    echo "   TODAY                     = "$(TODAY)
+    echo "   TOP_DIR                   = "$(TOP_DIR)
+    echo "   SDK_KERNEL_VERSION        = "$(SDK_KERNEL_VERSION)
+    echo "   SDK_GCC_VERSION           = "$(SDK_GCC_VERSION)
+    echo "   SDK_QT_VERSION            = "$(SDK_QT_VERSION)
+    echo "   SDK_TARGET_ARCH           = "$(SDK_TARGET_ARCH)
+    echo "   SDK_TARGET_GCC_ARCH       = "$(SDK_TARGET_GCC_ARCH)
+    echo "   LINUXDIR                  = "$(LINUXDIR)
+    echo "   LINUX_CONFIG              = "$(LINUX_CONFIG)
+    echo "   QTINSTALL_NAME            = "$(QTINSTALL_NAME)
+    echo "   GNU_TARBALL_PATH          = "$(GNU_TARBALL_PATH)
+    echo "   MAJOR                     = "$(MAJOR)
+    echo "   MINOR                     = "$(MINOR)
+    echo "   BRANCH                    = "$(BRANCH)
+    echo "   BUILDTIMES                = "$(BUILDTIMES)
+    echo "   VERSION                   = "$(VERSION)
+    echo "   CANDIDATE                 = "$(CANDIDATE)
+    echo "   CVS_TAG                   = "$(CVS_TAG)
+    echo "   SDK_VERSION_ALL           = "$(SDK_VERSION_ALL)
+    echo "   CHECKOUT_OPTION           = "$(CHECKOUT_OPTION)
+    echo "   CHECKOUT                  = "$(CHECKOUT)
+    echo "   UPDATE                    = "$(UPDATE)
+    echo "   DEVTOOLS_AUTOBUILD_CONFIG = "$(DEVTOOLS_AUTOBUILD_CONFIG)
+    echo "   TEST_ROOT_DIR             = "$(TEST_ROOT_DIR)
+    echo "   SOURCE_DIR                = "$(SOURCE_DIR)
+    echo "   TEMP_DIR                  = "$(TEMP_DIR)
+    echo "   PKG_DIR                   = "$(PKG_DIR)
+    echo "   KERNEL_PATH               = "$(KERNEL_PATH)
+    echo "   TOOLCHAIN_PATH            = "$(TOOLCHAIN_PATH)
+    echo "   SW_MEDIA_PATH             = "$(SW_MEDIA_PATH)
+    echo "   SW_MEDIA_INSTALL_DIR      = "$(SW_MEDIA_INSTALL_DIR)
+    echo "   QT_INSTALL_DIR            = "$(QT_INSTALL_DIR)
+    echo "   PATH                      = "$(PATH)
+    echo "   INSTALL_DIR               = "$(INSTALL_DIR)
+    echo "   PUBLISH_DIR               = "$(PUBLISH_DIR)
 endef
 
