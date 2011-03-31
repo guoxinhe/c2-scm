@@ -34,6 +34,12 @@ SOURCE_DIR			:= $(TOP_DIR)/source
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
 
+ifneq ($(CVS_TAG),)
+CHECKOUT_OPTION         := -r $(CVS_TAG)
+endif
+CHECKOUT                := cvs -q co -AP $(CHECKOUT_OPTION)
+UPDATE                  := cvs -q update -CAPd $(CHECKOUT_OPTION)
+
 # build installation configures
 TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
@@ -53,16 +59,6 @@ CVS_SRC_KERNEL_HEADERS  	:= projects/sw/kernel/$(LINUXDIR)
 CVS_SRC_UCLIBC          	:= projects/sw/devtools/uClibc
 CVS_SRC_DIRECTFB        	:= projects/sw/directfb/DirectFB-1.4.5
 STANDALONE_BUILD        	:= projects/sw/sdk/sdk_tools
-BUILDROOT_FILE          	:= $(TEMP_DIR)/devtools/tarballs/buildroot-c2.snapshot.tar.bz2
-BUSYBOX_1_5_1_FILE      	:= $(TEMP_DIR)/devtools/tarballs/busybox-1.5.1.tar.bz2
-BUSYBOX_1_13_3_FILE     	:= $(TEMP_DIR)/devtools/tarballs/busybox-1.13.3.tar.bz2
-I2CTOOLS_FILE           	:= $(TEMP_DIR)/devtools/tarballs/i2c-tools-3.0.1.tar.bz2
-OPROFILE_FILE           	:= $(TEMP_DIR)/devtools/tarballs/oprofile-0.9.1.tar.bz2
-BINUTILS_FILE           	:= $(TEMP_DIR)/devtools/tarballs/binutils-c2.snapshot.tar.bz2
-GCC_FILE                	:= $(TEMP_DIR)/devtools/tarballs/gcc-c2.snapshot.tar.bz2
-KERNEL_FILE      		:= $(TEMP_DIR)/devtools/tarballs/linux-libc-headers-$(SDK_KERNEL_VERSION).0.tar.bz2
-UCLIBC_FILE             	:= $(TEMP_DIR)/devtools/tarballs/uClibc-0.9.27.tar.bz2
-DIRECTFB_FILE           	:= $(TEMP_DIR)/devtools/tarballs/DirectFB-1.4.5.tar.bz2
 PKG_NAME_SRC_DEVTOOLS   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-src.tar.gz
 PKG_NAME_BIN_DEVTOOLS		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-bin.tar.gz
 DEVTOOLS_BUILD_PATH		:= $(TEST_ROOT_DIR)/devtools_build_folder/devtools

@@ -6,8 +6,23 @@ mission_modules += mission_devtools
 mission_targets += $(mission_devtools)
 .PHONY: $(mission_devtools)
 
+BUILDROOT_FILE          	:= $(TEMP_DIR)/devtools/tarballs/buildroot-c2.snapshot.tar.bz2
+BUSYBOX_1_5_1_FILE      	:= $(TEMP_DIR)/devtools/tarballs/busybox-1.5.1.tar.bz2
+BUSYBOX_1_13_3_FILE     	:= $(TEMP_DIR)/devtools/tarballs/busybox-1.13.3.tar.bz2
+I2CTOOLS_FILE           	:= $(TEMP_DIR)/devtools/tarballs/i2c-tools-3.0.1.tar.bz2
+OPROFILE_FILE           	:= $(TEMP_DIR)/devtools/tarballs/oprofile-0.9.1.tar.bz2
+BINUTILS_FILE           	:= $(TEMP_DIR)/devtools/tarballs/binutils-c2.snapshot.tar.bz2
+GCC_FILE                	:= $(TEMP_DIR)/devtools/tarballs/gcc-c2.snapshot.tar.bz2
+KERNEL_FILE      		:= $(TEMP_DIR)/devtools/tarballs/linux-libc-headers-$(SDK_KERNEL_VERSION).0.tar.bz2
+UCLIBC_FILE             	:= $(TEMP_DIR)/devtools/tarballs/uClibc-0.9.27.tar.bz2
+DIRECTFB_FILE           	:= $(TEMP_DIR)/devtools/tarballs/DirectFB-1.4.5.tar.bz2
+thirdparty:
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_3RDPARTY)
+	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/3rdParty $(TEMP_DIR)/devtools
+	@cd $(TEMP_DIR)/devtools ; \
+	    mv 3rdParty tarballs
 buildroot:
-	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUILDROOT)
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_BUILDROOT)
 	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/buildroot $(TEMP_DIR)/devtools
 	cd $(TEMP_DIR)/devtools/buildroot; \
 	cp $(DEVTOOLS_AUTOBUILD_CONFIG) autobuild_config; \
@@ -17,38 +32,35 @@ buildroot:
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		buildroot
-thirdparty:
-	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_3RDPARTY)
-	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/3rdParty $(TEMP_DIR)/devtools
-	@cd $(TEMP_DIR)/devtools ; \
-	    mv 3rdParty tarballs
 busybox151:
-	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.5.1)
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.5.1)
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_5_1_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		busybox-1.5.1
 busybox1131:
-	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.13.3)
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.13.3)
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_13_3_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		busybox-1.13.3
 i2ctools301:
-	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_I2CTOOLS) 
-	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/i2c-tools-3.0.1; \
-	    cd $(TEMP_DIR) && tar jcf $(I2CTOOLS_FILE) \
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_I2CTOOLS) 
+	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/i2c-tools-3.0.1; 
+	@cd $(TEMP_DIR); \
+	    tar jcf $(I2CTOOLS_FILE) \
 	        --exclude=CVS     \
 	        --exclude=CVSROOT \
 	        i2c-tools-3.0.1; \
 	    rm -rf i2c-tools-3.0.1
 oprofile:
 	@echo Checkout $(CVS_SRC_OPROFILE)
-	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_OPROFILE)
-	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/oprofile-0.9.1; \
-	    cd $(TEMP_DIR) && tar jcf $(OPROFILE_FILE) \
+	@cd $(SOURCE_DIR); $(CHECKOUT)  $(CVS_SRC_OPROFILE)
+	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/oprofile-0.9.1; 
+	@cd $(TEMP_DIR); \
+	    tar jcf $(OPROFILE_FILE) \
 	        --exclude=CVS     \
 	        --exclude=CVSROOT \
 	        oprofile-0.9.1; \
@@ -56,7 +68,7 @@ oprofile:
 directfb:
 	@#checkout directfb
 	@echo Checkout $(CVS_SRC_DIRECTFB)
-	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_DIRECTFB)
+	@cd $(SOURCE_DIR); $(CHECKOUT)  $(CVS_SRC_DIRECTFB)
 	@cd $(SOURCE_DIR)/projects/sw/directfb; \
 	    tar jcf $(DIRECTFB_FILE) \
 	        --exclude=CVS      \
@@ -65,10 +77,9 @@ directfb:
 binutils:	
 	@# checkout binutils
 	@echo Checkout $(CVS_SRC_BINUTILS)
-	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BINUTILS)	
-	@cd $(SOURCE_DIR)/projects/sw/devtools/binutils; \
-	    cp -rf binutils binutils-c2.snapshot
-	@cd $(SOURCE_DIR)/projects/sw/devtools/binutils; \
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_BINUTILS)	
+	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/binutils/binutils $(TEMP_DIR)/binutils-c2.snapshot
+	@cd $(TEMP_DIR); \
 	    tar jcf $(BINUTILS_FILE) \
 		--exclude=CVS \
 		--exclude=CVSROOT \
@@ -162,13 +173,12 @@ mxtool:
             TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) \
             MXTOOL_INSTALL_DIR=$(TEMP_DIR)/devtools/tarballs \
             install
+
 clean_oldfiles:
-	@# Also remove tar files that are part of c2_goodies-src package
 	@cd $(TEMP_DIR)/devtools/tarballs; rm -rf $(devtools-tarballs-remove)
 $(PKG_NAME_SRC_DEVTOOLS):
 	@echo Creating $(PKG_NAME_SRC_DEVTOOLS)
 	@cd $(TOP_DIR)
-	@mkdir -p $(PKG_DIR)
 	@cd $(TEMP_DIR) ; tar cvfz $(PKG_NAME_SRC_DEVTOOLS) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
@@ -176,6 +186,7 @@ $(PKG_NAME_SRC_DEVTOOLS):
 		./devtools/uclibc.mk ./devtools/e2fsprogs.mk ./devtools/binutils.mk \
 		./devtools/libpng.mk ./devtools/Config.in ./devtools/binutils.mk.64 \
 		./devtools/gcc-uclibc-3.x.mk ./devtools/gcc-uclibc-3.x.mk.64
+devtools_base_list :=
 
 src_get_devtools:  sdk_folders
 	@echo $@ done

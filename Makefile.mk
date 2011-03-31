@@ -1,12 +1,6 @@
 
 # Copyright (C) 2007 C2 Microsystems
 
-ifneq ($(CVS_TAG),)
-CHECKOUT_OPTION         := -r $(CVS_TAG)
-endif
-CHECKOUT                := cvs -q co -AP $(CHECKOUT_OPTION)
-UPDATE                  := cvs -q update -CAPd $(CHECKOUT_OPTION)
-
 makefile_test:=echo "nothing todo"
 CONFIG_SDK_CONFIGDEF=build.config
 ifneq (,$(realpath $(CONFIG_SDK_CONFIGDEF)))
