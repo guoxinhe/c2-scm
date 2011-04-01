@@ -111,9 +111,33 @@ PKG_NAME_BIN_HDMI_JAZZ2   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-hdmi-bin.tar.gz
 
 # c2box package
 CVS_SRC_SW_C2APPS		:= sw_c2apps
-PKG_NAME_SRC_C2BOX_ALL		:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-src-all.tar.gz
-PKG_NAME_C2BOX_DEMO		:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-bin.tar.gz
-PKG_NAME_BIN_TOOLS		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-tools-bin.tar.gz
+PKG_NAME_SRC_SW_C2APPS  := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_c2apps-src.tar.gz
+PKG_NAME_SRC_P2P        := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-p2p-src.tar.gz
+PKG_NAME_BIN_WEBKIT	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qtwebkit-bin.tar.gz
+PKG_NAME_SRC_C2BOX	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-src.tar.gz
+PKG_NAME_SRC_C2BOX_ALL	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-src-all.tar.gz
+PKG_NAME_SRC_MINIBD	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-minibd-src.tar.gz
+PKG_NAME_SRC_FLASH	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-flash-src.tar.gz
+PKG_NAME_SRC_KARAOKE	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-karaoke-src.tar.gz
+PKG_NAME_SRC_VIDEOCHAT	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-videochat-src.tar.gz
+PKG_NAME_SRC_THUNDERKK	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-thunderkk-src.tar.gz
+PKG_NAME_SRC_MVPHONE	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-mvphone-src.tar.gz
+PKG_NAME_SRC_BROWSER	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-browser-src.tar.gz
+PKG_NAME_SRC_IPCAM	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-ipcam-src.tar.gz
+PKG_NAME_SRC_JVM	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-jvm-src.tar.gz
+PKG_NAME_SRC_SOHU	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-sohu-src.tar.gz
+PKG_NAME_SRC_RECOEDING	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-recording-src.tar.gz
+
+# Demo package
+PKG_NAME_BIN_DEMO	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-demo-bin.tar.gz
+PKG_NAME_BIN_DEMO_P2P   := $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-demo-bin-p2p.tar.gz
+PKG_NAME_C2BOX_DEMO	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-c2box-bin.tar.gz
+PKG_NAME_BIN_PPS	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-pps-bin.tar.gz
+PKG_NAME_BIN_BESTV	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-bestv-bin.tar.gz
+PKG_NAME_BIN_THUNDERKK	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-thunderkk-bin.tar.gz
+PKG_NAME_BIN_VIDEOPHONE	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-videophone-bin.tar.gz
+PKG_NAME_BIN_VIDEOCHAT	:= $(PKG_DIR)/c2box/c2-$(SDK_VERSION_ALL)-videochat-bin.tar.gz
+PKG_NAME_BIN_TOOLS	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-tools-bin.tar.gz
 
 # SPI package
 CVS_SRC_SPI			:= sw/prom/spirom

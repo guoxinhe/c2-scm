@@ -8,15 +8,17 @@ mission_targets += $(mission_devtools)
 
 
 devtools_list += thirdparty
-thirdparty:
+src_get_thirdparty:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_3RDPARTY)
+thirdparty:
 	@mkdir -p $(TEMP_DIR)/devtools
 	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/3rdParty $(TEMP_DIR)/devtools
 	@cd $(TEMP_DIR)/devtools ; \
 	    mv 3rdParty tarballs
 devtools_list += buildroot
-buildroot:
+src_get_buildroot:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUILDROOT)
+buildroot:
 	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/buildroot $(TEMP_DIR)/
 	cd $(TEMP_DIR)/buildroot; \
 	cp $(DEVTOOLS_AUTOBUILD_CONFIG) autobuild_config; \
@@ -28,24 +30,27 @@ buildroot:
 		buildroot; \
 	    rm -rf buildroot;
 devtools_list += busybox151
-busybox151:
+src_get_busybox151:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.5.1)
+busybox151:
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_5_1_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		busybox-1.5.1
 devtools_list += busybox1131
-busybox1131:
+src_get_busybox1131:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.13.3)
+busybox1131:
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_13_3_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
 		busybox-1.13.3
 devtools_list += i2ctools301
-i2ctools301:
+src_get_i2ctools301:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_I2CTOOLS) 
+i2ctools301:
 	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/i2c-tools-3.0.1; \
 	    cd $(TEMP_DIR) && tar jcf $(I2CTOOLS_FILE) \
 	        --exclude=CVS     \
@@ -53,9 +58,9 @@ i2ctools301:
 	        i2c-tools-3.0.1; \
 	    rm -rf i2c-tools-3.0.1
 devtools_list += oprofile
-oprofile:
-	@echo Checkout $(CVS_SRC_OPROFILE)
+src_get_oprofile:
 	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_OPROFILE)
+oprofile:
 	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/oprofile-0.9.1; \
 	    cd $(TEMP_DIR) && tar jcf $(OPROFILE_FILE) \
 	        --exclude=CVS     \
@@ -63,20 +68,18 @@ oprofile:
 	        oprofile-0.9.1; \
 	    rm -rf oprofile-0.9.1
 devtools_list += directfb
-directfb:
-	@#checkout directfb
-	@echo Checkout $(CVS_SRC_DIRECTFB)
+src_get_directfb:
 	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_DIRECTFB)
+directfb:
 	@cd $(SOURCE_DIR)/projects/sw/directfb; \
 	    tar jcf $(DIRECTFB_FILE) \
 	        --exclude=CVS      \
 	        --exclude=CVSROOT  \
 	        DirectFB-1.4.5
 devtools_list += binutils
-binutils:	
-	@# checkout binutils
-	@echo Checkout $(CVS_SRC_BINUTILS)
+src_get_binutils:	
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BINUTILS)	
+binutils:	
 	@cd $(SOURCE_DIR)/projects/sw/devtools/binutils; \
 	    cp -rf binutils $(TEMP_DIR)/binutils-c2.snapshot
 	@cd $(TEMP_DIR); \
@@ -86,8 +89,9 @@ binutils:
 		binutils-c2.snapshot; \
 	    rm -rf binutils-c2.snapshot
 devtools_list += gccsrc
-gccsrc:
+src_get_gccsrc:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_GCC)
+gccsrc:
 	@cd $(SOURCE_DIR)/projects/sw/devtools/gcc; \
 	    cp -rf gcc $(TEMP_DIR)/gcc-c2.snapshot
 	@cd $(TEMP_DIR); \
@@ -97,10 +101,9 @@ gccsrc:
 		gcc-c2.snapshot ; \
 	    rm -rf gcc-c2.snapshot
 devtools_list += standalone_build_script
-standalone_build_script:
-	@# Get the standalone build scripts (alternate/checkout) 
-	@echo Checkout $(STANDALONE_BUILD)
+src_get_standalone_build_script:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(STANDALONE_BUILD)
+standalone_build_script:
 	cd $(SOURCE_DIR)/$(STANDALONE_BUILD); \
 	    cp -f buildtools.sh $(TEMP_DIR)/devtools; \
 	    cp -f autobuild $(TEMP_DIR)/devtools; \
@@ -114,8 +117,8 @@ standalone_build_script:
 	    cp -f binutils.mk.64 $(TEMP_DIR)/devtools
 devtools_list += kernel_include
 kernel_include:
-	@-echo Checkout $(CVS_SRC_KERNEL)
 	@-cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_KERNEL)
+src_get_kernel_include:
 	@-rm -rf $(TEMP_DIR)/kernel
 	@-cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/
 	@-cd $(TEMP_DIR)/kernel; \
@@ -131,10 +134,9 @@ kernel_include:
 			linux-libc-headers-$(SDK_KERNEL_VERSION).0 ; \
 		rm -rf linux-libc-headers-$(SDK_KERNEL_VERSION).0
 devtools_list += uclibc
-uclibc:
-	@# checkout uClibc
-	@echo Checkout $(CVS_SRC_UCLIBC)
+src_get_uclibc:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_UCLIBC)
+uclibc:
 	@cd $(SOURCE_DIR)/projects/sw/devtools/; \
 	    cp -rf uClibc $(TEMP_DIR)/uClibc-0.9.27
 	@cd $(TEMP_DIR); \
@@ -144,10 +146,14 @@ uclibc:
 		uClibc-0.9.27 ; \
 	    rm -rf uClibc-0.9.27
 devtools_list += mxtool
-mxtool:	
+src_get_mxtool:	
 	@# mxtool needs to be built and installed in tarballs/bin
-	@echo Checkout sw_media components for mxtool
-	cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_SW_MEDIA); 
+	#cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_SW_MEDIA); 
+	cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)/build      ; $(UPDATE);
+	cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)/arch       ; $(UPDATE);
+	cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)/csim       ; $(UPDATE);
+	cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)/intrinsics ; $(UPDATE);
+mxtool:	
 	@rm -rf $(TEMP_DIR)/mxtool_tmp/
 	@mkdir -p $(TEMP_DIR)/mxtool_tmp
 	@cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA); \
@@ -175,9 +181,11 @@ mxtool:
             MXTOOL_INSTALL_DIR=$(TEMP_DIR)/devtools/tarballs \
             install
 devtools_list += clean_oldfiles
+src_get_clean_oldfiles:
 clean_oldfiles:
 	@# Also remove tar files that are part of c2_goodies-src package
 	@cd $(TEMP_DIR)/devtools/tarballs; rm -rf $(devtools-tarballs-remove)
+
 $(PKG_NAME_SRC_DEVTOOLS): $(devtools_list)
 	@echo Creating $(PKG_NAME_SRC_DEVTOOLS)
 	@cd $(TOP_DIR)
@@ -189,12 +197,8 @@ $(PKG_NAME_SRC_DEVTOOLS): $(devtools_list)
 		./devtools/uclibc.mk ./devtools/e2fsprogs.mk ./devtools/binutils.mk \
 		./devtools/libpng.mk ./devtools/Config.in ./devtools/binutils.mk.64 \
 		./devtools/gcc-uclibc-3.x.mk ./devtools/gcc-uclibc-3.x.mk.64
-gt:
-	@echo devtools module depend on $(devtools_list)
-	@echo src get is: $(addprefix src_get_,$(devtools_list))
-	@echo src get is: $(addsuffix _src_get,$(devtools_list))
 
-src_get_devtools:  sdk_folders
+src_get_devtools:  sdk_folders $(addprefix src_get_,$(devtools_list))
 	@echo $@ done
 src_package_devtools: sdk_folders $(PKG_NAME_SRC_DEVTOOLS)
 	@echo $@ done
@@ -219,7 +223,7 @@ help_devtools: sdk_folders mktest
 	@echo $@ done
 $(DEVTOOLS_BUILD_PATH): $(PKG_NAME_SRC_DEVTOOLS)
 	@rm -rf $@
-	@echo Target folder $(@D)
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(@D); \
 	    tar xzf $<
@@ -247,7 +251,7 @@ $(TEST_ROOT_DIR)/c2:
 	@touch $@
 $(PKG_NAME_BIN_DEVTOOLS): $(DEVTOOLS_BUILD_PATH)/c2
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(<D); \
 	    rm $(PKG_NAME_BIN_DEVTOOLS); \
@@ -296,21 +300,21 @@ help_sw_media: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_SW_MEDIA_ALL):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
 		$(CVS_SRC_SW_MEDIA)
 	@touch $@
 $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA): $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	@rm -rf $@
-	@echo Target folder $(@D)
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEMP_DIR) ; \
 	    tar xzf $<
 	@touch $@
 $(PKG_NAME_SRC_SW_MEDIA_2ND) : $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	# Write version information
 	@cd $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)/media/daemon/msp/mspdaemon/; \
@@ -333,7 +337,7 @@ $(PKG_NAME_SRC_SW_MEDIA_2ND) : $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)
 
 $(PKG_NAME_SRC_SW_MEDIA): $(PKG_NAME_SRC_SW_MEDIA_2ND)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@mkdir -p $(TEMP_DIR)/mk_sw_media_3rdsrc; 
 	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc; \
@@ -348,7 +352,7 @@ $(PKG_NAME_SRC_SW_MEDIA): $(PKG_NAME_SRC_SW_MEDIA_2ND)
 	@touch $@
 $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR): $(PKG_NAME_SRC_SW_MEDIA_2ND)
 	@rm -rf $@
-	@echo Target folder $(@D)
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	@rm -rf  $(@D)/*
 	@cd $(TEST_ROOT_DIR); \
@@ -358,7 +362,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR): $(PKG_NAME_SRC_SW_
 	@touch $@
 $(PKG_NAME_BIN_SW_MEDIA): $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA); \
 	    tar zcf $(PKG_NAME_BIN_SW_MEDIA) \
@@ -367,7 +371,7 @@ $(PKG_NAME_BIN_SW_MEDIA): $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTAL
 	@touch $@
 $(PKG_NAME_BIN_SW_MEDIA_QA): $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA); \
             tar zcf $(PKG_NAME_BIN_SW_MEDIA_QA) \
@@ -375,7 +379,7 @@ $(PKG_NAME_BIN_SW_MEDIA_QA): $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INS
 	@touch $@
 $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR):$(PKG_NAME_BIN_SW_MEDIA_QA)
 	@rm -rf $@
-	@echo Target folder $(@D)
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(@D); \
 	    tar xzf $<
@@ -431,21 +435,21 @@ help_qt470: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_QT470):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
 		$(CVS_SRC_QT470)
 	@touch $@
 $(TEST_ROOT_DIR)/$(CVS_SRC_QT470):$(PKG_NAME_SRC_QT470)
 	@rm -rf $@
-	@echo Target folder $(@D)
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR) ; \
 	    tar xzf $<
 	@touch $@
 $(PKG_NAME_BIN_QT470): $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR) ; \
 	    tar czf  $(PKG_NAME_BIN_QT470) QtopiaCore-4.7.0-generic
@@ -480,8 +484,9 @@ help_kernel: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_KERNEL):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
+	@mkdir -p $(TEMP_DIR)/$(CVS_SRC_KERNEL)
 	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/$(CVS_SRC_KERNEL)/..
 	@cd $(TEMP_DIR)/$(CVS_SRC_KERNEL) && rm -rf linux-* && cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/$(LINUXDIR) .
 	@# Add -m32 switch (valid for both i386 and x86_64 builds)
@@ -503,7 +508,7 @@ $(PKG_NAME_SRC_KERNEL):
 	@touch $@
 $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL): $(PKG_NAME_SRC_KERNEL)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR)/kernel_build_sd ; \
 	    tar xzf $<
@@ -519,7 +524,7 @@ $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL)/$(LINUXDIR)/vmlinux.bin:
 	time make -j5 ARCH=c2 image ;
 $(PKG_NAME_BIN_KERNEL): $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL)/$(LINUXDIR)/vmlinux.bin
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
 	mv -f Makefile Makefile.save;\
@@ -574,7 +579,7 @@ help_kernelnand: sdk_folders mktest
 	@echo $@ done
 $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR): $(PKG_NAME_SRC_KERNEL)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEMP_DIR)/kernel_build_nand ; \
 	    tar xzf $<
@@ -585,7 +590,7 @@ $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)/.config:
 	make -j5 -f configs/jazz2-pvr-nand/pvr-nand.mk
 $(PKG_NAME_BIN_KERNEL_NAND): $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)/zvmlinux.bin
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	cd $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR);\
 	mv -f Makefile Makefile.save;\
@@ -642,7 +647,7 @@ help_uboot: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_UBOOT):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); \
 	    tar cfz $(PKG_NAME_SRC_UBOOT) \
@@ -652,7 +657,7 @@ $(PKG_NAME_SRC_UBOOT):
 	@touch $@
 $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT): $(PKG_NAME_SRC_UBOOT)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR); \
 	    tar xzf $<
@@ -663,7 +668,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities):
 	touch $(uboot_utilities)
 $(PKG_NAME_BIN_UBOOT): $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT); \
 		tar cfz $(PKG_NAME_BIN_UBOOT) $(uboot_utilities)
@@ -700,7 +705,7 @@ help_vivante: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_VIVANTE):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_SRC_VIVANTE) \
@@ -710,7 +715,7 @@ $(PKG_NAME_SRC_VIVANTE):
 	@touch $@
 $(PKG_NAME_TEST_SRC_VIVANTE):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_TEST_SRC_VIVANTE) \
@@ -720,7 +725,7 @@ $(PKG_NAME_TEST_SRC_VIVANTE):
 	@touch $@
 $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE):$(PKG_NAME_SRC_VIVANTE)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR); \
 	    tar xzf $<
@@ -732,7 +737,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)/build:
 	@touch $@
 $(PKG_NAME_BIN_VIVANTE):$(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)/build
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE); \
            tar cfz $(PKG_NAME_BIN_VIVANTE) build
@@ -767,7 +772,7 @@ help_hdmi: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_HDMI_JAZZ2):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@rm -rf $(TEMP_DIR)/PROPRIETARY; \
 	mkdir -p $(TEMP_DIR)/PROPRIETARY; \
@@ -780,7 +785,7 @@ $(PKG_NAME_SRC_HDMI_JAZZ2):
 	@touch $@
 $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv: $(PKG_NAME_SRC_HDMI_JAZZ2)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR); \
 	    tar xzf $<
@@ -790,7 +795,7 @@ $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko:
 		make KERNELDIR=$(DRIVER_USE_KERNEL)
 $(PKG_NAME_BIN_HDMI_JAZZ2):$(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/PROPRIETARY; \
 	    tar cfz $(PKG_NAME_BIN_HDMI_JAZZ2) \
@@ -811,6 +816,7 @@ src_get_c2box:  sdk_folders
          fi
 	@echo $@ done
 src_package_c2box: sdk_folders
+	@mkdir -p $(PKG_DIR)/c2box
 	@cd $(TEMP_DIR); rm -rf $(CVS_SRC_SW_C2APPS); \
 	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_SW_C2APPS) .
 	@cd $(TEMP_DIR)/$(CVS_SRC_SW_C2APPS)/pvr/filemanager/include; \
@@ -945,7 +951,7 @@ help_c2box: sdk_folders mktest
 	@echo $@ done
 $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS): $(PKG_NAME_SRC_C2BOX_ALL)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR)/$(PRODUCT); \
 	    tar xzf $<
@@ -954,7 +960,7 @@ $(TEST_ROOT_DIR)/$(PRODUCT)/work: \
 	override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin:$(QT_INSTALL_DIR)/bin
 $(TEST_ROOT_DIR)/$(PRODUCT)/work: $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS); \
 		BUILD_TARGET=TARGET_LINUX_C2 TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD=RELEASE \
@@ -965,14 +971,14 @@ $(TEST_ROOT_DIR)/$(PRODUCT)/work: $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APP
 	@touch $@
 $(PKG_NAME_C2BOX_DEMO):$(TEST_ROOT_DIR)/$(PRODUCT)/work
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(PRODUCT); \
 		tar cfz $(PKG_NAME_C2BOX_DEMO) work	
 	@touch $@
 $(PKG_NAME_BIN_TOOLS): $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS); \
 		tar cfz $@ tools
@@ -1024,14 +1030,14 @@ help_jtag: sdk_folders mktest
 	@echo $@ done
 $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG): $(PKG_NAME_SRC_JTAG)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR); \
 	    tar xzf $<
 	@touch $@
 $(PKG_NAME_BIN_JTAG): $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/usr/local
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cp -Rd $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/jtag_loader \
 		$(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/usr/local/share
@@ -1047,13 +1053,19 @@ mission_targets += $(mission_diag)
 .PHONY: $(mission_diag)
 src_get_diag:  sdk_folders
 	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_DIAG)
+	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_JTAG)
 	@echo $@ done
 src_package_diag: sdk_folders
+	@echo "BUILD TARGET: diag-src"
 	@rm -f $(PKG_NAME_SRC_DIAG)
 	@cd $(TEMP_DIR); \
 	    mkdir -p $(CVS_SRC_DIAG); \
+	    mkdir -p $(CVS_SRC_JTAG); \
 	    cd $(CVS_SRC_DIAG); \
 	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_DIAG) ../; \
+	    cd $(TEMP_DIR)/$(CVS_SRC_JTAG); \
+	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_JTAG) ../
+	
 	@echo "Creating package $(PKG_NAME_SRC_DIAG)"
 	@cd $(TEMP_DIR); \
 	    tar cfz $(PKG_NAME_SRC_DIAG) \
@@ -1092,14 +1104,14 @@ help_diag: sdk_folders mktest
 	@echo $@ done
 $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG): $(PKG_NAME_SRC_DIAG)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR); \
 	    tar xzf $<
 	@touch $@
 $(PKG_NAME_BIN_DIAG):  $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG)/loader
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG)/loader; \
 	    tar cvzf $(PKG_NAME_BIN_DIAG) \
@@ -1202,14 +1214,14 @@ help_c2_goodies: sdk_folders mktest
 	@echo $@ done
 $(TEST_ROOT_DIR)/c2_goodies: $(PKG_NAME_SRC_GOODIES)
 	@rm -rf $@
-	@echo Target folder $(@D) depend on $<
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(TEST_ROOT_DIR); \
 	    tar xzf $<
 	@touch $@
 $(PKG_NAME_BIN_GOODIES):  $(TEST_ROOT_DIR)/c2_goodies
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/; \
 	   tar cfz $(PKG_NAME_BIN_GOODIES) \
@@ -1321,6 +1333,10 @@ test_usrudisk: $(mission_usrudisk)
 help_usrudisk: sdk_folders mktest
 	@echo targets: $(mission_usrudisk)
 
+
+# example code
+# the src_get_xxx never depend on anything
+# the src_install_xxx never depend on anything
 mission_xxx := help_xxx clean_xxx src_get_xxx  \
 	src_package_xxx src_install_xxx src_config_xxx src_build_xxx \
 	bin_package_xxx bin_install_xxx
@@ -1354,16 +1370,16 @@ help_xxx: sdk_folders mktest
 	@echo targets: $(mission_xxx)
 	@echo $@ done
 $(TEMP_DIR)/xxx: src_get_xxx
-$(TEMP_DIR)/xxx.src.tar.gz $(TEMP_DIR)/xxx.bin.tar.gz: $(TEMP_DIR)/xxx
+$(TEMP_DIR)/xxx.src.tar.gz:
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $^
+	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(<D); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
-		$(<F)
+		$(TEMP_DIR)/xxx
 	@touch $@
 $(TEST_ROOT_DIR)/xxx: $(TEMP_DIR)/xxx.src.tar.gz
 	@rm -rf $@
-	@echo Extract $^ to Target folder $@
+	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(@D) ; \
 	    tar xzf $<
