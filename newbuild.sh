@@ -40,6 +40,25 @@ bin_package
 bin_install
 "
 
+update_indexlog()
+{
+    #handle echo "Hdmi:1:$hdmilog">>$indexlog
+    #to : update_indexlog "Devtools:1:$devtoolslog" $indexlog
+    m=`echo $1 | sed 's,\([^:]*\).*,\1,'`
+    x=`echo $1 | sed 's,[^:]*:\([^:]*\).*,\1,'`
+    f=`echo $1 | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
+    l=`echo $f | sed 's:.*/\(.*\):\1:'`
+
+    has=
+    [ -f $2 ] && has=`grep ^$m: $2`
+    if [ $has ];then
+        sed -i "s,$m:.*,$1,g" $2
+        recho "debug: $2 find $m and replaced $m:$x "
+    else
+        echo "$1" >>$2
+        recho "debug: $2 not find $m, appended: $1"
+    fi
+}
 
 recho_time_consumed()
 {
@@ -73,7 +92,9 @@ log=`pwd`/log   #/`date +%y%m%d`
 mkdir -p $log 
 make  mktest >$log/mktest.log
 make  help   >$log/help.log
-#make  bin_install_devtools
+nr_totalerror=0
+nr_totalmodule=0
+tm_total=`date +%s`
 for i in ${modules}; do
   nr_merr=0
   tm_module=`date +%s`
@@ -103,7 +124,12 @@ for i in ${modules}; do
       echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$i, $nr_merr error >>$log/progress.log
       recho_time_consumed $tm_a "$s: $iserror error(s). "  
   done
-  echo "$i:$nr_merr:$log/$i.log" >>$log/r.txt
+  nr_totalerror=$((nr_totalerror+nr_merr))
+  nr_totalmodule=$((nr_totalmodule+1))
+  #echo "$i:$nr_merr:$log/$i.log" >>$log/r.txt
+  update_indexlog "$i:$nr_merr:$log/$i.log" $log/r.txt
   recho_time_consumed $tm_module "Build module $i $nr_merr error(s). "
 done
+
+recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerror error(s). "
 

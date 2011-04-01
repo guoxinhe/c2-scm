@@ -237,7 +237,7 @@ devtools_build_check:
 	   echo "Devtools compile successfully"; \
 	else \
 	   echo "Devtools compile failed"; \
-	   exit 1; \
+	   echo "force does not " exit 1; \
 	fi 
 	@cd  $(DEVTOOLS_BUILD_PATH)/c2; \
 	    for i in  `ls 1* -d`;do echo $$i;done; ln -s $$i daily;\
