@@ -243,7 +243,7 @@ $(TEST_ROOT_DIR)/c2:
 	@touch $@
 $(PKG_NAME_BIN_DEVTOOLS): $(DEVTOOLS_BUILD_PATH)/c2
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D)
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(<D); \
 	    rm $(PKG_NAME_BIN_DEVTOOLS); \
@@ -292,7 +292,8 @@ help_sw_media: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_SW_MEDIA_ALL):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
 		$(CVS_SRC_SW_MEDIA)
 	@touch $@
@@ -304,9 +305,9 @@ $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA): $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	    tar xzf $<
 	@touch $@
 $(PKG_NAME_SRC_SW_MEDIA_2ND) : $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)
-	@echo "Creating package $@" 1
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	# Write version information
 	@cd $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)/media/daemon/msp/mspdaemon/; \
 	    sed -i '{s, "*".*,"$(SDK_VERSION_ALL)";,g}' mspVersion.h
@@ -328,7 +329,8 @@ $(PKG_NAME_SRC_SW_MEDIA_2ND) : $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)
 
 $(PKG_NAME_SRC_SW_MEDIA): $(PKG_NAME_SRC_SW_MEDIA_2ND)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@mkdir -p $(TEMP_DIR)/mk_sw_media_3rdsrc; 
 	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc; \
 	    rm -rf $(CVS_SRC_SW_MEDIA); \
@@ -352,7 +354,8 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR): $(PKG_NAME_SRC_SW_
 	@touch $@
 $(PKG_NAME_BIN_SW_MEDIA): $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA); \
 	    tar zcf $(PKG_NAME_BIN_SW_MEDIA) \
 		--exclude=RealPluginModule.plugin.so \
@@ -360,7 +363,8 @@ $(PKG_NAME_BIN_SW_MEDIA): $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTAL
 	@touch $@
 $(PKG_NAME_BIN_SW_MEDIA_QA): $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR)
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA); \
             tar zcf $(PKG_NAME_BIN_SW_MEDIA_QA) \
                 TARGET_LINUX_C2_$(SDK_TARGET_GCC_ARCH)_RELEASE
@@ -423,7 +427,8 @@ help_qt470: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_QT470):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
 		$(CVS_SRC_QT470)
 	@touch $@
@@ -436,7 +441,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_QT470):$(PKG_NAME_SRC_QT470)
 	@touch $@
 $(PKG_NAME_BIN_QT470): $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D)
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR) ; \
 	    tar czf  $(PKG_NAME_BIN_QT470) QtopiaCore-4.7.0-generic
@@ -471,7 +476,8 @@ help_kernel: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_KERNEL):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/$(CVS_SRC_KERNEL)/..
 	@cd $(TEMP_DIR)/$(CVS_SRC_KERNEL) && rm -rf linux-* && cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/$(LINUXDIR) .
 	@# Add -m32 switch (valid for both i386 and x86_64 builds)
@@ -509,7 +515,7 @@ $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL)/$(LINUXDIR)/vmlinux.bin:
 	time make -j5 ARCH=c2 image ;
 $(PKG_NAME_BIN_KERNEL): $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL)/$(LINUXDIR)/vmlinux.bin
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
 	mv -f Makefile Makefile.save;\
@@ -575,7 +581,7 @@ $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)/.config:
 	make -j5 -f configs/jazz2-pvr-nand/pvr-nand.mk
 $(PKG_NAME_BIN_KERNEL_NAND): $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)/zvmlinux.bin
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	cd $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR);\
 	mv -f Makefile Makefile.save;\
@@ -632,7 +638,8 @@ help_uboot: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_UBOOT):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); \
 	    tar cfz $(PKG_NAME_SRC_UBOOT) \
 	        --exclude=CVS \
@@ -652,7 +659,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities):
 	touch $(uboot_utilities)
 $(PKG_NAME_BIN_UBOOT): $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities)
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT); \
 		tar cfz $(PKG_NAME_BIN_UBOOT) $(uboot_utilities)
@@ -689,7 +696,8 @@ help_vivante: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_VIVANTE):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_SRC_VIVANTE) \
 		--exclude=CVS \
@@ -698,7 +706,8 @@ $(PKG_NAME_SRC_VIVANTE):
 	@touch $@
 $(PKG_NAME_TEST_SRC_VIVANTE):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_TEST_SRC_VIVANTE) \
 		--exclude=CVS \
@@ -719,7 +728,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)/build:
 	@touch $@
 $(PKG_NAME_BIN_VIVANTE):$(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)/build
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE); \
            tar cfz $(PKG_NAME_BIN_VIVANTE) build
@@ -754,7 +763,8 @@ help_hdmi: sdk_folders mktest
 	@echo $@ done
 $(PKG_NAME_SRC_HDMI_JAZZ2):
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
 	@rm -rf $(TEMP_DIR)/PROPRIETARY; \
 	mkdir -p $(TEMP_DIR)/PROPRIETARY; \
 	cp -arf $(SOURCE_DIR)/$(CVS_SRC_HDMI_JAZZ2) $(TEMP_DIR)/PROPRIETARY;
@@ -776,7 +786,7 @@ $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko:
 		make KERNELDIR=$(DRIVER_USE_KERNEL)
 $(PKG_NAME_BIN_HDMI_JAZZ2):$(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/PROPRIETARY; \
 	    tar cfz $(PKG_NAME_BIN_HDMI_JAZZ2) \
@@ -951,14 +961,14 @@ $(TEST_ROOT_DIR)/$(PRODUCT)/work: $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APP
 	@touch $@
 $(PKG_NAME_C2BOX_DEMO):$(TEST_ROOT_DIR)/$(PRODUCT)/work
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(PRODUCT); \
 		tar cfz $(PKG_NAME_C2BOX_DEMO) work	
 	@touch $@
 $(PKG_NAME_BIN_TOOLS): $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS)
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS); \
 		tar cfz $@ tools
@@ -1017,7 +1027,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG): $(PKG_NAME_SRC_JTAG)
 	@touch $@
 $(PKG_NAME_BIN_JTAG): $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/usr/local
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cp -Rd $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/jtag_loader \
 		$(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/usr/local/share
@@ -1085,7 +1095,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG): $(PKG_NAME_SRC_DIAG)
 	@touch $@
 $(PKG_NAME_BIN_DIAG):  $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG)/loader
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG)/loader; \
 	    tar cvzf $(PKG_NAME_BIN_DIAG) \
@@ -1195,7 +1205,7 @@ $(TEST_ROOT_DIR)/c2_goodies: $(PKG_NAME_SRC_GOODIES)
 	@touch $@
 $(PKG_NAME_BIN_GOODIES):  $(TEST_ROOT_DIR)/c2_goodies
 	if [ -f $@ ]; then rm $@;fi
-	@echo Target folder $(@D) depend on $<
+	@echo "Creating package $@" depend on $^
 	@mkdir -p $(@D)
 	@cd $(TEST_ROOT_DIR)/; \
 	   tar cfz $(PKG_NAME_BIN_GOODIES) \
