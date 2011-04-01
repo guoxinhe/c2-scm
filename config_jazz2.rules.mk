@@ -9,8 +9,8 @@ mission_targets += $(mission_devtools)
 
 devtools_list += thirdparty
 thirdparty:
-	@mkdir -p $(TEMP_DIR)/devtools
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_3RDPARTY)
+	@mkdir -p $(TEMP_DIR)/devtools
 	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/3rdParty $(TEMP_DIR)/devtools
 	@cd $(TEMP_DIR)/devtools ; \
 	    mv 3rdParty tarballs
@@ -189,6 +189,10 @@ $(PKG_NAME_SRC_DEVTOOLS): $(devtools_list)
 		./devtools/uclibc.mk ./devtools/e2fsprogs.mk ./devtools/binutils.mk \
 		./devtools/libpng.mk ./devtools/Config.in ./devtools/binutils.mk.64 \
 		./devtools/gcc-uclibc-3.x.mk ./devtools/gcc-uclibc-3.x.mk.64
+gt:
+	@echo devtools module depend on $(devtools_list)
+	@echo src get is: $(addprefix src_get_,$(devtools_list))
+	@echo src get is: $(addsuffix _src_get,$(devtools_list))
 
 src_get_devtools:  sdk_folders
 	@echo $@ done
