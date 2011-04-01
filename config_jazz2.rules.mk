@@ -206,6 +206,7 @@ bin_install_devtools: sdk_folders $(TEST_ROOT_DIR)/c2
 	@echo $@ done
 clean_devtools: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
+	rm -rf  $(TEMP_DIR)/devtools $(DEVTOOLS_BUILD_PATH) $(TEST_ROOT_DIR)/c2
 	@echo $@ done
 test_devtools: $(mission_devtools)
 help_devtools: sdk_folders mktest
@@ -258,9 +259,13 @@ mission_modules += mission_sw_media
 mission_targets += $(mission_sw_media)
 .PHONY: $(mission_sw_media)
 src_get_sw_media:  sdk_folders
+	@if test -d "$(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)"; then \
+	     cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA); $(UPDATE); \
+	 else \
+	     cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_SW_MEDIA); \
+	 fi
 	@echo $@ done
-src_package_sw_media: sdk_folders 
-	#$(PKG_NAME_SRC_SW_MEDIA_ALL)
+src_package_sw_media: sdk_folders $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	@echo $@ done
 src_install_sw_media: sdk_folders  $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)
 	@echo $@ done
@@ -285,7 +290,7 @@ help_sw_media: sdk_folders mktest
 	@echo 
 	@echo targets: $(mission_sw_media)
 	@echo $@ done
-$(PKG_NAME_SRC_SW_MEDIA_ALL)-hide:
+$(PKG_NAME_SRC_SW_MEDIA_ALL):
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@"
 	@cd $(SOURCE_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
@@ -409,6 +414,7 @@ bin_install_qt470: sdk_folders
 	@echo $@ done
 clean_qt470: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
+	rm -rf $(TEST_ROOT_DIR)/$(CVS_SRC_QT470) $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic
 	@echo $@ done
 test_qt470: $(mission_qt470)
 help_qt470: sdk_folders mktest
@@ -443,8 +449,9 @@ mission_modules += mission_kernel
 mission_targets += $(mission_kernel)
 .PHONY: $(mission_kernel)
 src_get_kernel:  sdk_folders
+	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_KERNEL)
 	@echo $@ done
-src_package_kernel: sdk_folders
+src_package_kernel: sdk_folders $(PKG_NAME_SRC_KERNEL)
 	@echo $@ done
 src_install_kernel: sdk_folders $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL)
 	@echo $@ done
@@ -462,6 +469,28 @@ test_kernel: $(mission_kernel)
 help_kernel: sdk_folders mktest
 	@echo targets: $(mission_kernel)
 	@echo $@ done
+$(PKG_NAME_SRC_KERNEL):
+	if [ -f $@ ]; then rm $@;fi
+	@echo "Creating package $@"
+	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/$(CVS_SRC_KERNEL)/..
+	@cd $(TEMP_DIR)/$(CVS_SRC_KERNEL) && rm -rf linux-* && cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/$(LINUXDIR) .
+	@# Add -m32 switch (valid for both i386 and x86_64 builds)
+	@cd $(TEMP_DIR)/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
+	        sed -i '{s,= gcc,= gcc -m32,g}' Makefile;
+	@# Add version
+	@cd $(TEMP_DIR)/$(CVS_SRC_KERNEL)/$(LINUXDIR)/arch/c2/configs; \
+	    sed -i 's/CONFIG_LOCALVERSION=""/CONFIG_LOCALVERSION="[$(SDK_VERSION_ALL)]"/' $(LINUX_CONFIG)
+	@cd $(TEMP_DIR)/$(CVS_SRC_KERNEL)/configs/jazz2-pvr-nand; \
+	    sed -i 's/CONFIG_LOCALVERSION=""/CONFIG_LOCALVERSION="[$(SDK_VERSION_ALL)]"/' defconfig
+	
+	@# package up kernel src
+	@cd $(TEMP_DIR); \
+	    tar cfz $(PKG_NAME_SRC_KERNEL) \
+    		--exclude=CVS \
+    		--exclude=CVSROOT \
+    		./$(CVS_SRC_KERNEL); \
+	    rm -rf $(CVS_SRC_KERNEL)
+	@touch $@
 $(TEST_ROOT_DIR)/kernel_build_sd/$(CVS_SRC_KERNEL): $(PKG_NAME_SRC_KERNEL)
 	@rm -rf $@
 	@echo Target folder $(@D) depend on $<
@@ -581,8 +610,9 @@ mission_modules += mission_uboot
 mission_targets += $(mission_uboot)
 .PHONY: $(mission_uboot)
 src_get_uboot:  sdk_folders
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_UBOOT)
 	@echo $@ done
-src_package_uboot: sdk_folders
+src_package_uboot: sdk_folders $(PKG_NAME_SRC_UBOOT) 
 	@echo $@ done
 src_install_uboot: sdk_folders $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)
 	@echo $@ done
@@ -600,6 +630,15 @@ test_uboot: $(mission_uboot)
 help_uboot: sdk_folders mktest
 	@echo targets: $(mission_uboot)
 	@echo $@ done
+$(PKG_NAME_SRC_UBOOT):
+	if [ -f $@ ]; then rm $@;fi
+	@echo "Creating package $@"
+	@cd $(SOURCE_DIR); \
+	    tar cfz $(PKG_NAME_SRC_UBOOT) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+	        $(CVS_SRC_UBOOT)
+	@touch $@
 $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT): $(PKG_NAME_SRC_UBOOT)
 	@rm -rf $@
 	@echo Target folder $(@D) depend on $<
@@ -628,8 +667,9 @@ mission_modules += mission_vivante
 mission_targets += $(mission_vivante)
 .PHONY: $(mission_vivante)
 src_get_vivante:  sdk_folders
+	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_VIVANTE)
 	@echo $@ done
-src_package_vivante: sdk_folders
+src_package_vivante: sdk_folders $(PKG_NAME_SRC_VIVANTE)  $(PKG_NAME_TEST_SRC_VIVANTE)
 	@echo $@ done
 src_install_vivante: sdk_folders  $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)
 	@echo $@ done
@@ -647,6 +687,24 @@ test_vivante: $(mission_vivante)
 help_vivante: sdk_folders mktest
 	@echo targets: $(mission_vivante)
 	@echo $@ done
+$(PKG_NAME_SRC_VIVANTE):
+	if [ -f $@ ]; then rm $@;fi
+	@echo "Creating package $@"
+	@cd $(SOURCE_DIR); \
+	   tar cfz $(PKG_NAME_SRC_VIVANTE) \
+		--exclude=CVS \
+		--exclude=CVSROOT \
+		$(CVS_SRC_VIVANTE)
+	@touch $@
+$(PKG_NAME_TEST_SRC_VIVANTE):
+	if [ -f $@ ]; then rm $@;fi
+	@echo "Creating package $@"
+	@cd $(SOURCE_DIR); \
+	   tar cfz $(PKG_NAME_TEST_SRC_VIVANTE) \
+		--exclude=CVS \
+		--exclude=CVSROOT \
+		$(CVS_SRC_VIVANTE)/gfxtst
+	@touch $@
 $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE):$(PKG_NAME_SRC_VIVANTE)
 	@rm -rf $@
 	@echo Target folder $(@D) depend on $<
@@ -674,8 +732,9 @@ mission_modules += mission_hdmi
 mission_targets += $(mission_hdmi)
 .PHONY: $(mission_hdmi)
 src_get_hdmi:  sdk_folders
+	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_HDMI_JAZZ2)
 	@echo $@ done
-src_package_hdmi: sdk_folders
+src_package_hdmi: sdk_folders $(PKG_NAME_SRC_HDMI_JAZZ2)
 	@echo $@ done
 src_install_hdmi: sdk_folders $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv
 	@echo $@ done
@@ -693,6 +752,18 @@ test_hdmi: $(mission_hdmi)
 help_hdmi: sdk_folders mktest
 	@echo targets: $(mission_hdmi)
 	@echo $@ done
+$(PKG_NAME_SRC_HDMI_JAZZ2):
+	if [ -f $@ ]; then rm $@;fi
+	@echo "Creating package $@"
+	@rm -rf $(TEMP_DIR)/PROPRIETARY; \
+	mkdir -p $(TEMP_DIR)/PROPRIETARY; \
+	cp -arf $(SOURCE_DIR)/$(CVS_SRC_HDMI_JAZZ2) $(TEMP_DIR)/PROPRIETARY;
+	@cd $(TEMP_DIR); \
+	   tar cfz $(PKG_NAME_SRC_HDMI_JAZZ2) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+	        ./PROPRIETARY/jazz2hdmi
+	@touch $@
 $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv: $(PKG_NAME_SRC_HDMI_JAZZ2)
 	@rm -rf $@
 	@echo Target folder $(@D) depend on $<
@@ -719,8 +790,119 @@ mission_modules += mission_c2box
 mission_targets += $(mission_c2box)
 .PHONY: $(mission_c2box)
 src_get_c2box:  sdk_folders
+	@if test -d "$(SOURCE_DIR)/$(CVS_SRC_SW_C2APPS)" ; then \
+	     cd $(SOURCE_DIR)/$(CVS_SRC_SW_C2APPS); $(UPDATE); \
+         else \
+             cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_SW_C2APPS); \
+         fi
 	@echo $@ done
 src_package_c2box: sdk_folders
+	@cd $(TEMP_DIR); rm -rf $(CVS_SRC_SW_C2APPS); \
+	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_SW_C2APPS) .
+	@cd $(TEMP_DIR)/$(CVS_SRC_SW_C2APPS)/pvr/filemanager/include; \
+            sed -i '{s, ".*","$(SDK_VERSION_ALL)-$(BUILDTIMES)",g}' version.h
+	
+	@rm -f $(PKG_NAME_SRC_SW_C2APPS)
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_SW_C2APPS) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+	        --exclude=ipcam \
+		--exclude=dtv \
+		--exclude=p2p/PiPlugin \
+		--exclude=p2p/httpPlugin \
+		--exclude=p2p/tplugin \
+		--exclude=p2p/yt \
+		--exclude=p2p/libThunderPlugin \
+		--exclude=filemanager \
+	        $(CVS_SRC_SW_C2APPS)
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_C2BOX_ALL) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+	        --exclude=ipcam \
+		--exclude=dtv \
+		--exclude=p2p/PiPlugin \
+		--exclude=p2p/httpPlugin \
+		--exclude=p2p/tplugin \
+		--exclude=p2p/yt \
+		--exclude=p2p/libThunderPlugin \
+		--exclude=filemanager2 \
+	        $(CVS_SRC_SW_C2APPS)
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_C2BOX) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+	        --exclude=ipcam \
+		--exclude=dtv \
+		--exclude=p2p/PiPlugin \
+		--exclude=p2p/httpPlugin \
+		--exclude=p2p/tplugin \
+		--exclude=p2p/yt \
+		--exclude=p2p/libThunderPlugin \
+		--exclude=filemanager2 \
+		--exclude=apps/discs \
+		--exclude=apps/flash \
+		--exclude=apps/karaoke \
+		--exclude=apps/videochat \
+		--exclude=apps/thunderkk \
+		--exclude=apps/videophone \
+		--exclude=apps/dtv \
+		--exclude=apps/pps \
+		--exclude=apps/browser \
+		--exclude=apps/camera \
+		--exclude=apps/jvm \
+		--exclude=apps/sohu \
+		--exclude=apps/capture \
+	        $(CVS_SRC_SW_C2APPS)
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_MINIBD) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/discs
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_FLASH) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/flash
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_KARAOKE) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/karaoke
+	@if [ "$(SDK_TARGET_ARCH)" != "jazz2l" ]; then \
+	cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_VIDEOCHAT) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videochat; \
+	fi
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_THUNDERKK) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/thunderkk
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_MVPHONE) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videophone
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_BROWSER) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/browser
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_IPCAM) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/camera
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_JVM) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/jvm
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_RECOEDING) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/capture
+	@cd $(TEMP_DIR); \
+	    tar zcf $(PKG_NAME_SRC_SOHU) \
+		--exclude=CVS \
+		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/sohu
+	@rm -rf $(TEMP_DIR)/$(CVS_SRC_SW_C2APPS)
+	
 	@echo $@ done
 src_install_c2box: sdk_folders $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS)
 	@echo $@ done
@@ -789,8 +971,20 @@ mission_modules += mission_jtag
 mission_targets += $(mission_jtag)
 .PHONY: $(mission_jtag)
 src_get_jtag:  sdk_folders
+	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_JTAG)
 	@echo $@ done
 src_package_jtag: sdk_folders
+	@cd $(TEMP_DIR); \
+	    mkdir -p $(CVS_SRC_JTAG); \
+	    cd $(TEMP_DIR)/$(CVS_SRC_JTAG); \
+	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_JTAG) ../
+	
+	@echo "Creating package $(PKG_NAME_SRC_JTAG)"
+	@cd $(TEMP_DIR); \
+	    tar cfz $(PKG_NAME_SRC_JTAG) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+	        $(CVS_SRC_JTAG)
 	@echo $@ done
 src_install_jtag: sdk_folders $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)
 	@echo $@ done
@@ -838,8 +1032,29 @@ mission_modules += mission_diag
 mission_targets += $(mission_diag)
 .PHONY: $(mission_diag)
 src_get_diag:  sdk_folders
+	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_DIAG)
 	@echo $@ done
 src_package_diag: sdk_folders
+	@rm -f $(PKG_NAME_SRC_DIAG)
+	@cd $(TEMP_DIR); \
+	    mkdir -p $(CVS_SRC_DIAG); \
+	    cd $(CVS_SRC_DIAG); \
+	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_DIAG) ../; \
+	@echo "Creating package $(PKG_NAME_SRC_DIAG)"
+	@cd $(TEMP_DIR); \
+	    tar cfz $(PKG_NAME_SRC_DIAG) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+		$(CVS_SRC_DIAG)/example \
+		$(CVS_SRC_DIAG)/include \
+		$(CVS_SRC_DIAG)/jtag_scripts \
+		$(CVS_SRC_DIAG)/lib \
+		$(CVS_SRC_DIAG)/loader \
+		$(CVS_SRC_DIAG)/Makefile \
+		$(CVS_SRC_DIAG)/moduledefs \
+		$(CVS_SRC_DIAG)/modulerules \
+		$(CVS_SRC_DIAG)/test \
+	
 	@echo $@ done
 src_install_diag: sdk_folders $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG)
 	@echo $@ done
@@ -886,8 +1101,50 @@ mission_modules += mission_c2_goodies
 mission_targets += $(mission_c2_goodies)
 .PHONY: $(mission_c2_goodies)
 src_get_c2_goodies:  sdk_folders
+	@echo "Checkout fusepod sources"
+	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d fusepod $(FUSEPOD_SCRIPT); 
+	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(DJMOUNT_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(FUSEPOD_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(LIBGPOD_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(FUSE_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(GLIB_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(TAGLIB_PKG);
+	
+	@echo "Checkout perl sources"
+	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d perl $(PERL_SCRIPT); 
+	@cd $(SOURCE_DIR)/c2_goodies/perl && $(CHECKOUT) -d dist $(PERL_PKG); 
+	
+	@echo "Checkout snoopy sources"
+	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d snoopy $(CVS_SRC_SNOOPY); 
+	
+	@echo "Checkout hdd library sources"
+	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d hdd $(HDD_SCRIPT); 
+	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(SAMBA_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(LIBUSB_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(LIBPTP_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(NTFS_PKG); 
+	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(NTFSPROGS_PKG); 
+	
+	@echo "Checkout benchmark sources"
+	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d benchmark $(BENCHMARK_SCRIPT);
+	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(BONNIE_PKG);
+	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(IOZONE_PKG);
+	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(LMBENCH_PKG);
+	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(UNIXBENCH_PKG);
+	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(IPERF_PKG);
+	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(NETPERF_PKG);
+	
+	@echo "Checkout ethertools source"
+	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d ethertool $(ETHERTOOL_PKG);
 	@echo $@ done
 src_package_c2_goodies: sdk_folders
+	@rm -f $(PKG_NAME_SRC_GOODIES)
+	@echo "Creating package $(PKG_NAME_SRC_GOODIES)"
+	@cd $(SOURCE_DIR); \
+	tar cfz $(PKG_NAME_SRC_GOODIES) \
+    		--exclude=CVS \
+    		--exclude=CVSROOT \
+    		./c2_goodies
 	@echo $@ done
 src_install_c2_goodies: sdk_folders $(TEST_ROOT_DIR)/c2_goodies
 	@echo $@ done
@@ -1083,15 +1340,16 @@ help_xxx: sdk_folders mktest
 	@echo targets: $(mission_xxx)
 	@echo $@ done
 $(TEMP_DIR)/xxx: src_get_xxx
-$(TEMP_DIR)/xxx.src.tar.gz: $(TEMP_DIR)/xxx
+$(TEMP_DIR)/xxx.src.tar.gz $(TEMP_DIR)/xxx.bin.tar.gz: $(TEMP_DIR)/xxx
 	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@"
-	@cd $(TEMP_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
-		xxx
+	@echo "Creating package $@" depend on $^
+	@mkdir -p $(@D)
+	@cd $(<D); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
+		$(<F)
 	@touch $@
 $(TEST_ROOT_DIR)/xxx: $(TEMP_DIR)/xxx.src.tar.gz
 	@rm -rf $@
-	@echo Target folder $(@D)
+	@echo Extract $^ to Target folder $@
 	@mkdir -p $(@D)
 	cd $(@D) ; \
 	    tar xzf $<
