@@ -40,6 +40,19 @@ bin_package
 bin_install
 "
 
+##  cron debug message code, these setting does not pass to Makefile
+#----------------------------------------------------------------------
+#export MISSION=`echo $0 | sed 's:.*/\(.*\):\1:'`
+export MISSION=${0##*/}
+export rlog=$HOME/rlog/rlog.$MISSION
+recho()
+{
+    #progress echo, for debug during run as the crontab task.
+    if [ ! -z "$rlog" ] ; then
+    echo `date +"%Y-%m-%d %H:%M:%S"` " $@" >>$rlog.log.txt
+    fi
+    echo `date +"%Y-%m-%d %H:%M:%S"` " $@"
+}
 update_indexlog()
 {
     #handle echo "Hdmi:1:$hdmilog">>$indexlog
