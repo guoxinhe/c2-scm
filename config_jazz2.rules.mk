@@ -198,7 +198,7 @@ src_install_devtools: sdk_folders $(DEVTOOLS_BUILD_PATH)
 	@echo $@ done
 src_config_devtools: sdk_folders
 	@echo $@ done
-src_build_devtools: sdk_folders $(DEVTOOLS_BUILD_PATH)/c2
+src_build_devtools: sdk_folders $(DEVTOOLS_BUILD_PATH)/c2 devtools_build_check
 	@echo $@ done
 bin_package_devtools: sdk_folders  $(PKG_NAME_BIN_DEVTOOLS)
 	@echo $@ done
@@ -221,6 +221,7 @@ $(DEVTOOLS_BUILD_PATH): $(PKG_NAME_SRC_DEVTOOLS)
 	@touch $@
 $(DEVTOOLS_BUILD_PATH)/c2: $(DEVTOOLS_BUILD_PATH)
 	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
+devtools_build_check:
 	# judge if the devtools is compiled successfully
 	@cd  $(DEVTOOLS_BUILD_PATH); \
 	if [ $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.* |wc -l) -gt 0 ]; then \
@@ -273,6 +274,11 @@ bin_install_sw_media: sdk_folders  $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/$(CVS
 	@echo $@ done
 clean_sw_media: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
+	rm -rf  $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)  \
+		$(TEMP_DIR)/mk_sw_media_3rdsrc \
+		$(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA) \
+		$(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/$(CVS_SRC_SW_MEDIA) \
+		;
 	@echo $@ done
 test_sw_media: $(mission_sw_media)
 help_sw_media: sdk_folders mktest
@@ -318,15 +324,15 @@ $(PKG_NAME_SRC_SW_MEDIA_2ND) : $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)
 $(PKG_NAME_SRC_SW_MEDIA): $(PKG_NAME_SRC_SW_MEDIA_2ND)
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@"
-	@mkdir -p $(TEST_ROOT_DIR)/mk_sw_media_src; 
-	@cd $(TEST_ROOT_DIR)/mk_sw_media_src; \
+	@mkdir -p $(TEMP_DIR)/mk_sw_media_3rdsrc; 
+	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc; \
 	    rm -rf $(CVS_SRC_SW_MEDIA); \
 	    tar xfz $(PKG_NAME_SRC_SW_MEDIA_2ND)
-	@cd $(TEST_ROOT_DIR)/mk_sw_media_src/$(CVS_SRC_SW_MEDIA); \
+	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc/$(CVS_SRC_SW_MEDIA); \
 	    rm -rf media/plugins/real; \
 	    cp build/build/customer/build/globalconfig-C2-PVR-$(SDK_TARGET_ARCH) \
 		build/build/customer/build/globalconfig-C2-PVR
-	@cd $(TEST_ROOT_DIR)/mk_sw_media_src; \
+	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc; \
 	    tar zcf $(PKG_NAME_SRC_SW_MEDIA) $(CVS_SRC_SW_MEDIA)
 	@touch $@
 $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR): $(PKG_NAME_SRC_SW_MEDIA_2ND)
