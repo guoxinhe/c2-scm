@@ -1374,8 +1374,8 @@ $(TEMP_DIR)/xxx.src.tar.gz:
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
-	@cd $(<D); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
-		$(TEMP_DIR)/xxx
+	@cd $(TEMP_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
+		xxx
 	@touch $@
 $(TEST_ROOT_DIR)/xxx: $(TEMP_DIR)/xxx.src.tar.gz
 	@rm -rf $@
