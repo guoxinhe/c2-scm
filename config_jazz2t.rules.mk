@@ -1,43 +1,43 @@
 
 BRANCH_SOURCE_DIR :=$(TOP_DIR)/source-JAZZ2T
-mission_jazz2tkernelnfs := help_jazz2tkernelnfs clean_jazz2tkernelnfs src_get_jazz2tkernelnfs  \
-	src_package_jazz2tkernelnfs src_install_jazz2tkernelnfs src_config_jazz2tkernelnfs src_build_jazz2tkernelnfs \
-	bin_package_jazz2tkernelnfs bin_install_jazz2tkernelnfs
-mission_modules += mission_jazz2tkernelnfs
-mission_targets += $(mission_jazz2tkernelnfs)
-.PHONY: $(mission_jazz2tkernelnfs)
-src_get_jazz2tkernelnfs:  sdk_folders
+mission_kerneljazz2tnfs := help_kerneljazz2tnfs clean_kerneljazz2tnfs src_get_kerneljazz2tnfs  \
+	src_package_kerneljazz2tnfs src_install_kerneljazz2tnfs src_config_kerneljazz2tnfs src_build_kerneljazz2tnfs \
+	bin_package_kerneljazz2tnfs bin_install_kerneljazz2tnfs
+mission_modules += mission_kerneljazz2tnfs
+mission_targets += $(mission_kerneljazz2tnfs)
+.PHONY: $(mission_kerneljazz2tnfs)
+src_get_kerneljazz2tnfs:  sdk_folders
 	mkdir -p $(BRANCH_SOURCE_DIR); 
 	cd $(BRANCH_SOURCE_DIR);  \
 	    cvs co -r JAZZ2T $(CVS_SRC_KERNEL)/linux-2.6;
 	@echo $@ done
-src_package_jazz2tkernelnfs: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.src.tar.gz
+src_package_kerneljazz2tnfs: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.src.tar.gz
 	@echo $@ done
-src_install_jazz2tkernelnfs: sdk_folders $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL)
+src_install_kerneljazz2tnfs: sdk_folders $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)
 	@echo $@ done
-src_config_jazz2tkernelnfs: sdk_folders
-	@cd $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR)/; \
+src_config_kerneljazz2tnfs: sdk_folders
+	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR)/; \
 	    cp arch/c2/configs/$(LINUX_CONFIG) .config; \
 	    yes "" |make oldconfig;
-	@cd $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL); \
+	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL); \
 	    make initramfs_gen.txt;
 	@echo $@ done
-src_build_jazz2tkernelnfs: sdk_folders
-	@cd $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL); \
+src_build_kerneljazz2tnfs: sdk_folders
+	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL); \
 	    make
 	@echo $@ done
-bin_package_jazz2tkernelnfs: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.bin.tar.gz
+bin_package_kerneljazz2tnfs: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.bin.tar.gz
 	@echo $@ done
-bin_install_jazz2tkernelnfs: sdk_folders
+bin_install_kerneljazz2tnfs: sdk_folders
 	@echo $@ done
-clean_jazz2tkernelnfs: sdk_folders
-	rm -rf $(TEMP_DIR)/$(CVS_SRC_KERNEL) $(TEST_ROOT_DIR)/build_jazz2tkernelnfs $(TEST_USR_DIR)/jazz2tkernelnfs
+clean_kerneljazz2tnfs: sdk_folders
+	rm -rf $(TEMP_DIR)/$(CVS_SRC_KERNEL) $(TEST_ROOT_DIR)/build_kerneljazz2tnfs $(TEST_USR_DIR)/kerneljazz2tnfs
 	@echo $@ don
-test_jazz2tkernelnfs: $(mission_jazz2tkernelnfs)
-help_jazz2tkernelnfs: sdk_folders mktest
-	@echo targets: $(mission_jazz2tkernelnfs)
+test_kerneljazz2tnfs: $(mission_kerneljazz2tnfs)
+help_kerneljazz2tnfs: sdk_folders mktest
+	@echo targets: $(mission_kerneljazz2tnfs)
 	@echo $@ done
-$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.src.tar.gz:
+$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.src.tar.gz:
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
@@ -62,21 +62,21 @@ $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.src.tar.gz:
     		./$(CVS_SRC_KERNEL); \
 	    rm -rf $(CVS_SRC_KERNEL)
 	@touch $@
-$(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL): $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.src.tar.gz
+$(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL): $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.src.tar.gz
 	@rm -rf $@
 	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
-	cd $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/ ; \
+	cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/ ; \
 	    tar xzf $<
 	@touch $@
-$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.bin.tar.gz:
+$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.bin.tar.gz:
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
-	@cd $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
+	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
 	mv -f Makefile Makefile.save;\
 	echo "image:" > Makefile;
-	@cd $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/; \
+	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/; \
 		tar cfz $@ \
 		$(CVS_SRC_KERNEL)/1gb.part \
 		$(CVS_SRC_KERNEL)/initramfs_files \
@@ -93,10 +93,10 @@ $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.bin.tar.gz:
 		$(CVS_SRC_KERNEL)/$(LINUXDIR)/usr \
 		$(CVS_SRC_KERNEL)/$(LINUXDIR)/.config \
 		$(CVS_SRC_KERNEL)/Makefile
-	@cd $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
+	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
 	mv -f Makefile.save Makefile
 	@touch $@
-$(TEST_USR_DIR)/jazz2tkernelnfs:$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs.bin.tar.gz
+$(TEST_USR_DIR)/kerneljazz2tnfs:$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.bin.tar.gz
 	@rm -rf $@
 	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)

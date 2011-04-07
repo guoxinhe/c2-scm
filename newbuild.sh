@@ -129,6 +129,20 @@ checkadd_fail_send_list()
         if [ $x -ne 0 ]; then
 	    nr_failmodule=$(($nr_failmodule+1))
             case $m in
+            devtools*     ) addto_send hguo@c2micro.com saladwang@c2micro.com        ;;
+            sw_media*     ) addto_send hguo@c2micro.com              ;;
+            qt*           ) addto_send hguo@c2micro.com              ;;
+            c2box*        ) addto_send hguo@c2micro.com              ;;
+            jtag*         ) addto_send hguo@c2micro.com jsun@c2micro.com             ;;
+            c2_goodies*   ) addto_send hguo@c2micro.com robinlee@c2micro.com ali@c2micro.com             ;;
+            diag*         ) addto_send hguo@c2micro.com              ;;
+            kernel*       ) addto_send hguo@c2micro.com swine@c2micro.com jsun@c2micro.com robinlee@c2micro.com ali@c2micro.com roger@c2micro.com janetliu@c2micro.com llian@c2micro.com ;;
+            vivante*      ) addto_send hguo@c2micro.com llian@c2micro.com            ;;
+            hdmi*         ) addto_send hguo@c2micro.com jsun@c2micro.com             ;;
+            uboot*        ) addto_send hguo@c2micro.com robinlee@c2micro.com ali@c2micro.com             ;;
+            facudisk*     ) addto_send hguo@c2micro.com              ;;
+            usrudisk*     ) addto_send hguo@c2micro.com              ;;
+
             Devtools)     addto_send  saladwang@c2micro.com ;;
             Buildroot)    addto_send  saladwang@c2micro.com ;;
             SPI)          addto_send       jsun@c2micro.com ;;
