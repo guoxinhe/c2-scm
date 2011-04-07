@@ -17,15 +17,18 @@ clean:
 	rm -rf $(PKG_DIR)
 	rm -rf $(TEST_ROOT_DIR)
 	rm -rf $(TOP_DIR)/test 
-	rm -rf $(TEMP_DIR) 
+	rm -rf $(TEMP_DIR)
+	rm -rf $(TEST_USR_DIR)
+
+CONFIG_SDK_ARCHRULESDEF=$(SDK_TARGET_ARCH).rules
+ifneq (,$(realpath $(CONFIG_SDK_ARCHRULESDEF)))
+     include $(realpath $(CONFIG_SDK_ARCHRULESDEF))
+endif
 
 CONFIG_SDK_RULESDEF=build.rules
 ifneq (,$(realpath $(CONFIG_SDK_RULESDEF)))
      include $(realpath $(CONFIG_SDK_RULESDEF))
 endif
-
-mktest:
-	@$(makefile_test)
 
 #------------------------------------------------------------------------------
 .NOTPARALLEL:

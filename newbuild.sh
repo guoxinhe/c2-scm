@@ -93,14 +93,14 @@ if [ "$1" == "init" ]; then
   shift
 fi
 
-config_enable_clean=
-config_enable_src_get=
+config_enable_clean=y
+config_enable_src_get=y
 config_enable_src_package=y
-config_enable_src_install=
-config_enable_src_config=
-config_enable_src_build=
-config_enable_bin_package=
-config_enable_bin_install=
+config_enable_src_install=y
+config_enable_src_config=y
+config_enable_src_build=y
+config_enable_bin_package=y
+config_enable_bin_install=y
 log=`pwd`/log   #/`date +%y%m%d`
 mkdir -p $log 
 make  mktest >$log/mktest.log

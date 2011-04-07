@@ -232,6 +232,18 @@ $(DEVTOOLS_BUILD_PATH)/c2: $(DEVTOOLS_BUILD_PATH)
 	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
 devtools_build_check:
 	# judge if the devtools is compiled successfully
+	@if test $(shell grep 'Moving build files...' test/tools-build/buildroot/makelog.$(TODAY) |wc -l) = 1; then \
+	   echo "Devtools compile successfully"; \
+	else \
+	   echo "Devtools compile failed"; \
+	   exit 1; \
+	fi 
+	@cd test/c2; \
+	    ln -s $(TODAY) daily; \
+	    ln -s daily sw;
+	
+devtools_build_check_bugversion:
+	# judge if the devtools is compiled successfully
 	@cd  $(DEVTOOLS_BUILD_PATH); \
 	if [ $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.* |wc -l) -gt 0 ]; then \
 	   echo "Devtools compile successfully"; \
@@ -239,7 +251,7 @@ devtools_build_check:
 	   echo "Devtools compile failed"; \
 	   echo "force does not " exit 1; \
 	fi 
-	@cd  $(DEVTOOLS_BUILD_PATH)/c2; \
+	@-cd  $(DEVTOOLS_BUILD_PATH)/c2; \
 	    for i in  `ls 1* -d`;do echo $$i;done; ln -s $$i daily;\
 	    ln -s daily sw; 
 	@touch $@
@@ -1350,48 +1362,66 @@ src_get_xxx:  sdk_folders
 	@echo "xxx:xxx.c" 		>>$(TEMP_DIR)/xxx/Makefile
 	@echo "	gcc xxx.c -o xxx" 	>>$(TEMP_DIR)/xxx/Makefile
 	@echo $@ done
-src_package_xxx: sdk_folders $(TEMP_DIR)/xxx.src.tar.gz
+src_package_xxx: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
 	@echo $@ done
 src_install_xxx: sdk_folders $(TEST_ROOT_DIR)/xxx
 	@echo $@ done
 src_config_xxx: sdk_folders
 	@echo $@ done
-src_build_xxx: sdk_folders 
+src_build_xxx: sdk_folders
+	@cd $(TEST_ROOT_DIR)/xxx; \
+		make
 	@echo $@ done
-bin_package_xxx: sdk_folders
+bin_package_xxx: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
 	@echo $@ done
-bin_install_xxx: sdk_folders
+bin_install_xxx: sdk_folders $(TEST_USR_DIR)/xxx
 	@echo $@ done
 clean_xxx: sdk_folders
-	rm -rf $(TEMP_DIR)/xxx $(TEMP_DIR)/xxx.src.tar.gz $(TEST_ROOT_DIR)/xxx
+	rm -rf $(TEMP_DIR)/xxx $(TEST_ROOT_DIR)/xxx $(TEST_USR_DIR)/xxx
 	@echo $@ don
 test_xxx: $(mission_xxx)
 help_xxx: sdk_folders mktest
 	@echo targets: $(mission_xxx)
 	@echo $@ done
-$(TEMP_DIR)/xxx: src_get_xxx
-$(TEMP_DIR)/xxx.src.tar.gz:
+$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz:
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@" depend on $<
 	@mkdir -p $(@D)
 	@cd $(TEMP_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
 		xxx
 	@touch $@
-$(TEST_ROOT_DIR)/xxx: $(TEMP_DIR)/xxx.src.tar.gz
+$(TEST_ROOT_DIR)/xxx: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
 	@rm -rf $@
 	@echo Extract $< to Target folder $@
 	@mkdir -p $(@D)
 	cd $(@D) ; \
 	    tar xzf $<
 	@touch $@
+$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz:
+	if [ -f $@ ]; then rm $@;fi
+	@echo "Creating package $@" depend on $<
+	@mkdir -p $(@D)
+	@cd $(TEST_ROOT_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
+		xxx
+	@touch $@
+$(TEST_USR_DIR)/xxx:$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
+	@rm -rf $@
+	@echo Extract $< to Target folder $@
+	@mkdir -p $(@D)
+	cd $(@D) ; \
+	    tar xzf $<
+	@touch $@
+	
 
-sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR)
-.PHONY: sdk_folders help
+sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR) $(TEST_USR_DIR)
+.PHONY: sdk_folders ls mktest mc help
 sdk_folders: $(sdkautodirs)
 $(sdkautodirs):
 	@mkdir -p $@
 ls:
 	@echo support mission targets: $(mission_targets) 
+mktest:
+	@$(call makefile_test)
 mc help: mktest
 	@echo
 	@echo "support mission        :" $(shell echo $(subst _xxx,,"$(mission_xxx)") test)

@@ -30,6 +30,7 @@ PRODUCT				:= $(SDK_TARGET_ARCH)-sdk
 SDK_VERSION_ALL			:= $(SDK_TARGET_ARCH)-sdk-$(TODAY)
 DEVTOOLS_AUTOBUILD_CONFIG 	:= autobuild_config_$(SDK_TARGET_ARCH)
 TEST_ROOT_DIR			:= $(TOP_DIR)/test_root
+TEST_USR_DIR			:= $(TOP_DIR)/test_usr
 SOURCE_DIR			:= $(TOP_DIR)/source
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
