@@ -159,7 +159,7 @@ PKG_NAME_BIN_JTAG       	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jtag-bin.tar.gz
 
 # U-BOOT package
 uboot_utilities			:=u-boot-utilities
-UBOOT_BOARDTYPE         	:= jazz2evb_config
+UBOOT_BOARDTYPE         	:= jazz2tevb_config
 UBOOT_MAKECONFIG        	:= MPUCLK=400 MEMCLK=400 DDR_DEVICE=MT47H64M16-25E
 CVS_SRC_UBOOT			:= sw/prom/u-boot-1.3.0
 PKG_NAME_SRC_UBOOT		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-src.tar.gz
