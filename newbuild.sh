@@ -261,11 +261,14 @@ recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerro
 export SDK_TARGET_ARCH=`make SDK_TARGET_ARCH`
 export TREE_PREFIX=dev
 export SDK_RESULTS_DIR=$DIST_DIR/
-export SDK_CVS_USER=$USER
+export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{print $2}'`
+[ $SDK_CVS_USER ] || export SDK_CVS_USER=`whoami`
+
+WWWROOT=/var/www/html/hguo
 DATE=`date +%y%m%d`
 scp_upload_logs()
 {
-    SCP_TARGET=/home/${USER}/public_html/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
+    SCP_TARGET=${WWWROOT}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
     mkdir -p $SCP_TARGET
     cp $log/* $SCP_TARGET/
     pushd $SCP_TARGET;  
@@ -279,8 +282,8 @@ CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=1
 
 PKG_DIR=`make PKG_DIR`
-S200_DIR=/home/$USER/sdkdailybuild/$SDK_TARGET_ARCH/dev/weekly/$DATE
-mkdir -p /var/www/html/$USER/
+S200_DIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/dev/weekly/$DATE
+mkdir -p ${WWWROOT}
 
 if [ $CONFIG_BUILD_PUBLISHLOG ]; then
     scp_upload_logs
@@ -294,13 +297,14 @@ fi
 if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_sdk_daily.html
 #    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
-#    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
+#    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$SDK_CVS_USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
     ./html_generate.cgi  >$DIST_DIR/$HTML_REPORT
     #fix: // in url like:  href='https://access.c2micro.com/jazz2_msp_dev_logs//100829.log
     sed -i 's:_logs//1:_logs/1:g' $DIST_DIR/$HTML_REPORT
     sed -i 's:SDK Daily Build Results:SDK My Test Build Results:g' $DIST_DIR/$HTML_REPORT
-    sed -i "s,https://access.c2micro.com/~${USER}/,http://${THISIP}/${USER}/,g" $DIST_DIR/$HTML_REPORT
-    cp $DIST_DIR/$HTML_REPORT  /home/${USER}/public_html/
+    sed -i "s,https://access.c2micro.com/~${SDK_CVS_USER}/,http://${THISIP}/${SDK_CVS_USER}/,g" $DIST_DIR/$HTML_REPORT
+    #cp $DIST_DIR/$HTML_REPORT  /home/${SDK_CVS_USER}/public_html/
+    cp $DIST_DIR/$HTML_REPORT  ${WWWROOT}/
 fi
 
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
@@ -312,7 +316,7 @@ if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
 	echo ""
 	echo "Script $THISIP:`readlink -f $0`"
 	echo "Get build package at: 10.16.13.200:$S200_DIR/"
-        echo "Click here to watch report: http://${THISIP}/${USER}/$HTML_REPORT"
-        echo "Click here to watch logs: http://${THISIP}/${USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
+        echo "Click here to watch report: http://${THISIP}/${SDK_CVS_USER}/$HTML_REPORT"
+        echo "Click here to watch logs: http://${THISIP}/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
     ) 2>&1 | mail -s"$mail_title" $SENDTO
 fi
