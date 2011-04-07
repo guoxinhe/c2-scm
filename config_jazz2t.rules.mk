@@ -104,3 +104,76 @@ $(TEST_USR_DIR)/jazz2tkernelnfs:$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jazz2tkernelnfs
 	    tar xzf $<
 	@touch $@
 
+
+
+mission_ubootjazz2tevb := help_ubootjazz2tevb clean_ubootjazz2tevb       src_get_ubootjazz2tevb  \
+	src_package_ubootjazz2tevb src_install_ubootjazz2tevb src_config_ubootjazz2tevb src_build_ubootjazz2tevb \
+	bin_package_ubootjazz2tevb bin_install_ubootjazz2tevb
+mission_modules += mission_ubootjazz2tevb
+mission_targets += $(mission_ubootjazz2tevb)
+.PHONY: $(mission_ubootjazz2tevb)
+src_get_ubootjazz2tevb:  sdk_folders
+	mkdir -p $(BRANCH_SOURCE_DIR);
+	@cd $(BRANCH_SOURCE_DIR); cvs co -r JAZZ2T $(CVS_SRC_UBOOT)
+	@echo $@ done
+src_package_ubootjazz2tevb: sdk_folders $(PKG_NAME_SRC_UBOOT)
+	if [ -f $(PKG_NAME_SRC_UBOOT) ]; then rm $(PKG_NAME_SRC_UBOOT);fi
+	@echo "Creating package $(PKG_NAME_SRC_UBOOT)"
+	@cd $(BRANCH_SOURCE_DIR); \
+	    tar cfz $(PKG_NAME_SRC_UBOOT) \
+	        --exclude=CVS \
+	        --exclude=CVSROOT \
+	        $(CVS_SRC_UBOOT)
+	@echo $@ done
+src_install_ubootjazz2tevb: sdk_folders
+	@rm -rf $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)
+	@echo Extract $(PKG_NAME_SRC_UBOOT) to Target folder $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)
+	cd $(TEST_ROOT_DIR); \
+	    tar xzf $(PKG_NAME_SRC_UBOOT)
+	@echo $@ done
+src_config_ubootjazz2tevb: sdk_folders
+	@echo $@ done
+src_build_ubootjazz2tevb: sdk_folders
+	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT); \
+		./build.sh jazz2t;
+	@touch $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities)
+	@echo $@ done
+bin_package_ubootjazz2tevb: sdk_folders
+	if [ -f $(PKG_NAME_BIN_UBOOT) ]; then rm $(PKG_NAME_BIN_UBOOT);fi
+	@echo "Creating package $(PKG_NAME_BIN_UBOOT)"
+	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT); \
+		tar cfz $(PKG_NAME_BIN_UBOOT) $(uboot_utilities)
+	@touch $(PKG_NAME_BIN_UBOOT)
+	@echo $@ done
+bin_install_ubootjazz2tevb: sdk_folders
+	@echo $@ done
+clean_ubootjazz2tevb: sdk_folders
+	@echo $@ done
+test_ubootjazz2tevb: $(mission_ubootjazz2tevb)
+help_ubootjazz2tevb: sdk_folders mktest
+	@echo targets: $(mission_ubootjazz2tevb)
+	@echo $@ done
+
+mission_diagjazz2t := help_diagjazz2t clean_diagjazz2t src_get_diagjazz2t  \
+	src_package_diagjazz2t src_install_diagjazz2t src_config_diagjazz2t src_build_diagjazz2t \
+	bin_package_diagjazz2t bin_install_diagjazz2t
+mission_modules += mission_diagjazz2t
+mission_targets += $(mission_diagjazz2t)
+.PHONY: $(mission_diagjazz2t)
+src_get_diagjazz2t:src_get_diag
+src_package_diagjazz2t:src_package_diag
+src_install_diagjazz2t:src_install_diag
+src_config_diagjazz2t:src_config_diag
+src_build_diagjazz2t: sdk_folders
+	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG); \
+	    make BOARD=cc3300 MEMCLK=400 MPUCLK=400 clean; \
+	    make BOARD=cc3300 MEMCLK=400 MPUCLK=400
+	touch $(TEST_ROOT_DIR)/$(CVS_SRC_DIAG)/loader
+	@echo $@ done
+bin_package_diagjazz2t:bin_package_diag
+bin_install_diagjazz2t:bin_install_diag
+clean_diagjazz2t:clean_diag
+test_diagjazz2t: $(mission_diagjazz2t)
+help_diagjazz2t: sdk_folders mktest
+	@echo targets: $(mission_diagjazz2t)
+	@echo $@ done

@@ -687,7 +687,6 @@ $(PKG_NAME_BIN_UBOOT): $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities)
 	@touch $@
 
 
-DRIVER_USE_KERNEL       := $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 mission_vivante := help_vivante clean_vivante       src_get_vivante  \
 	src_package_vivante src_install_vivante src_config_vivante src_build_vivante \
 	bin_package_vivante bin_install_vivante

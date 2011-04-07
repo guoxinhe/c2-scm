@@ -51,6 +51,7 @@ KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
+DRIVER_USE_KERNEL       	:= $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 
 # DEVTOOLS package
 CVS_SRC_BUILDROOT       	:= projects/sw/devtools/buildroot
