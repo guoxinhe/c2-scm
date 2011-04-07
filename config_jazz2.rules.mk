@@ -1428,3 +1428,6 @@ mc help: mktest
 	@echo "support mission modules:" $(subst mission_,,"$(mission_modules)")
 	@echo "support mission test   :" $(subst mission_,test_,"$(mission_modules)")
 	@echo
+
+$(definedenvlist):
+	@echo ${$@}

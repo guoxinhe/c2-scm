@@ -240,6 +240,43 @@ BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
 
 override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
 
+definedenvlist :=	\
+   TODAY                     \
+   TOP_DIR                   \
+   SDK_KERNEL_VERSION        \
+   SDK_GCC_VERSION           \
+   SDK_QT_VERSION            \
+   SDK_TARGET_ARCH           \
+   SDK_TARGET_GCC_ARCH       \
+   LINUXDIR                  \
+   LINUX_CONFIG              \
+   QTINSTALL_NAME            \
+   GNU_TARBALL_PATH          \
+   MAJOR                     \
+   MINOR                     \
+   BRANCH                    \
+   BUILDTIMES                \
+   VERSION                   \
+   CANDIDATE                 \
+   CVS_TAG                   \
+   SDK_VERSION_ALL           \
+   CHECKOUT_OPTION           \
+   CHECKOUT                  \
+   UPDATE                    \
+   DEVTOOLS_AUTOBUILD_CONFIG \
+   TEST_ROOT_DIR             \
+   SOURCE_DIR                \
+   TEMP_DIR                  \
+   PKG_DIR                   \
+   KERNEL_PATH               \
+   TOOLCHAIN_PATH            \
+   SW_MEDIA_PATH             \
+   SW_MEDIA_INSTALL_DIR      \
+   QT_INSTALL_DIR            \
+   PATH                      \
+   INSTALL_DIR               \
+   PUBLISH_DIR               \
+
 define makefile_test
     echo "   TODAY                     = "$(TODAY)
     echo "   TOP_DIR                   = "$(TOP_DIR)

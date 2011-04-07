@@ -1,14 +1,15 @@
 #!/bin/sh
 
+THISIP=`/sbin/ifconfig eth0 | grep 'inet addr' | sed 's/.*addr:\(.*\)\(  Bcast.*\)/\1/'`
 . ~/.bash_profile
 
-[ -h build.config ] || ln -s sdkmake/config_jazz2.daily.mk build.config
-[ -h build.rules  ] || ln -s sdkmake/config_jazz2.rules.mk build.rules
-[ -h Makefile     ] || ln -s sdkmake/Makefile.mk           Makefile
-[ -h newbuild.sh  ] || ln -s sdkmake/newbuild.sh           newbuild.sh
-[ -h bc.mk        ] || ln -s sdkmake/config_jazz2.daily.mk bc.mk
-[ -h br.mk        ] || ln -s sdkmake/config_jazz2.rules.mk br.mk
-
+[ -f build.config      ] || ln -s sdkmake/config_jazz2.daily.mk build.config
+[ -f build.rules       ] || ln -s sdkmake/config_jazz2.rules.mk build.rules
+[ -f Makefile          ] || ln -s sdkmake/Makefile.mk           Makefile
+[ -f newbuild.sh       ] || ln -s sdkmake/newbuild.sh           newbuild.sh
+[ -f bc.mk             ] || ln -s sdkmake/config_jazz2.daily.mk bc.mk
+[ -f br.mk             ] || ln -s sdkmake/config_jazz2.rules.mk br.mk
+[ -f html_generate.cgi ] || ln -s sdkmake/html_generate.cgi     html_generate.cgi
 modules="
 xxx
 "
@@ -73,6 +74,36 @@ update_indexlog()
     fi
 }
 
+addto_send()
+{
+    while [ $# -gt 0 ] ; do
+        if [ "$SENDTO" = "" ]; then
+            SENDTO=$1 ;
+        else
+          r=`echo $SENDTO | grep $1`
+          if [ "$r" = "" ]; then
+            SENDTO=$SENDTO,$1 ;
+          fi
+        fi
+        shift
+    done
+    export SENDTO
+}
+addto_cc()
+{
+    while [ $# -gt 0 ] ; do
+        if [ "$CCTO" = "" ]; then
+            CCTO=$1 ;
+        else
+          r=`echo $CCTO | grep $1`
+          if [ "$r" = "" ]; then
+            CCTO=$CCTO,$1 ;
+          fi
+        fi
+        shift
+    done
+    export CCTO
+}
 recho_time_consumed()
 {
     tm_b=`date +%s`
@@ -84,6 +115,82 @@ recho_time_consumed()
     shift
     echo "$@" "$tm_c seconds / $tm_h:$tm_m:$tm_s consumed."
 }
+
+checkadd_fail_send_list()
+{
+    #pickup the fail log's tail to email for a quick preview
+    loglist=`cat $indexlog`
+    nr_failmodule=0
+    for i in $loglist ; do
+        m=`echo $i | sed 's,\([^:]*\).*,\1,'`
+        x=`echo $i | sed 's,[^:]*:\([^:]*\).*,\1,'`
+        f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
+        l=`echo $f | sed 's:.*/\(.*\):\1:'`
+        if [ $x -ne 0 ]; then
+	    nr_failmodule=$(($nr_failmodule+1))
+            case $m in
+            Devtools)     addto_send  saladwang@c2micro.com ;;
+            Buildroot)    addto_send  saladwang@c2micro.com ;;
+            SPI)          addto_send       jsun@c2micro.com ;;
+            Jtag)         addto_send       jsun@c2micro.com ;;
+            Uboot)        addto_send   robinlee@c2micro.com ;;
+            Hdmi)         addto_send  zhenzhang@c2micro.com ;;
+            C2_goodies)   addto_send   robinlee@c2micro.com ;;
+            Qt)           addto_send dashanzhou@c2micro.com ;;
+            Kernel)       addto_send      swine@c2micro.com ;;
+            Kernel2632)   addto_send      swine@c2micro.com ;;
+            Sw_media)     addto_send       weli@c2micro.com ;;
+            vivante)      addto_send      llian@c2micro.com ;;
+            Sw_c2apps)    addto_send dashanzhou@c2micro.com ;;
+            factory_udisk)addto_send       hguo@c2micro.com ;;
+            user_udisk)   addto_send       hguo@c2micro.com ;;
+            *)  	  ;;
+            esac
+        fi
+    done
+    [ $nr_failmodule -gt 0 ] && addto_cc wdiao@c2micro.com
+}
+
+list_fail_url_tail()
+{
+    #pickup the fail log's tail to email for a quick preview
+    loglist=`cat $indexlog`
+    for i in $loglist ; do
+        m=`echo $i | sed 's,\([^:]*\).*,\1,'`
+        x=`echo $i | sed 's,[^:]*:\([^:]*\).*,\1,'`
+        f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
+        l=`echo $f | sed 's:.*/\(.*\):\1:'`
+        if [ $x -ne 0 ]; then
+            case $m in
+            *_udisk) #jump these
+                ;;
+            *)
+                echo $m fail :
+                echo "    " "https://access.c2micro.com/~${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
+                ;;
+            esac
+        fi
+    done
+    for i in $loglist ; do
+        m=`echo $i | sed 's,\([^:]*\).*,\1,'`
+        x=`echo $i | sed 's,[^:]*:\([^:]*\).*,\1,'`
+        f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
+        l=`echo $f | sed 's:.*/\(.*\):\1:'`
+        if [ $x -ne 0 ]; then
+            case $m in
+            *_udisk) #jump these
+                ;;
+            *)
+                echo
+                echo $m fail , tail of $l:
+                tail -n 40 $f
+                ;;
+            esac
+        fi
+    done
+}
+
+
 
 if [ "$1" == "init" ]; then
   make clean
@@ -101,8 +208,12 @@ config_enable_src_config=y
 config_enable_src_build=y
 config_enable_bin_package=y
 config_enable_bin_install=y
-log=`pwd`/log   #/`date +%y%m%d`
-mkdir -p $log 
+DIST_DIR=`pwd`/log
+logid=${DIST_DIR}/`date +%y%m%d`
+log=${logid}.log
+
+
+mkdir -p $log ${DIST_DIR}/`date +%y%m%d`
 make  mktest >$log/mktest.log
 make  help   >$log/help.log
 nr_totalerror=0
@@ -140,9 +251,53 @@ for i in ${modules}; do
   nr_totalerror=$((nr_totalerror+nr_merr))
   nr_totalmodule=$((nr_totalmodule+1))
   #echo "$i:$nr_merr:$log/$i.log" >>$log/r.txt
-  update_indexlog "$i:$nr_merr:$log/$i.log" $log/r.txt
+  update_indexlog "$i:$nr_merr:$log/$i.log" $logid.txt
   recho_time_consumed $tm_module "Build module $i $nr_merr error(s). "
 done
 
 recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerror error(s). "
 
+#these 4 exports are used by html_generate.cgi
+export SDK_TARGET_ARCH=`make SDK_TARGET_ARCH`
+export TREE_PREFIX=dev
+export SDK_RESULTS_DIR=$DIST_DIR/
+export SDK_CVS_USER=$USER
+DATE=`date +%y%m%d`
+scp_upload_logs()
+{
+    SCP_TARGET=/home/${USER}/public_html/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
+    mkdir -p $SCP_TARGET
+    cp $log/* $SCP_TARGET/
+    pushd $SCP_TARGET;  
+    unix2dos * ;
+    popd
+}
+mkdir -p /var/www/html/$USER/
+scp_upload_logs
+
+PKG_DIR=`make PKG_DIR`
+S200_DIR=/home/$USER/sdkdailybuild/$SDK_TARGET_ARCH/dev/weekly/$DATE
+ssh ${SDK_CVS_USER}@10.16.13.200     "mkdir -p $S200_DIR"
+scp -r $PKG_DIR/* ${SDK_CVS_USER}@10.16.13.200:$S200_DIR/
+
+    HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_sdk_daily.html
+#    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
+#    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
+    ./html_generate.cgi  >$DIST_DIR/$HTML_REPORT
+    #fix: // in url like:  href='https://access.c2micro.com/jazz2_msp_dev_logs//100829.log
+    sed -i 's:_logs//1:_logs/1:g' $DIST_DIR/$HTML_REPORT
+    sed -i 's:SDK Daily Build Results:SDK My Test Build Results:g' $DIST_DIR/$HTML_REPORT
+    sed -i "s,https://access.c2micro.com/~${USER}/,http://${THISIP}/${USER}/,g" $DIST_DIR/$HTML_REPORT
+    cp $DIST_DIR/$HTML_REPORT  /home/${USER}/public_html/
+
+    addto_send hguo@c2micro.com
+    #checkadd_fail_send_list
+    mail_title="$0 Build all $nr_totalmodule module(s) $nr_totalerror error(s). `date`"
+    (
+	echo "$mail_title"
+	echo ""
+	echo "Script $THISIP:`readlink -f $0`"
+	echo "Get build package at: 10.16.13.200:$S200_DIR/"
+        echo "Click here to watch report: http://${THISIP}/${USER}/$HTML_REPORT"
+        echo "Click here to watch logs: http://${THISIP}/${USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
+    ) 2>&1 | mail -s"$mail_title" $SENDTO
