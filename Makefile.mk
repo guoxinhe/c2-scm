@@ -2,7 +2,7 @@
 # Copyright (C) 2007 C2 Microsystems
 
 makefile_test:=echo "nothing todo"
-CONFIG_SDK_CONFIGDEF=build.config
+CONFIG_SDK_CONFIGDEF=build.config.mk
 ifneq (,$(realpath $(CONFIG_SDK_CONFIGDEF)))
     include $(realpath $(CONFIG_SDK_CONFIGDEF))
 endif
@@ -20,12 +20,12 @@ clean:
 	rm -rf $(TEMP_DIR)
 	rm -rf $(TEST_USR_DIR)
 
-CONFIG_SDK_ARCHRULESDEF=$(SDK_TARGET_ARCH).rules
+CONFIG_SDK_ARCHRULESDEF=$(SDK_TARGET_ARCH).rules.mk
 ifneq (,$(realpath $(CONFIG_SDK_ARCHRULESDEF)))
      include $(realpath $(CONFIG_SDK_ARCHRULESDEF))
 endif
 
-CONFIG_SDK_RULESDEF=build.rules
+CONFIG_SDK_RULESDEF=build.rules.mk
 ifneq (,$(realpath $(CONFIG_SDK_RULESDEF)))
      include $(realpath $(CONFIG_SDK_RULESDEF))
 endif

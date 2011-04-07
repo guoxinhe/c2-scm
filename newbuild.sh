@@ -3,8 +3,8 @@
 THISIP=`/sbin/ifconfig eth0 | grep 'inet addr' | sed 's/.*addr:\(.*\)\(  Bcast.*\)/\1/'`
 . ~/.bash_profile
 
-[ -f build.config      ] || ln -s sdkmake/config_jazz2.daily.mk build.config
-[ -f build.rules       ] || ln -s sdkmake/config_jazz2.rules.mk build.rules
+[ -f build.config.mk   ] || ln -s sdkmake/config_jazz2.daily.mk build.config.mk
+[ -f build.rules.mk    ] || ln -s sdkmake/config_jazz2.rules.mk build.rules.mk
 [ -f Makefile          ] || ln -s sdkmake/Makefile.mk           Makefile
 [ -f newbuild.sh       ] || ln -s sdkmake/newbuild.sh           newbuild.sh
 [ -f bc.mk             ] || ln -s sdkmake/config_jazz2.daily.mk bc.mk
@@ -272,14 +272,26 @@ scp_upload_logs()
     unix2dos * ;
     popd
 }
-mkdir -p /var/www/html/$USER/
-scp_upload_logs
+
+CONFIG_BUILD_PUBLISH=1
+CONFIG_BUILD_PUBLISHLOG=1
+CONFIG_BUILD_PUBLISHHTML=1
+CONFIG_BUILD_PUBLISHEMAIL=1
 
 PKG_DIR=`make PKG_DIR`
 S200_DIR=/home/$USER/sdkdailybuild/$SDK_TARGET_ARCH/dev/weekly/$DATE
-ssh ${SDK_CVS_USER}@10.16.13.200     "mkdir -p $S200_DIR"
-scp -r $PKG_DIR/* ${SDK_CVS_USER}@10.16.13.200:$S200_DIR/
+mkdir -p /var/www/html/$USER/
 
+if [ $CONFIG_BUILD_PUBLISHLOG ]; then
+    scp_upload_logs
+fi
+
+if [ $CONFIG_BUILD_PUBLISH ]; then
+    ssh ${SDK_CVS_USER}@10.16.13.200     "mkdir -p $S200_DIR"
+    scp -r $PKG_DIR/* ${SDK_CVS_USER}@10.16.13.200:$S200_DIR/
+fi
+
+if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_sdk_daily.html
 #    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
 #    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
@@ -289,7 +301,9 @@ scp -r $PKG_DIR/* ${SDK_CVS_USER}@10.16.13.200:$S200_DIR/
     sed -i 's:SDK Daily Build Results:SDK My Test Build Results:g' $DIST_DIR/$HTML_REPORT
     sed -i "s,https://access.c2micro.com/~${USER}/,http://${THISIP}/${USER}/,g" $DIST_DIR/$HTML_REPORT
     cp $DIST_DIR/$HTML_REPORT  /home/${USER}/public_html/
+fi
 
+if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
     addto_send hguo@c2micro.com
     #checkadd_fail_send_list
     mail_title="$0 Build all $nr_totalmodule module(s) $nr_totalerror error(s). `date`"
@@ -301,3 +315,4 @@ scp -r $PKG_DIR/* ${SDK_CVS_USER}@10.16.13.200:$S200_DIR/
         echo "Click here to watch report: http://${THISIP}/${USER}/$HTML_REPORT"
         echo "Click here to watch logs: http://${THISIP}/${USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
     ) 2>&1 | mail -s"$mail_title" $SENDTO
+fi
