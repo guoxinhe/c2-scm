@@ -12,6 +12,7 @@ cd `pwd`
 [ -f bc.mk             ] || ln -s sdkmake/config_jazz2.daily.mk bc.mk
 [ -f br.mk             ] || ln -s sdkmake/config_jazz2.rules.mk br.mk
 [ -f html_generate.cgi ] || ln -s sdkmake/html_generate.cgi     html_generate.cgi
+
 modules="
 xxx
 "
@@ -32,6 +33,7 @@ facudisk
 usrudisk
 xxx
 "
+
 steps="
 clean
 src_get
@@ -225,18 +227,25 @@ config_enable_src_config=y
 config_enable_src_build=y
 config_enable_bin_package=y
 config_enable_bin_install=y
+
+DATE=`date +%y%m%d`
 DIST_DIR=`pwd`/log
-logid=${DIST_DIR}/`date +%y%m%d`
-log=${logid}.log
-
-
-mkdir -p $log ${DIST_DIR}/`date +%y%m%d`
+log=${DIST_DIR}/$DATE.log
+indexlog=${DIST_DIR}/$DATE.txt
+mkdir -p  ${DIST_DIR}/$DATE ${DIST_DIR}/$DATE.log
+[ -h $DIST_DIR/l ] && rm $DIST_DIR/l
+[ -h $DIST_DIR/r ] && rm $DIST_DIR/r
+[ -h $DIST_DIR/i ] && rm $DIST_DIR/i
+ln -s $DIST_DIR/$DATE      $DIST_DIR/i
+ln -s $DIST_DIR/$DATE.log  $DIST_DIR/l
+ln -s $DIST_DIR/$DATE.txt  $DIST_DIR/r
 make  mktest >$log/mktest.log
 make  help   >$log/help.log
+
 nr_totalerror=0
 nr_totalmodule=0
 tm_total=`date +%s`
-indexlog=$logid.txt
+
 for i in ${modules}; do
   nr_merr=0
   tm_module=`date +%s`
@@ -283,7 +292,6 @@ export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{prin
 [ $SDK_CVS_USER ] || export SDK_CVS_USER=`whoami`
 
 WWWROOT=/var/www/html/hguo
-DATE=`date +%y%m%d`
 scp_upload_logs()
 {
     SCP_TARGET=${WWWROOT}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
@@ -300,7 +308,7 @@ CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=1
 
 PKG_DIR=`make PKG_DIR`
-S200_DIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/dev/weekly/$DATE
+S200_DIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
 mkdir -p ${WWWROOT}
 
 if [ $CONFIG_BUILD_PUBLISHLOG ]; then
