@@ -578,7 +578,7 @@ src_install_kernelnand: sdk_folders $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERN
 src_config_kernelnand: sdk_folders
 	@echo $@ done
 src_build_kernelnand: sdk_folders $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)/zvmlinux.bin
-	@if [ ! -d $(TEST_ROOT_DIR)/prebuilt ];then ln -s $(TEST_ROOT_DIR)/kernel_build_nand $(TEST_ROOT_DIR)/prebuilt; fi
+	@if [ ! -d $(TEST_ROOT_DIR)/prebuilt ];then ln -s $(TEMP_DIR)/kernel_build_nand $(TEST_ROOT_DIR)/prebuilt; fi
 	@echo $@ done
 bin_package_kernelnand: sdk_folders $(PKG_NAME_BIN_KERNEL_NAND)
 	@echo $@ done
