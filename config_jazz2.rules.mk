@@ -11,6 +11,7 @@ devtools_list += thirdparty
 src_get_thirdparty:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_3RDPARTY)
 thirdparty:
+	@echo $@ Create  $(TEMP_DIR)/devtools/tarballs
 	@mkdir -p $(TEMP_DIR)/devtools
 	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/3rdParty $(TEMP_DIR)/devtools
 	@cd $(TEMP_DIR)/devtools ; \
@@ -19,6 +20,7 @@ devtools_list += buildroot
 src_get_buildroot:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUILDROOT)
 buildroot:
+	@echo $@
 	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/buildroot $(TEMP_DIR)/
 	cd $(TEMP_DIR)/buildroot; \
 	cp $(DEVTOOLS_AUTOBUILD_CONFIG) autobuild_config; \
@@ -33,6 +35,7 @@ devtools_list += busybox151
 src_get_busybox151:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.5.1)
 busybox151:
+	@echo $@
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_5_1_FILE) \
 		--exclude=CVS     \
@@ -42,6 +45,7 @@ devtools_list += busybox1131
 src_get_busybox1131:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUSYBOX_1.13.3)
 busybox1131:
+	@echo $@
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_13_3_FILE) \
 		--exclude=CVS     \
@@ -51,6 +55,7 @@ devtools_list += i2ctools301
 src_get_i2ctools301:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_I2CTOOLS) 
 i2ctools301:
+	@echo $@
 	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/i2c-tools-3.0.1; \
 	    cd $(TEMP_DIR) && tar jcf $(I2CTOOLS_FILE) \
 	        --exclude=CVS     \
@@ -61,6 +66,7 @@ devtools_list += oprofile
 src_get_oprofile:
 	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_OPROFILE)
 oprofile:
+	@echo $@
 	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/oprofile-0.9.1; \
 	    cd $(TEMP_DIR) && tar jcf $(OPROFILE_FILE) \
 	        --exclude=CVS     \
@@ -71,6 +77,7 @@ devtools_list += directfb
 src_get_directfb:
 	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_DIRECTFB)
 directfb:
+	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/directfb; \
 	    tar jcf $(DIRECTFB_FILE) \
 	        --exclude=CVS      \
@@ -80,6 +87,7 @@ devtools_list += binutils
 src_get_binutils:	
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BINUTILS)	
 binutils:	
+	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/devtools/binutils; \
 	    cp -rf binutils $(TEMP_DIR)/binutils-c2.snapshot
 	@cd $(TEMP_DIR); \
@@ -92,6 +100,7 @@ devtools_list += gccsrc
 src_get_gccsrc:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_GCC)
 gccsrc:
+	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/devtools/gcc; \
 	    cp -rf gcc $(TEMP_DIR)/gcc-c2.snapshot
 	@cd $(TEMP_DIR); \
@@ -104,6 +113,7 @@ devtools_list += standalone_build_script
 src_get_standalone_build_script:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(STANDALONE_BUILD)
 standalone_build_script:
+	@echo $@
 	cd $(SOURCE_DIR)/$(STANDALONE_BUILD); \
 	    cp -f buildtools.sh $(TEMP_DIR)/devtools; \
 	    cp -f autobuild $(TEMP_DIR)/devtools; \
@@ -116,9 +126,10 @@ standalone_build_script:
 	    cp -f gcc-uclibc-3.x.mk $(TEMP_DIR)/devtools; \
 	    cp -f binutils.mk.64 $(TEMP_DIR)/devtools
 devtools_list += kernel_include
-kernel_include:
-	@-cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_KERNEL)
 src_get_kernel_include:
+	@-cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_KERNEL)
+kernel_include:
+	@echo $@
 	@-rm -rf $(TEMP_DIR)/kernel
 	@-cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/
 	@-cd $(TEMP_DIR)/kernel; \
@@ -137,6 +148,7 @@ devtools_list += uclibc
 src_get_uclibc:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_UCLIBC)
 uclibc:
+	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/devtools/; \
 	    cp -rf uClibc $(TEMP_DIR)/uClibc-0.9.27
 	@cd $(TEMP_DIR); \
@@ -154,6 +166,7 @@ src_get_mxtool:
 	cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)/csim       ; $(UPDATE);
 	cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)/intrinsics ; $(UPDATE);
 mxtool:	
+	@echo $@
 	@rm -rf $(TEMP_DIR)/mxtool_tmp/
 	@mkdir -p $(TEMP_DIR)/mxtool_tmp
 	@cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA); \
@@ -183,6 +196,7 @@ mxtool:
 devtools_list += clean_oldfiles
 src_get_clean_oldfiles:
 clean_oldfiles:
+	@echo $@
 	@# Also remove tar files that are part of c2_goodies-src package
 	@cd $(TEMP_DIR)/devtools/tarballs; rm -rf $(devtools-tarballs-remove)
 
@@ -202,11 +216,28 @@ src_get_devtools:  sdk_folders $(addprefix src_get_,$(devtools_list))
 	@echo $@ done
 src_package_devtools: sdk_folders $(PKG_NAME_SRC_DEVTOOLS)
 	@echo $@ done
-src_install_devtools: sdk_folders $(DEVTOOLS_BUILD_PATH)
+src_install_devtools: sdk_folders 
+	@rm -rf $(DEVTOOLS_BUILD_PATH)
+	@echo Extract $(PKG_NAME_SRC_DEVTOOLS) to Target folder $(DEVTOOLS_BUILD_PATH)
+	@mkdir -p $(DEVTOOLS_BUILD_PATH)
+	cd $(DEVTOOLS_BUILD_PATH)/..; \
+	    tar xzf $(PKG_NAME_SRC_DEVTOOLS)
+	@touch $@
 	@echo $@ done
 src_config_devtools: sdk_folders
 	@echo $@ done
-src_build_devtools: sdk_folders $(DEVTOOLS_BUILD_PATH)/c2 devtools_build_check
+src_build_devtools: sdk_folders 
+	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
+	# judge if the devtools is compiled successfully
+	@if test $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.$(TODAY) |wc -l) = 1; then \
+	   echo "Devtools compile successfully"; \
+	else \
+	   echo "Devtools compile failed"; \
+	   exit 1; \
+	fi 
+	@cd test/c2; \
+	    ln -s $(TODAY) daily; \
+	    ln -s daily sw;
 	@echo $@ done
 bin_package_devtools: sdk_folders  $(PKG_NAME_BIN_DEVTOOLS)
 	@echo $@ done
@@ -221,27 +252,6 @@ help_devtools: sdk_folders mktest
 	@echo 
 	@echo targets: $(mission_devtools)
 	@echo $@ done
-$(DEVTOOLS_BUILD_PATH): $(PKG_NAME_SRC_DEVTOOLS)
-	@rm -rf $@
-	@echo Extract $< to Target folder $@
-	@mkdir -p $(@D)
-	cd $(@D); \
-	    tar xzf $<
-	@touch $@
-$(DEVTOOLS_BUILD_PATH)/c2: $(DEVTOOLS_BUILD_PATH)
-	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
-devtools_build_check:
-	# judge if the devtools is compiled successfully
-	@if test $(shell grep 'Moving build files...' test/tools-build/buildroot/makelog.$(TODAY) |wc -l) = 1; then \
-	   echo "Devtools compile successfully"; \
-	else \
-	   echo "Devtools compile failed"; \
-	   exit 1; \
-	fi 
-	@cd test/c2; \
-	    ln -s $(TODAY) daily; \
-	    ln -s daily sw;
-	
 devtools_build_check_bugversion:
 	# judge if the devtools is compiled successfully
 	@cd  $(DEVTOOLS_BUILD_PATH); \
@@ -256,7 +266,7 @@ devtools_build_check_bugversion:
 	    ln -s daily sw; 
 	@touch $@
 $(TEST_ROOT_DIR)/c2:
-	@echo "disable $@ depend on the bin.tar.gz, this may trigger a build"
+	@echo extract $(PKG_NAME_BIN_DEVTOOLS) to $@ 
 	@rm -rf $@
 	@cd $(@D); \
 	    tar xzf $(PKG_NAME_BIN_DEVTOOLS)
