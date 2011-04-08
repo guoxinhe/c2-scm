@@ -678,7 +678,8 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT): $(PKG_NAME_SRC_UBOOT)
 $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities):
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT); \
 		./build.sh jazz2;
-	touch $(uboot_utilities)
+	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT); \
+	    touch $(uboot_utilities)
 $(PKG_NAME_BIN_UBOOT): $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities)
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@" depend on $<
