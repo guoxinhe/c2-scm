@@ -3,6 +3,8 @@
 THISIP=`/sbin/ifconfig eth0 | grep 'inet addr' | sed 's/.*addr:\(.*\)\(  Bcast.*\)/\1/'`
 . ~/.bash_profile
 
+cd `pwd`
+
 [ -f build.config.mk   ] || ln -s sdkmake/config_jazz2.daily.mk build.config.mk
 [ -f build.rules.mk    ] || ln -s sdkmake/config_jazz2.rules.mk build.rules.mk
 [ -f Makefile          ] || ln -s sdkmake/Makefile.mk           Makefile
@@ -162,7 +164,7 @@ checkadd_fail_send_list()
             esac
         fi
     done
-    [ $nr_failmodule -gt 0 ] && addto_cc wdiao@c2micro.com
+    #[ $nr_failmodule -gt 0 ] && addto_cc wdiao@c2micro.com
 }
 
 list_fail_url_tail()
@@ -180,7 +182,8 @@ list_fail_url_tail()
                 ;;
             *)
                 echo $m fail :
-                echo "    " "https://access.c2micro.com/~${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
+                echo "    " "http://$THISIP/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
+                #echo "    " "https://access.c2micro.com/~${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
                 ;;
             esac
         fi
@@ -233,6 +236,7 @@ make  help   >$log/help.log
 nr_totalerror=0
 nr_totalmodule=0
 tm_total=`date +%s`
+indexlog=$logid.txt
 for i in ${modules}; do
   nr_merr=0
   tm_module=`date +%s`
@@ -265,7 +269,7 @@ for i in ${modules}; do
   nr_totalerror=$((nr_totalerror+nr_merr))
   nr_totalmodule=$((nr_totalmodule+1))
   #echo "$i:$nr_merr:$log/$i.log" >>$log/r.txt
-  update_indexlog "$i:$nr_merr:$log/$i.log" $logid.txt
+  update_indexlog "$i:$nr_merr:$log/$i.log" $indexlog
   recho_time_consumed $tm_module "Build module $i $nr_merr error(s). "
 done
 
@@ -321,16 +325,22 @@ if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     cp $DIST_DIR/$HTML_REPORT  ${WWWROOT}/
 fi
 
-if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
     addto_send hguo@c2micro.com
-    #checkadd_fail_send_list
-    mail_title="$0 Build all $nr_totalmodule module(s) $nr_totalerror error(s). `date`"
+    checkadd_fail_send_list
+    mail_title="Build all $nr_totalmodule module(s) $nr_totalerror error(s). `date`"
     (
-	echo "$mail_title"
+	echo "`readlink -f $0` $mail_title"
 	echo ""
+	echo "send to $SENDTO"
 	echo "Script $THISIP:`readlink -f $0`"
 	echo "Get build package at: 10.16.13.200:$S200_DIR/"
         echo "Click here to watch report: http://${THISIP}/${SDK_CVS_USER}/$HTML_REPORT"
         echo "Click here to watch logs: http://${THISIP}/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
-    ) 2>&1 | mail -s"$mail_title" $SENDTO
+	list_fail_url_tail
+	echo ""
+	echo "Regards,"
+	echo "`whoami` on $THISIP"
+    ) >$log/email.log 2>&1
+if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
+    cat $log/email.log | mail -s"$mail_title" $SENDTO
 fi
