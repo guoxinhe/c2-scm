@@ -47,11 +47,11 @@ UPDATE                  := echo "cvs -q update -CAPd $(CHECKOUT_OPTION)"
 TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
 SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
-KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
-DRIVER_USE_KERNEL       	:= $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)
+CVS_SRC_KERNEL			:= sw/kernel
+KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 
 # DEVTOOLS package
 CVS_SRC_BUILDROOT       	:= projects/sw/devtools/buildroot
@@ -96,7 +96,6 @@ PKG_NAME_TEST_BIN_SW_MEDIA 	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-test-bi
 PKG_NAME_DOC_SW_MEDIA		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-doc.tar.gz
 
 #kernel package
-CVS_SRC_KERNEL			:= sw/kernel
 PKG_NAME_SRC_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-src.tar.gz
 PKG_NAME_BIN_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-bin.tar.gz
 PKG_NAME_BIN_KERNEL_NAND	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-nand-bin.tar.gz

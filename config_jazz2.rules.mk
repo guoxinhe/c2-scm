@@ -578,6 +578,7 @@ src_install_kernelnand: sdk_folders $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERN
 src_config_kernelnand: sdk_folders
 	@echo $@ done
 src_build_kernelnand: sdk_folders $(TEMP_DIR)/kernel_build_nand/$(CVS_SRC_KERNEL)/$(LINUXDIR)/zvmlinux.bin
+	@if [ ! -d $(TEST_ROOT_DIR)/prebuilt ];then ln -s $(TEST_ROOT_DIR)/kernel_build_nand $(TEST_ROOT_DIR)/prebuilt; fi
 	@echo $@ done
 bin_package_kernelnand: sdk_folders $(PKG_NAME_BIN_KERNEL_NAND)
 	@echo $@ done
@@ -744,7 +745,7 @@ $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE):$(PKG_NAME_SRC_VIVANTE)
 $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)/build/sdk/drivers/galcore.ko: 
 $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)/build:
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE); \
-		make KERNELDIR=$(DRIVER_USE_KERNEL) install
+		make KERNELDIR=$(KERNEL_PATH) install
 	@touch $@
 $(PKG_NAME_BIN_VIVANTE):$(TEST_ROOT_DIR)/$(CVS_SRC_VIVANTE)/build
 	if [ -f $@ ]; then rm $@;fi
@@ -803,7 +804,7 @@ $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv: $(PKG_NAME_SRC_HDMI_JAZZ2)
 	@touch $@
 $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko:
 	@cd $(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv; \
-		make KERNELDIR=$(DRIVER_USE_KERNEL)
+		make KERNELDIR=$(KERNEL_PATH)
 $(PKG_NAME_BIN_HDMI_JAZZ2):$(TEST_ROOT_DIR)/PROPRIETARY/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko
 	if [ -f $@ ]; then rm $@;fi
 	@echo "Creating package $@" depend on $<

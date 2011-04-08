@@ -34,7 +34,6 @@ TEST_USR_DIR			:= $(TOP_DIR)/test_usr
 SOURCE_DIR			:= $(TOP_DIR)/source
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
-CVS_SRC_KERNEL			:= sw/kernel
 
 ifneq ($(CVS_TAG),)
 CHECKOUT_OPTION         := -r $(CVS_TAG)
@@ -48,11 +47,11 @@ UPDATE                  := echo "cvs -q update -CAPd $(CHECKOUT_OPTION)"
 TOOLCHAIN_PATH			:= /c2/local/c2/daily-jazz2t/bin
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
 SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
-KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
-DRIVER_USE_KERNEL       	:= $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR)/
+CVS_SRC_KERNEL			:= sw/kernel
+KERNEL_PATH			:= $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR)/
 
 # DEVTOOLS package
 CVS_SRC_BUILDROOT       	:= projects/sw/devtools/buildroot
