@@ -34,6 +34,7 @@ TEST_USR_DIR			:= $(TOP_DIR)/test_usr
 SOURCE_DIR			:= $(TOP_DIR)/source
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
+CVS_SRC_KERNEL			:= sw/kernel
 
 ifneq ($(CVS_TAG),)
 CHECKOUT_OPTION         := -r $(CVS_TAG)
@@ -51,7 +52,7 @@ KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
-DRIVER_USE_KERNEL       	:= $(TEST_ROOT_DIR)/build_jazz2tkernelnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR)/
+DRIVER_USE_KERNEL       	:= $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR)/
 
 # DEVTOOLS package
 CVS_SRC_BUILDROOT       	:= projects/sw/devtools/buildroot
@@ -96,7 +97,6 @@ PKG_NAME_TEST_BIN_SW_MEDIA 	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-test-bi
 PKG_NAME_DOC_SW_MEDIA		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-doc.tar.gz
 
 #kernel package
-CVS_SRC_KERNEL			:= sw/kernel
 PKG_NAME_SRC_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-src.tar.gz
 PKG_NAME_BIN_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-bin.tar.gz
 PKG_NAME_BIN_KERNEL_NAND	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-nand-bin.tar.gz

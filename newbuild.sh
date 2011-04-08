@@ -247,7 +247,7 @@ for i in ${modules}; do
       if [ "$s" == "bin_package" -a "$config_enable_bin_package" == "y" ]; then jump= ; fi
       if [ "$s" == "bin_install" -a "$config_enable_bin_install" == "y" ]; then jump= ; fi
 
-      echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$i
+      echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$i " "
       tm_a=`date +%s`
       echo `date +"%Y-%m-%d %H:%M:%S"` Start build  ${s}_$i >>$log/progress.log
       if [ "$jump" == "y" ]; then

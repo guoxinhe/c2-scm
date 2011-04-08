@@ -23,7 +23,7 @@ src_config_kerneljazz2tnfs: sdk_folders
 	    make initramfs_gen.txt;
 	@echo $@ done
 src_build_kerneljazz2tnfs: sdk_folders
-	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL); \
+	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR)/; \
 	    make
 	@echo $@ done
 bin_package_kerneljazz2tnfs: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.bin.tar.gz
