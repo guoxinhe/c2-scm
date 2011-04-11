@@ -228,13 +228,7 @@ src_config_devtools: sdk_folders
 	@echo $@ done
 src_build_devtools: sdk_folders 
 	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
-	# judge if the devtools is compiled successfully
-	@if test $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.$(TODAY) |wc -l) = 1; then \
-	   echo "Devtools compile successfully"; \
-	else \
-	   echo "Devtools compile failed"; \
-	   exit 1; \
-	fi 
+	# if the devtools is compiled successfully, will return 0, else error no.
 	@cd test/c2; \
 	    ln -s $(TODAY) daily; \
 	    ln -s daily sw;
