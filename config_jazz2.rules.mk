@@ -229,7 +229,7 @@ src_config_devtools: sdk_folders
 src_build_devtools: sdk_folders 
 	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
 	# if the devtools is compiled successfully, will return 0, else error no.
-	@cd test/c2; \
+	@cd $(DEVTOOLS_BUILD_PATH)/c2; \
 	    ln -s $(TODAY) daily; \
 	    ln -s daily sw;
 	@echo $@ done
