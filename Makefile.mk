@@ -30,5 +30,17 @@ ifneq (,$(realpath $(CONFIG_SDK_RULESDEF)))
      include $(realpath $(CONFIG_SDK_RULESDEF))
 endif
 
+ifneq (,$(realpath test.rules.mk ))
+     include $(realpath test.rules.mk))
+endif
+
+ifneq (,$(realpath debug.rules.mk ))
+     include $(realpath debug.rules.mk))
+endif
+
+ifneq (,$(realpath local.rules.mk ))
+     include $(realpath local.rules.mk))
+endif
+
 #------------------------------------------------------------------------------
 .NOTPARALLEL:
