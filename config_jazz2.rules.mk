@@ -1379,10 +1379,10 @@ src_build_xxx: sdk_folders
 	@echo $@ done
 bin_package_xxx: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
 	@echo $@ done
-bin_install_xxx: sdk_folders $(TEST_USR_DIR)/xxx
+bin_install_xxx: sdk_folders
 	@echo $@ done
 clean_xxx: sdk_folders
-	rm -rf $(TEMP_DIR)/xxx $(TEST_ROOT_DIR)/xxx $(TEST_USR_DIR)/xxx
+	rm -rf $(TEMP_DIR)/xxx $(TEST_ROOT_DIR)/xxx
 	@echo $@ don
 test_xxx: $(mission_xxx)
 help_xxx: sdk_folders mktest
@@ -1409,16 +1409,8 @@ $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz:
 	@cd $(TEST_ROOT_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
 		xxx
 	@touch $@
-$(TEST_USR_DIR)/xxx:$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
-	@rm -rf $@
-	@echo Extract $< to Target folder $@
-	@mkdir -p $(@D)
-	cd $(@D) ; \
-	    tar xzf $<
-	@touch $@
-	
 
-sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR) $(TEST_USR_DIR)
+sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR)
 .PHONY: sdk_folders ls mktest mc help
 sdk_folders: $(sdkautodirs)
 $(sdkautodirs):

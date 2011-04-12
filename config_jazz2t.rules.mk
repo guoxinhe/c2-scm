@@ -31,7 +31,7 @@ bin_package_kerneljazz2tnfs: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel
 bin_install_kerneljazz2tnfs: sdk_folders
 	@echo $@ done
 clean_kerneljazz2tnfs: sdk_folders
-	rm -rf $(TEMP_DIR)/$(CVS_SRC_KERNEL) $(TEST_ROOT_DIR)/build_kerneljazz2tnfs $(TEST_USR_DIR)/kerneljazz2tnfs
+	rm -rf $(TEMP_DIR)/$(CVS_SRC_KERNEL) $(TEST_ROOT_DIR)/build_kerneljazz2tnfs
 	@echo $@ don
 test_kerneljazz2tnfs: $(mission_kerneljazz2tnfs)
 help_kerneljazz2tnfs: sdk_folders mktest
@@ -96,15 +96,6 @@ $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.bin.tar.gz:
 	@cd $(TEST_ROOT_DIR)/build_kerneljazz2tnfs/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
 	mv -f Makefile.save Makefile
 	@touch $@
-$(TEST_USR_DIR)/kerneljazz2tnfs:$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kerneljazz2tnfs.bin.tar.gz
-	@rm -rf $@
-	@echo Extract $< to Target folder $@
-	@mkdir -p $(@D)
-	cd $(@D) ; \
-	    tar xzf $<
-	@touch $@
-
-
 
 mission_ubootjazz2tevb := help_ubootjazz2tevb clean_ubootjazz2tevb       src_get_ubootjazz2tevb  \
 	src_package_ubootjazz2tevb src_install_ubootjazz2tevb src_config_ubootjazz2tevb src_build_ubootjazz2tevb \

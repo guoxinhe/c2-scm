@@ -11,14 +11,13 @@ all:
 version:
 	# Print out the compiler version used
 	c2-linux-gcc -v
-
+cleanall: clean
+	rm -rf $(PKG_DIR) log
 clean:
 	@echo "BUILD_TARGET: clean"
-	rm -rf $(PKG_DIR)
 	rm -rf $(TEST_ROOT_DIR)
 	rm -rf $(TOP_DIR)/test 
 	rm -rf $(TEMP_DIR)
-	rm -rf $(TEST_USR_DIR)
 
 CONFIG_SDK_ARCHRULESDEF=$(SDK_TARGET_ARCH).rules.mk
 ifneq (,$(realpath $(CONFIG_SDK_ARCHRULESDEF)))

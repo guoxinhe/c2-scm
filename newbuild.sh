@@ -2,16 +2,19 @@
 
 THISIP=`/sbin/ifconfig eth0 | grep 'inet addr' | sed 's/.*addr:\(.*\)\(  Bcast.*\)/\1/'`
 . ~/.bash_profile
+fullcmd=`readlink -f $0`
+fullfod=${fullcmd%/*}
+fullfod=${fullfod##*/}
 
 cd `pwd`
 
-[ -f build.config.mk   ] || ln -s sdkmake/config_jazz2.daily.mk build.config.mk
-[ -f build.rules.mk    ] || ln -s sdkmake/config_jazz2.rules.mk build.rules.mk
-[ -f Makefile          ] || ln -s sdkmake/Makefile.mk           Makefile
-[ -f newbuild.sh       ] || ln -s sdkmake/newbuild.sh           newbuild.sh
-[ -f bc.mk             ] || ln -s sdkmake/config_jazz2.daily.mk bc.mk
-[ -f br.mk             ] || ln -s sdkmake/config_jazz2.rules.mk br.mk
-[ -f html_generate.cgi ] || ln -s sdkmake/html_generate.cgi     html_generate.cgi
+[ -f build.config.mk   ] || ln -s $fullfod/config_jazz2.daily.mk build.config.mk
+[ -f build.rules.mk    ] || ln -s $fullfod/config_jazz2.rules.mk build.rules.mk
+[ -f Makefile          ] || ln -s $fullfod/Makefile.mk           Makefile
+[ -f newbuild.sh       ] || ln -s $fullfod/newbuild.sh           newbuild.sh
+[ -f bc.mk             ] || ln -s $fullfod/config_jazz2.daily.mk bc.mk
+[ -f br.mk             ] || ln -s $fullfod/config_jazz2.rules.mk br.mk
+[ -f html_generate.cgi ] || ln -s $fullfod/html_generate.cgi     html_generate.cgi
 
 modules="
 xxx
@@ -302,10 +305,10 @@ scp_upload_logs()
     popd
 }
 
-CONFIG_BUILD_PUBLISH=1
-CONFIG_BUILD_PUBLISHLOG=1
-CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=1
+CONFIG_BUILD_PUBLISH=
+CONFIG_BUILD_PUBLISHLOG=
+CONFIG_BUILD_PUBLISHHTML=
+CONFIG_BUILD_PUBLISHEMAIL=
 
 PKG_DIR=`make PKG_DIR`
 S200_DIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
@@ -335,19 +338,20 @@ fi
 
     addto_send hguo@c2micro.com
     checkadd_fail_send_list
-    mail_title="Build all $nr_totalmodule module(s) $nr_totalerror error(s). `date`"
+    mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_totalerror error(s)."
     (
-	echo "`readlink -f $0` $mail_title"
+	echo "$mail_title"
 	echo ""
-	echo "send to $SENDTO"
-	echo "Script $THISIP:`readlink -f $0`"
 	echo "Get build package at: 10.16.13.200:$S200_DIR/"
         echo "Click here to watch report: http://${THISIP}/${SDK_CVS_USER}/$HTML_REPORT"
         echo "Click here to watch logs: http://${THISIP}/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
 	list_fail_url_tail
 	echo ""
+	echo "send to list: $SENDTO"
+	echo ""
 	echo "Regards,"
-	echo "`whoami` on $THISIP"
+	echo "`whoami`@$THISIP":"`readlink -f $0`"
+	date
     ) >$log/email.log 2>&1
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
     cat $log/email.log | mail -s"$mail_title" $SENDTO
