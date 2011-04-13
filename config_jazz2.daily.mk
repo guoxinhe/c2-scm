@@ -98,6 +98,9 @@ PKG_NAME_DOC_SW_MEDIA		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-doc.tar.gz
 PKG_NAME_SRC_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-src.tar.gz
 PKG_NAME_BIN_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-bin.tar.gz
 PKG_NAME_BIN_KERNEL_NAND	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-nand-bin.tar.gz
+PKG_NAME_SRC_KERNEL_2632	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-2.6.32-src.tar.gz
+PKG_NAME_BIN_KERNEL_2632	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-2.6.32-bin.tar.gz
+LINUXDIR_2632			:= linux-2.6.32
 
 # vivante package
 CVS_SRC_VIVANTE         	:= projects/sw/bsp/vivante/VIVANTE_GAL2D_Unified

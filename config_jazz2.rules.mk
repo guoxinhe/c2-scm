@@ -1415,8 +1415,13 @@ sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR)
 sdk_folders: $(sdkautodirs)
 $(sdkautodirs):
 	@mkdir -p $@
+c2: bin_install_devtools
+mod:
+	@echo "support mission modules:" $(subst mission_,,"$(mission_modules)")
+op:
+	@echo "support mission        :" $(shell echo $(subst _xxx,,"$(mission_xxx)") test)
 ls:
-	@echo support mission targets: $(mission_targets) 
+	@echo support mission targets: $(mission_targets)
 mktest:
 	@$(call makefile_test)
 mc help: mktest
@@ -1425,6 +1430,5 @@ mc help: mktest
 	@echo "support mission modules:" $(subst mission_,,"$(mission_modules)")
 	@echo "support mission test   :" $(subst mission_,test_,"$(mission_modules)")
 	@echo
-
 $(definedenvlist):
 	@echo ${$@}

@@ -111,6 +111,36 @@ addto_cc()
     done
     export CCTO
 }
+addto_fail()
+{
+    while [ $# -gt 0 ] ; do
+        if [ "$FAILLIST" = "" ]; then
+            FAILLIST=$1 ;
+        else
+          r=`echo $FAILLIST | grep $1`
+          if [ "$r" = "" ]; then
+            FAILLIST=$FAILLIST,$1 ;
+          fi
+        fi
+        shift
+    done
+    export FAILLIST
+}
+addto_reportedfail()
+{
+    while [ $# -gt 0 ] ; do
+        if [ "$REPORTEDFAILLIST" = "" ]; then
+            REPORTEDFAILLIST=$1 ;
+        else
+          r=`echo $REPORTEDFAILLIST | grep $1`
+          if [ "$r" = "" ]; then
+            REPORTEDFAILLIST=$REPORTEDFAILLIST,$1 ;
+          fi
+        fi
+        shift
+    done
+    export REPORTEDFAILLIST
+}
 recho_time_consumed()
 {
     tm_b=`date +%s`
@@ -134,6 +164,7 @@ checkadd_fail_send_list()
         f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
         l=`echo $f | sed 's:.*/\(.*\):\1:'`
         if [ $x -ne 0 ]; then
+	    addto_reportedfail $m
 	    nr_failmodule=$(($nr_failmodule+1))
             case $m in
             devtools*     ) addto_send hguo@c2micro.com saladwang@c2micro.com        ;;
@@ -175,6 +206,7 @@ checkadd_fail_send_list()
 list_fail_url_tail()
 {
     #pickup the fail log's tail to email for a quick preview
+    nr_failurl=0
     loglist=`cat $indexlog`
     for i in $loglist ; do
         m=`echo $i | sed 's,\([^:]*\).*,\1,'`
@@ -182,6 +214,7 @@ list_fail_url_tail()
         f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
         l=`echo $f | sed 's:.*/\(.*\):\1:'`
         if [ $x -ne 0 ]; then
+            nr_failurl=$((nr_failurl+1))
             case $m in
             *_udisk) #jump these
                 ;;
@@ -210,6 +243,7 @@ list_fail_url_tail()
             esac
         fi
     done
+    export nr_failurl
 }
 
 
@@ -278,6 +312,9 @@ for i in ${modules}; do
       echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$i, $nr_merr error >>$log/progress.log
       recho_time_consumed $tm_a "$s: $iserror error(s). "  
   done
+  if [ $nr_merr -ne 0 ];then
+      addto_fail $i
+  fi
   nr_totalerror=$((nr_totalerror+nr_merr))
   nr_totalmodule=$((nr_totalmodule+1))
   #echo "$i:$nr_merr:$log/$i.log" >>$log/r.txt
@@ -347,6 +384,9 @@ fi
         echo "Click here to watch logs: http://${THISIP}/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
 	list_fail_url_tail
 	echo ""
+	[ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
+	[ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
+        [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
 	echo "send to list: $SENDTO"
 	echo ""
 	echo "Regards,"
