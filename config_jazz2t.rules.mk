@@ -127,16 +127,7 @@ src_config_ubootjazz2tevb: sdk_folders
 src_build_ubootjazz2tevb: sdk_folders
 	@echo "BUILD TARGET: u-boot-bin"
 	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT); \
-	    rm -rf $(uboot_utilities); \
-	    mkdir -p $(uboot_utilities); \
-	    make clean; \
-	    make $(UBOOT_BOARDTYPE); \
-	    make boot -j1 $(UBOOT_MAKECONFIG) MC_MODE=2; \
-	    mv u-boot.rom $(uboot_utilities)/u-boot-2mc.rom; \
-	    cp README.C2  $(uboot_utilities)/;\
-	    cp tools/mkimage  $(uboot_utilities)/;\
-	    cp HOWTO.*  $(uboot_utilities)/;\
-	
+		./build.sh jazz2t;
 	@touch $(TEST_ROOT_DIR)/$(CVS_SRC_UBOOT)/$(uboot_utilities)
 	@echo $@ done
 bin_package_ubootjazz2tevb: sdk_folders
