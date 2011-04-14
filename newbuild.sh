@@ -12,8 +12,6 @@ cd `pwd`
 [ -f build.rules.mk    ] || ln -s $fullfod/config_jazz2.rules.mk build.rules.mk
 [ -f Makefile          ] || ln -s $fullfod/Makefile.mk           Makefile
 [ -f newbuild.sh       ] || ln -s $fullfod/newbuild.sh           newbuild.sh
-[ -f bc.mk             ] || ln -s $fullfod/config_jazz2.daily.mk bc.mk
-[ -f br.mk             ] || ln -s $fullfod/config_jazz2.rules.mk br.mk
 [ -f html_generate.cgi ] || ln -s $fullfod/html_generate.cgi     html_generate.cgi
 
 modules="
@@ -84,12 +82,17 @@ update_indexlog()
 addto_send()
 {
     while [ $# -gt 0 ] ; do
+        email=$1
+        x=`echo $1 | grep "@"`
+        if [ $? -ne 0 ]; then
+            email=${email}@c2micro.com
+        fi
         if [ "$SENDTO" = "" ]; then
-            SENDTO=$1 ;
+            SENDTO=$email ;
         else
-          r=`echo $SENDTO | grep $1`
+          r=`echo $SENDTO | grep $email`
           if [ "$r" = "" ]; then
-            SENDTO=$SENDTO,$1 ;
+            SENDTO=$SENDTO,$email ;
           fi
         fi
         shift
@@ -99,12 +102,17 @@ addto_send()
 addto_cc()
 {
     while [ $# -gt 0 ] ; do
+        email=$1
+        x=`echo $1 | grep "@"`
+        if [ $? -ne 0 ]; then
+            email=${email}@c2micro.com
+        fi
         if [ "$CCTO" = "" ]; then
-            CCTO=$1 ;
+            CCTO=$email ;
         else
-          r=`echo $CCTO | grep $1`
+          r=`echo $CCTO | grep $email`
           if [ "$r" = "" ]; then
-            CCTO=$CCTO,$1 ;
+            CCTO=$CCTO,$email ;
           fi
         fi
         shift
@@ -153,6 +161,21 @@ recho_time_consumed()
     echo "$@" "$tm_c seconds / $tm_h:$tm_m:$tm_s consumed."
 }
 
+blame_devtools="saladwang hguo"
+blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli"
+blame_qt="mxia dashanzhou txiang"
+blame_c2box="mxia dashanzhou txiang"
+blame_jtag="jsun"
+blame_c2_goodies="jsun robinlee ali"
+blame_diag="jsun"
+blame_kernel="jsun robinlee ali roger llian swine hguo janetliu"
+blame_vivante="llian jsun"
+blame_hdmi="jsun"
+blame_uboot="ali jsun robinlee"
+blame_facudisk="hguo"
+blame_usrudisk="hguo"
+blame_xxx="hguo"
+
 checkadd_fail_send_list()
 {
     #pickup the fail log's tail to email for a quick preview
@@ -167,40 +190,25 @@ checkadd_fail_send_list()
 	    addto_reportedfail $m
 	    nr_failmodule=$(($nr_failmodule+1))
             case $m in
-            devtools*     ) addto_send hguo@c2micro.com saladwang@c2micro.com        ;;
-            sw_media*     ) addto_send hguo@c2micro.com weli@c2micro.com fzhang@c2micro.com             ;;
-            qt*           ) addto_send hguo@c2micro.com mxia@c2micro.com dashanzhou@c2micro.com txiang@c2micro.com             ;;
-            c2box*        ) addto_send hguo@c2micro.com mxia@c2micro.com            ;;
-            jtag*         ) addto_send hguo@c2micro.com jsun@c2micro.com             ;;
-            c2_goodies*   ) addto_send hguo@c2micro.com robinlee@c2micro.com ali@c2micro.com             ;;
-            diag*         ) addto_send hguo@c2micro.com jsun@c2micro.com             ;;
-            kernel*       ) addto_send hguo@c2micro.com swine@c2micro.com jsun@c2micro.com robinlee@c2micro.com ali@c2micro.com roger@c2micro.com janetliu@c2micro.com llian@c2micro.com ;;
-            vivante*      ) addto_send hguo@c2micro.com llian@c2micro.com            ;;
-            hdmi*         ) addto_send hguo@c2micro.com jsun@c2micro.com             ;;
-            uboot*        ) addto_send hguo@c2micro.com robinlee@c2micro.com ali@c2micro.com             ;;
-            facudisk*     ) addto_send hguo@c2micro.com              ;;
-            usrudisk*     ) addto_send hguo@c2micro.com              ;;
-
-            Devtools)     addto_send  saladwang@c2micro.com ;;
-            Buildroot)    addto_send  saladwang@c2micro.com ;;
-            SPI)          addto_send       jsun@c2micro.com ;;
-            Jtag)         addto_send       jsun@c2micro.com ;;
-            Uboot)        addto_send   robinlee@c2micro.com ;;
-            Hdmi)         addto_send  zhenzhang@c2micro.com ;;
-            C2_goodies)   addto_send   robinlee@c2micro.com ;;
-            Qt)           addto_send dashanzhou@c2micro.com ;;
-            Kernel)       addto_send      swine@c2micro.com ;;
-            Kernel2632)   addto_send      swine@c2micro.com ;;
-            Sw_media)     addto_send       weli@c2micro.com ;;
-            vivante)      addto_send      llian@c2micro.com ;;
-            Sw_c2apps)    addto_send dashanzhou@c2micro.com ;;
-            factory_udisk)addto_send       hguo@c2micro.com ;;
-            user_udisk)   addto_send       hguo@c2micro.com ;;
+            devtools*    ) addto_send $blame_devtools   ;; 
+            sw_media*    ) addto_send $blame_sw_media   ;; 
+            qt*          ) addto_send $blame_qt         ;; 
+            c2box*       ) addto_send $blame_c2box      ;; 
+            jtag*        ) addto_send $blame_jtag       ;; 
+            c2_goodies*  ) addto_send $blame_c2_goodies ;; 
+            diag*        ) addto_send $blame_diag       ;; 
+            kernel*      ) addto_send $blame_kernel     ;; 
+            vivante*     ) addto_send $blame_vivante    ;; 
+            hdmi*        ) addto_send $blame_hdmi       ;; 
+            uboot*       ) addto_send $blame_uboot      ;; 
+            facudisk*    ) addto_send $blame_facudisk   ;; 
+            usrudisk*    ) addto_send $blame_usrudisk   ;; 
+            xxx*         ) addto_send $blame_xxx        ;; 
             *)  	  ;;
             esac
         fi
     done
-    #[ $nr_failmodule -gt 0 ] && addto_cc wdiao@c2micro.com
+    [ $nr_failmodule -gt 0 ] && addto_cc robinlee@c2micro.com
 }
 
 list_fail_url_tail()
@@ -246,13 +254,7 @@ list_fail_url_tail()
     export nr_failurl
 }
 
-
-
 if [ "$1" == "init" ]; then
-  make clean
-  rm -rf log
-  lcp /sdk/jazz2/dev/weekly/110330 jazz2-sdk-110330
-  make bin_install_devtools
   shift
 fi
 
