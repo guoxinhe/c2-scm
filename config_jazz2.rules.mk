@@ -1361,54 +1361,61 @@ mission_modules += mission_xxx
 mission_targets += $(mission_xxx)
 .PHONY: $(mission_xxx)
 src_get_xxx:  sdk_folders
+	@echo start $@
+	@echo Checkout data fro repository
 	@mkdir -p $(TEMP_DIR)/xxx
 	@echo "int main(int argc, char **argv){return argv[argc-1][0];}" >$(TEMP_DIR)/xxx/xxx.c
 	@echo "all:xxx"    		 >$(TEMP_DIR)/xxx/Makefile
 	@echo "xxx:xxx.c" 		>>$(TEMP_DIR)/xxx/Makefile
 	@echo "	gcc xxx.c -o xxx" 	>>$(TEMP_DIR)/xxx/Makefile
 	@echo $@ done
-src_package_xxx: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
+src_package_xxx: sdk_folders 
+	@echo start $@
+	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
+	@cd $(TEMP_DIR); \
+	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz \
+		--exclude=CVS --exclude=CVSROOT \
+		xxx
 	@echo $@ done
-src_install_xxx: sdk_folders $(TEST_ROOT_DIR)/xxx
+src_install_xxx: sdk_folders 
+	@echo start $@
+	@echo Create: $(TEST_ROOT_DIR)/xxx
+	@rm -rf $(TEST_ROOT_DIR)/xxx
+	cd $(TEST_ROOT_DIR) ; \
+	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
 	@echo $@ done
 src_config_xxx: sdk_folders
+	@echo start $@
+	@echo Config software
 	@echo $@ done
 src_build_xxx: sdk_folders
+	@echo start $@
+	@echo build $(TEST_ROOT_DIR)/xxx
 	@cd $(TEST_ROOT_DIR)/xxx; \
-		make
+		make; sleep 2
 	@echo $@ done
-bin_package_xxx: sdk_folders $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
+bin_package_xxx: sdk_folders 
+	@echo start $@
+	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
+	@rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
+	@cd $(TEST_ROOT_DIR); \
+	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz \
+		--exclude=CVS --exclude=CVSROOT \
+		xxx
 	@echo $@ done
 bin_install_xxx: sdk_folders
+	@echo start $@
+	@echo Install software
 	@echo $@ done
 clean_xxx: sdk_folders
+	@echo start $@
+	@echo clean xxx
 	rm -rf $(TEMP_DIR)/xxx $(TEST_ROOT_DIR)/xxx
-	@echo $@ don
+	@echo $@ done
 test_xxx: $(mission_xxx)
 help_xxx: sdk_folders mktest
 	@echo targets: $(mission_xxx)
 	@echo $@ done
-$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz:
-	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $<
-	@mkdir -p $(@D)
-	@cd $(TEMP_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
-		xxx
-	@touch $@
-$(TEST_ROOT_DIR)/xxx: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
-	@rm -rf $@
-	@echo Extract $< to Target folder $@
-	@mkdir -p $(@D)
-	cd $(@D) ; \
-	    tar xzf $<
-	@touch $@
-$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz:
-	if [ -f $@ ]; then rm $@;fi
-	@echo "Creating package $@" depend on $<
-	@mkdir -p $(@D)
-	@cd $(TEST_ROOT_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
-		xxx
-	@touch $@
 
 sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR)
 .PHONY: sdk_folders ls mktest mc help
