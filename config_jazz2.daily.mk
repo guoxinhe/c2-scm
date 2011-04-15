@@ -240,7 +240,8 @@ BIN_MKYAFFS2 		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/mkyaffs/mkya
 BIN_MKJFFS2  		:= $(TOOLCHAIN_PATH)/mkfs.jffs2
 BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
 
-override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
+SYSPATH			:=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
+override PATH 		:= $(TOOLCHAIN_PATH):$(TEST_ROOT_DIR)/usr/bin:$(TEST_ROOT_DIR)/bin:$(SYSPATH)
 
 definedenvlist :=	\
    TODAY                     \
@@ -281,7 +282,6 @@ definedenvlist :=	\
 
 define makefile_test
     echo "   TODAY                     = "$(TODAY)
-    echo "   TOP_DIR                   = "$(TOP_DIR)
     echo "   SDK_KERNEL_VERSION        = "$(SDK_KERNEL_VERSION)
     echo "   SDK_GCC_VERSION           = "$(SDK_GCC_VERSION)
     echo "   SDK_QT_VERSION            = "$(SDK_QT_VERSION)
@@ -303,17 +303,22 @@ define makefile_test
     echo "   CHECKOUT                  = "$(CHECKOUT)
     echo "   UPDATE                    = "$(UPDATE)
     echo "   DEVTOOLS_AUTOBUILD_CONFIG = "$(DEVTOOLS_AUTOBUILD_CONFIG)
-    echo "   TEST_ROOT_DIR             = "$(TEST_ROOT_DIR)
-    echo "   SOURCE_DIR                = "$(SOURCE_DIR)
-    echo "   TEMP_DIR                  = "$(TEMP_DIR)
-    echo "   PKG_DIR                   = "$(PKG_DIR)
-    echo "   KERNEL_PATH               = "$(KERNEL_PATH)
-    echo "   TOOLCHAIN_PATH            = "$(TOOLCHAIN_PATH)
-    echo "   SW_MEDIA_PATH             = "$(SW_MEDIA_PATH)
     echo "   SW_MEDIA_INSTALL_DIR      = "$(SW_MEDIA_INSTALL_DIR)
-    echo "   QT_INSTALL_DIR            = "$(QT_INSTALL_DIR)
-    echo "   PATH                      = "$(PATH)
     echo "   INSTALL_DIR               = "$(INSTALL_DIR)
     echo "   PUBLISH_DIR               = "$(PUBLISH_DIR)
+
+    echo "   Folder settings"
+    echo "   TOP_DIR                   = "$(TOP_DIR)
+    echo "   SOURCE_DIR                = "$(SOURCE_DIR)
+    echo "   PKG_DIR                   = "$(PKG_DIR)
+    echo "   TEMP_DIR                  = "$(TEMP_DIR)
+    echo "   TEST_ROOT_DIR             = "$(TEST_ROOT_DIR)
+    echo "   Path settings"
+    echo "   PATH                      = "$(PATH)
+    echo "   TOOLCHAIN_PATH            = "$(TOOLCHAIN_PATH)
+    echo "   KERNEL_PATH               = "$(KERNEL_PATH)
+    echo "   SW_MEDIA_PATH             = "$(SW_MEDIA_PATH)
+    echo "   QT_INSTALL_DIR            = "$(QT_INSTALL_DIR)
+
 endef
 

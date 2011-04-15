@@ -280,7 +280,7 @@ ln -s $DIST_DIR/$DATE.log  $DIST_DIR/l
 ln -s $DIST_DIR/$DATE.txt  $DIST_DIR/r
 make  mktest >$log/mktest.log
 make  help   >$log/help.log
-
+make  backup
 nr_totalerror=0
 nr_totalmodule=0
 tm_total=`date +%s`

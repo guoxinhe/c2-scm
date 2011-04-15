@@ -1421,11 +1421,23 @@ $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz: bin_package_xxx
 $(TEMP_DIR)/xxx: src_install_xxx
 $(TEMP_DIR)/usr/xxx: bin_install_xxx
 
-sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR)
-.PHONY: sdk_folders ls mktest mc help
-sdk_folders: $(sdkautodirs)
+sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR) \
+	$(PKG_DIR)/Basic $(PKG_DIR)/Premium $(PKG_DIR)/Advanced \
+	$(PKG_DIR)/C2QAOnly $(PKG_DIR)/sdkmake \
+	$(TEST_ROOT_DIR)/usr  $(TEST_ROOT_DIR)/usr/bin $(TEST_ROOT_DIR)/bin \
+	$(TEST_ROOT_DIR)/home $(TEST_ROOT_DIR)/c2box $(TEST_ROOT_DIR)/build \
+	$(TEST_ROOT_DIR)/boot $(TEST_ROOT_DIR)/tmp
+
+.PHONY: sdk_folders ls mktest mc help c2
+sdk_folders: $(sdkautodirs) $(TEST_ROOT_DIR)/usr/zlink
 $(sdkautodirs):
 	@mkdir -p $@
+$(TEST_ROOT_DIR)/usr/zlink:
+	ln -s $(TEST_ROOT_DIR)/c2 $(TEST_ROOT_DIR)/usr/c2
+	ln -s $(KERNEL_PATH)      $(TEST_ROOT_DIR)/usr/kernel
+	ln -s $(SW_MEDIA_PATH)    $(TEST_ROOT_DIR)/usr/sw_media
+	ln -s $(QT_INSTALL_DIR)   $(TEST_ROOT_DIR)/usr/qt
+	echo "Created Link." >$@
 c2: bin_install_devtools
 mod:
 	@echo "support mission modules:" $(subst mission_,,"$(mission_modules)")
@@ -1433,6 +1445,8 @@ op:
 	@echo "support mission        :" $(shell echo $(subst _xxx,,"$(mission_xxx)") test)
 ls:
 	@echo support mission targets: $(mission_targets)
+bk backup:
+	cp -f build.config.mk build.rules.mk html_generate.cgi Makefile newbuild.sh $(PKG_DIR)/sdkmake
 mktest:
 	@$(call makefile_test)
 mc help: mktest
