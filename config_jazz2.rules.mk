@@ -1416,6 +1416,10 @@ test_xxx: $(mission_xxx)
 help_xxx: sdk_folders mktest
 	@echo targets: $(mission_xxx)
 	@echo $@ done
+$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz: src_package_xxx
+$(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz: bin_package_xxx
+$(TEMP_DIR)/xxx: src_install_xxx
+$(TEMP_DIR)/usr/xxx: bin_install_xxx
 
 sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR)
 .PHONY: sdk_folders ls mktest mc help
