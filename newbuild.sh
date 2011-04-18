@@ -36,6 +36,9 @@ xxx
 "
 
 steps="
+help
+"
+steps_jump="
 clean
 src_get
 src_package
@@ -228,8 +231,7 @@ list_fail_url_tail()
                 ;;
             *)
                 echo $m fail :
-                echo "    " "http://$THISIP/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
-                #echo "    " "https://access.c2micro.com/~${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
+                echo "    " "${WWW_HTTPHEAD}://$WWW_SERVER/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
                 ;;
             esac
         fi
@@ -257,16 +259,6 @@ list_fail_url_tail()
 if [ "$1" == "init" ]; then
   shift
 fi
-
-config_enable_clean=y
-config_enable_src_get=y
-config_enable_src_package=y
-config_enable_src_install=y
-config_enable_src_config=y
-config_enable_src_build=y
-config_enable_bin_package=y
-config_enable_bin_install=y
-
 DATE=`date +%y%m%d`
 DIST_DIR=`pwd`/log
 log=${DIST_DIR}/$DATE.log
@@ -290,30 +282,20 @@ for i in ${modules}; do
   nr_merr=0
   tm_module=`date +%s`
   for s in ${steps}; do
-      jump=y
       iserror=0
-      if [ "$s" == "src_get"     -a "$config_enable_src_get"     == "y" ]; then jump= ; fi
-      if [ "$s" == "src_package" -a "$config_enable_src_package" == "y" ]; then jump= ; fi
-      if [ "$s" == "src_install" -a "$config_enable_src_install" == "y" ]; then jump= ; fi
-      if [ "$s" == "src_config"  -a "$config_enable_src_config"  == "y" ]; then jump= ; fi
-      if [ "$s" == "src_build"   -a "$config_enable_src_build"   == "y" ]; then jump= ; fi
-      if [ "$s" == "bin_package" -a "$config_enable_bin_package" == "y" ]; then jump= ; fi
-      if [ "$s" == "bin_install" -a "$config_enable_bin_install" == "y" ]; then jump= ; fi
-
       echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$i " "
       tm_a=`date +%s`
       echo `date +"%Y-%m-%d %H:%M:%S"` Start build  ${s}_$i >>$log/progress.log
-      if [ "$jump" == "y" ]; then
-          echo "make ${s}_$i jumped" >>$log/$i.log 2>&1
-      else
-          make ${s}_$i        >>$log/$i.log 2>&1
-      fi
+      make ${s}_$i        >>$log/$i.log 2>&1
       if [ $? -ne 0 ];then
         nr_merr=$((nr_merr+1))
 	iserror=$((iserror+1))
       fi
       echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$i, $nr_merr error >>$log/progress.log
       recho_time_consumed $tm_a "$s: $iserror error(s). "  
+      if [ $nr_merr -ne 0 ];then
+        break;
+      fi
   done
   if [ $nr_merr -ne 0 ];then
       addto_fail $i
@@ -326,7 +308,7 @@ for i in ${modules}; do
 done
 
 recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerror error(s). "
-
+## --------------------------- report part ----------------------------
 #these 4 exports are used by html_generate.cgi
 export SDK_TARGET_ARCH=`make SDK_TARGET_ARCH`
 export TREE_PREFIX=dev
@@ -334,10 +316,54 @@ export SDK_RESULTS_DIR=$DIST_DIR/
 export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{print $2}'`
 [ $SDK_CVS_USER ] || export SDK_CVS_USER=`whoami`
 
-WWWROOT=/var/www/html/hguo
+WWW_ROOT=/var/www/html/hguo
+WWW_SERVER=${THISIP}
+WWW_HTTPHEAD=http
+WWW_TITLE="${SDK_TARGET_ARCH}-${TREE_PREFIX} SDK daily Build Results"
+HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_sdk_daily.html
+PKG_DIR=`make PKG_DIR`
+SSH_SERVER=10.16.13.200
+SSH_SCPDIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
+mkdir -p ${WWW_ROOT}
+
+CONFIG_BUILD_PUBLISH=
+CONFIG_BUILD_PUBLISHLOG=y
+CONFIG_BUILD_PUBLISHHTML=
+CONFIG_BUILD_PUBLISHEMAIL=
+
+addto_send hguo@c2micro.com
+checkadd_fail_send_list
+mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_totalerror error(s)."
+(
+    echo "$mail_title"
+    echo ""
+    echo "Get build package at:       ${SSH_SERVER}:$SSH_SCPDIR/"
+    echo "Click here to watch report: ${WWW_HTTPHEAD}://${WWW_SERVER}/${SDK_CVS_USER}/$HTML_REPORT"
+    echo "Click here to watch logs:   ${WWW_HTTPHEAD}://${WWW_SERVER}/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
+    list_fail_url_tail
+    echo ""
+    [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
+    [ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
+    [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
+    echo "send to list: $SENDTO"
+    echo ""
+    echo "Regards,"
+    echo "`whoami`@`hostname`"
+    echo "$THISIP":"`readlink -f $0`"
+    date
+) >$log/email.log 2>&1
+
+#    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
+#    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$SDK_CVS_USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
+./html_generate.cgi  >$DIST_DIR/$HTML_REPORT
+#fix: // in url like:  href='https://access.c2micro.com/jazz2_msp_dev_logs//100829.log
+sed -i 's:_logs//1:_logs/1:g' $DIST_DIR/$HTML_REPORT
+sed -i "s:SDK Daily Build Results:${WWW_TITLE}:g" $DIST_DIR/$HTML_REPORT
+sed -i "s,https://access.c2micro.com/~${SDK_CVS_USER}/,${WWW_HTTPHEAD}://${WWW_SERVER}/${SDK_CVS_USER}/,g" $DIST_DIR/$HTML_REPORT
+
 scp_upload_logs()
 {
-    SCP_TARGET=${WWWROOT}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
+    SCP_TARGET=${WWW_ROOT}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
     mkdir -p $SCP_TARGET
     cp $log/* $SCP_TARGET/
     pushd $SCP_TARGET;  
@@ -345,57 +371,19 @@ scp_upload_logs()
     popd
 }
 
-CONFIG_BUILD_PUBLISH=
-CONFIG_BUILD_PUBLISHLOG=
-CONFIG_BUILD_PUBLISHHTML=
-CONFIG_BUILD_PUBLISHEMAIL=
-
-PKG_DIR=`make PKG_DIR`
-S200_DIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
-mkdir -p ${WWWROOT}
-
 if [ $CONFIG_BUILD_PUBLISHLOG ]; then
     scp_upload_logs
 fi
 
 if [ $CONFIG_BUILD_PUBLISH ]; then
-    ssh ${SDK_CVS_USER}@10.16.13.200     "mkdir -p $S200_DIR"
-    scp -r $PKG_DIR/* ${SDK_CVS_USER}@10.16.13.200:$S200_DIR/
+    ssh ${SDK_CVS_USER}@${SSH_SERVER}     "mkdir -p $SSH_SCPDIR"
+    scp -r $PKG_DIR/* ${SDK_CVS_USER}@${SSH_SERVER}:$SSH_SCPDIR/
 fi
 
 if [ $CONFIG_BUILD_PUBLISHHTML ]; then
-    HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_sdk_daily.html
-#    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
-#    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$SDK_CVS_USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
-    ./html_generate.cgi  >$DIST_DIR/$HTML_REPORT
-    #fix: // in url like:  href='https://access.c2micro.com/jazz2_msp_dev_logs//100829.log
-    sed -i 's:_logs//1:_logs/1:g' $DIST_DIR/$HTML_REPORT
-    sed -i 's:SDK Daily Build Results:SDK My Test Build Results:g' $DIST_DIR/$HTML_REPORT
-    sed -i "s,https://access.c2micro.com/~${SDK_CVS_USER}/,http://${THISIP}/${SDK_CVS_USER}/,g" $DIST_DIR/$HTML_REPORT
-    #cp $DIST_DIR/$HTML_REPORT  /home/${SDK_CVS_USER}/public_html/
-    cp $DIST_DIR/$HTML_REPORT  ${WWWROOT}/
+    cp $DIST_DIR/$HTML_REPORT  ${WWW_ROOT}/
 fi
 
-    addto_send hguo@c2micro.com
-    checkadd_fail_send_list
-    mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_totalerror error(s)."
-    (
-	echo "$mail_title"
-	echo ""
-	echo "Get build package at: 10.16.13.200:$S200_DIR/"
-        echo "Click here to watch report: http://${THISIP}/${SDK_CVS_USER}/$HTML_REPORT"
-        echo "Click here to watch logs: http://${THISIP}/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
-	list_fail_url_tail
-	echo ""
-	[ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
-	[ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
-        [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
-	echo "send to list: $SENDTO"
-	echo ""
-	echo "Regards,"
-	echo "`whoami`@$THISIP":"`readlink -f $0`"
-	date
-    ) >$log/email.log 2>&1
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
     cat $log/email.log | mail -s"$mail_title" $SENDTO
 fi
