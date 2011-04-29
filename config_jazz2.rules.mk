@@ -1027,7 +1027,7 @@ src_install_jtag: sdk_folders $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)
 	@echo $@ done
 src_config_jtag: sdk_folders
 	cd $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/jtag-client; \
-	./configure --prefix=/usr/local --enable-bus=C2 openwince_includes_path="$(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/include"; 
+	./configure --prefix=/usr/local openwince_includes_path="$(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/include"; 
 	@echo $@ done
 src_build_jtag: sdk_folders
 	cd $(TEST_ROOT_DIR)/$(CVS_SRC_JTAG)/jtag-client; \
