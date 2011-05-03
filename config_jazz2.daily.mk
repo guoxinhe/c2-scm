@@ -43,7 +43,8 @@ CHECKOUT                := echo "cvs -q co -AP $(CHECKOUT_OPTION)"
 UPDATE                  := echo "cvs -q update -CAPd $(CHECKOUT_OPTION)"
 
 # build installation configures
-TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
+#TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
+TOOLCHAIN_PATH			:= $(TOP_DIR)/c2/daily/bin
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
 SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
@@ -106,6 +107,7 @@ LINUXDIR_2632			:= linux-2.6.32
 CVS_SRC_VIVANTE         	:= projects/sw/bsp/vivante/VIVANTE_GAL2D_Unified
 PKG_NAME_SRC_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-src.tar.gz
 PKG_NAME_BIN_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-bin.tar.gz
+PKG_NAME_TEST_SRC_VIVANTE	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-test-src.tar.gz
 
 # hdmi package
 CVS_SRC_HDMI_JAZZ2      	:= projects/sw/bsp/hdmi/jazz2hdmi

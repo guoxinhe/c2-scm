@@ -305,6 +305,7 @@ for i in ${modules}; do
   #echo "$i:$nr_merr:$log/$i.log" >>$log/r.txt
   update_indexlog "$i:$nr_merr:$log/$i.log" $indexlog
   recho_time_consumed $tm_module "Build module $i $nr_merr error(s). "
+  echo "    "
 done
 
 recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerror error(s). "
@@ -327,7 +328,7 @@ SSH_SCPDIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekl
 mkdir -p ${WWW_ROOT}
 
 CONFIG_BUILD_PUBLISH=
-CONFIG_BUILD_PUBLISHLOG=y
+CONFIG_BUILD_PUBLISHLOG=
 CONFIG_BUILD_PUBLISHHTML=
 CONFIG_BUILD_PUBLISHEMAIL=
 
@@ -346,6 +347,8 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
     [ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
     [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
     echo "send to list: $SENDTO"
+    echo "You receive this email because you are in the relative software maintainer list"
+    echo "For more other request about this email, please send contact with me"
     echo ""
     echo "Regards,"
     echo "`whoami`@`hostname`"

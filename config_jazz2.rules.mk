@@ -292,7 +292,7 @@ src_package_sw_media: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	@echo "Creating package $(PKG_NAME_SRC_SW_MEDIA_ALL)"
-	@cd $(SOURCE_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
+	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_SW_MEDIA_ALL) --exclude=CVS --exclude=CVSROOT \
 		$(CVS_SRC_SW_MEDIA)
 	@echo $@ done
 src_install_sw_media: sdk_folders
@@ -400,7 +400,7 @@ src_package_qt470: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_QT470)
 	@echo "Creating package $(PKG_NAME_SRC_QT470)"
-	@cd $(SOURCE_DIR); tar cfz $@ --exclude=CVS --exclude=CVSROOT \
+	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_QT470) --exclude=CVS --exclude=CVSROOT \
 		$(CVS_SRC_QT470)
 	@echo $@ done
 src_install_qt470: sdk_folders
@@ -690,8 +690,8 @@ src_package_vivante: sdk_folders
 		--exclude=CVSROOT \
 		$(CVS_SRC_VIVANTE)
 	
-	@-rm -rf (PKG_NAME_TEST_SRC_VIVANTE)
-	@echo "Creating package (PKG_NAME_TEST_SRC_VIVANTE)"
+	@-rm -rf $(PKG_NAME_TEST_SRC_VIVANTE)
+	@echo "Creating package $(PKG_NAME_TEST_SRC_VIVANTE)"
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_TEST_SRC_VIVANTE) \
 		--exclude=CVS \
@@ -939,7 +939,7 @@ src_build_c2box: sdk_folders
 		cp -f build/sdk/drivers/libdirectfb_gal.so  work/lib/ ;\
 	
 	@echo $@ done
-bin_package_c2box: sdk_folders $(PKG_NAME_C2BOX_DEMO) $(PKG_NAME_BIN_TOOLS)
+bin_package_c2box: sdk_folders
 	@-rm -rf $(PKG_NAME_C2BOX_DEMO)
 	@echo "Creating package $(PKG_NAME_C2BOX_DEMO)"
 	@cd $(TEST_ROOT_DIR)/$(PRODUCT); \
@@ -1395,7 +1395,7 @@ sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR) \
 	$(TEST_ROOT_DIR)/boot $(TEST_ROOT_DIR)/tmp
 
 .PHONY: sdk_folders ls mktest mc help c2
-sdk_folders: $(sdkautodirs) $(TEST_ROOT_DIR)/usr/zlink
+sdk_folders: $(sdkautodirs) $(TEST_ROOT_DIR)/usr/zlink updatetoplink
 $(sdkautodirs):
 	@mkdir -p $@
 $(TEST_ROOT_DIR)/usr/zlink:
@@ -1404,6 +1404,14 @@ $(TEST_ROOT_DIR)/usr/zlink:
 	ln -s $(SW_MEDIA_PATH)    $(TEST_ROOT_DIR)/usr/sw_media
 	ln -s $(QT_INSTALL_DIR)   $(TEST_ROOT_DIR)/usr/qt
 	echo "Created Link." >$@
+updatetoplink:
+	@-if [ -h $(TOP_DIR)/deploy ]; then rm $(TOP_DIR)/deploy; fi; \
+		ln -s $(PKG_DIR)	  $(TOP_DIR)/deploy
+	@-if [ -h $(TOP_DIR)/build ]; then rm $(TOP_DIR)/build; fi; \
+		ln -s $(TEST_ROOT_DIR)	  $(TOP_DIR)/build
+	@-if [ -h $(TOP_DIR)/install ]; then rm $(TOP_DIR)/install; fi; \
+		ln -s $(TEST_ROOT_DIR)	  $(TOP_DIR)/install
+
 c2: bin_install_devtools
 mod:
 	@echo "support mission modules:" $(subst mission_,,"$(mission_modules)")
