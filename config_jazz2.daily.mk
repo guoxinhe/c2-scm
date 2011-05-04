@@ -45,14 +45,15 @@ UPDATE                  := echo "cvs -q update -CAPd $(CHECKOUT_OPTION)"
 
 # build installation configures
 #TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
-TOOLCHAIN_PATH			:= $(TOP_DIR)/c2/daily/bin
+TOOLCHAIN_PATH			:= $(shell readlink -f $(TOP_DIR)/c2/daily/bin)
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
 SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
 CVS_SRC_KERNEL			:= sw/kernel
-KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
+#KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
+KERNEL_PATH			:= $(TEST_ROOT_DIR)/build_kernela2632/kernel
 
 # DEVTOOLS package
 CVS_SRC_BUILDROOT       	:= projects/sw/devtools/buildroot

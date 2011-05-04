@@ -617,52 +617,52 @@ help_kernelnand: sdk_folders mktest
 	@echo targets: $(mission_kernelnand)
 	@echo $@ done
 
-mission_ak2632 := help_ak2632 clean_ak2632 src_get_ak2632  \
-	src_package_ak2632 src_install_ak2632 src_config_ak2632 src_build_ak2632 \
-	bin_package_ak2632 bin_install_ak2632
-mission_modules += mission_ak2632
-mission_targets += $(mission_ak2632)
-.PHONY: $(mission_ak2632)
-src_get_ak2632:  sdk_folders
+mission_kernela2632 := help_kernela2632 clean_kernela2632 src_get_kernela2632  \
+	src_package_kernela2632 src_install_kernela2632 src_config_kernela2632 src_build_kernela2632 \
+	bin_package_kernela2632 bin_install_kernela2632
+mission_modules += mission_kernela2632
+mission_targets += $(mission_kernela2632)
+.PHONY: $(mission_kernela2632)
+src_get_kernela2632:  sdk_folders
 	@echo start $@
 	cd $(SOURCE_LOCAL); if [ ! -d kernel ]; then git clone hguo@git.bj.c2micro.com:/mentor-mirror/build/kernel.git; fi
 	cd $(SOURCE_LOCAL)/kernel; git checkout devel;  git pull origin devel
 	@echo $@ done
-src_package_ak2632: sdk_folders 
+src_package_kernela2632: sdk_folders 
 	@echo start $@
-	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.src.tar.gz
+	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.src.tar.gz
 	@cd $(SOURCE_LOCAL); \
-	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.src.tar.gz \
+	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.src.tar.gz \
 		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
 		kernel
 	@echo $@ done
-src_install_ak2632: sdk_folders 
+src_install_kernela2632: sdk_folders 
 	@echo start $@
-	@echo Create: $(TEST_ROOT_DIR)/build_ak2632
-	@-rm -rf $(TEST_ROOT_DIR)/build_ak2632
-	@mkdir -p $(TEST_ROOT_DIR)/build_ak2632
-	cd $(TEST_ROOT_DIR)/build_ak2632 ; \
-	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.src.tar.gz
+	@echo Create: $(TEST_ROOT_DIR)/build_kernela2632
+	@-rm -rf $(TEST_ROOT_DIR)/build_kernela2632
+	@mkdir -p $(TEST_ROOT_DIR)/build_kernela2632
+	cd $(TEST_ROOT_DIR)/build_kernela2632 ; \
+	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.src.tar.gz
 	@echo $@ done
-src_config_ak2632: sdk_folders
+src_config_kernela2632: sdk_folders
 	@echo start $@
 	@echo Config software
-	@cd $(TEST_ROOT_DIR)/build_ak2632/kernel; \
+	@cd $(TEST_ROOT_DIR)/build_kernela2632/kernel; \
 		cp arch/c2/configs/c2_nfsdroid_defconfig .config; \
 		make oldconfig
 	@echo $@ done
-src_build_ak2632: sdk_folders
+src_build_kernela2632: sdk_folders
 	@echo start $@
-	@echo build $(TEST_ROOT_DIR)/ak2632
-	@cd $(TEST_ROOT_DIR)/build_ak2632/kernel; \
+	@echo build $(TEST_ROOT_DIR)/kernela2632
+	@cd $(TEST_ROOT_DIR)/build_kernela2632/kernel; \
 		make -j 5
 	@echo $@ done
-bin_package_ak2632: sdk_folders 
+bin_package_kernela2632: sdk_folders 
 	@echo start $@
-	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.bin.tar.gz
-	@-rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.bin.tar.gz
-	@cd $(TEST_ROOT_DIR)/build_ak2632/; \
-	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.bin.tar.gz \
+	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.bin.tar.gz
+	@-rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.bin.tar.gz
+	@cd $(TEST_ROOT_DIR)/build_kernela2632/; \
+	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.bin.tar.gz \
 		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
 		kernel/vmlinux \
 		kernel/vmlinux.bin \
@@ -678,18 +678,18 @@ bin_package_ak2632: sdk_folders
 		kernel/initramfs_data.cpio.gz \
 		;
 	@echo $@ done
-bin_install_ak2632: sdk_folders
+bin_install_kernela2632: sdk_folders
 	@echo start $@
 	@echo Install software
 	@echo $@ done
-clean_ak2632: sdk_folders
+clean_kernela2632: sdk_folders
 	@echo start $@
-	@echo clean ak2632
-	@-rm -rf $(TEST_ROOT_DIR)/build_ak2632
+	@echo clean kernela2632
+	@-rm -rf $(TEST_ROOT_DIR)/build_kernela2632
 	@echo $@ done
-test_ak2632: $(mission_ak2632)
-help_ak2632: sdk_folders mktest
-	@echo targets: $(mission_ak2632)
+test_kernela2632: $(mission_kernela2632)
+help_kernela2632: sdk_folders mktest
+	@echo targets: $(mission_kernela2632)
 	@echo $@ done
 
 mission_uboot := help_uboot clean_uboot       src_get_uboot  \

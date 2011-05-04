@@ -21,6 +21,7 @@ modules_jump="
 devtools 
 sw_media 
 qt470 
+kernela2632
 kernel 
 kernelnand 
 uboot 
@@ -165,13 +166,13 @@ recho_time_consumed()
 }
 
 blame_devtools="saladwang hguo"
-blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli"
-blame_qt="mxia dashanzhou txiang slu jzhang"
-blame_c2box="mxia dashanzhou txiang slu jzhang"
+blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli  codec_sw"
+blame_qt="mxia dashanzhou txiang slu jzhang                                         sw_apps"
+blame_c2box="mxia dashanzhou txiang slu jzhang                                      sw_apps"
 blame_jtag="jsun"
 blame_c2_goodies="jsun robinlee ali"
 blame_diag="jsun"
-blame_kernel="jsun robinlee ali roger llian simongao xingeng swine hguo janetliu"
+blame_kernel="jsun robinlee ali roger llian simongao xingeng swine hguo janetliu    sys_sw"
 blame_vivante="llian jsun"
 blame_hdmi="jsun xingeng"
 blame_uboot="ali jsun robinlee"
@@ -277,7 +278,8 @@ make  backup
 nr_totalerror=0
 nr_totalmodule=0
 tm_total=`date +%s`
-
+build_modules_x_steps()
+{
 for i in ${modules}; do
   nr_merr=0
   tm_module=`date +%s`
@@ -307,6 +309,23 @@ for i in ${modules}; do
   recho_time_consumed $tm_module "Build module $i $nr_merr error(s). "
   echo "    "
 done
+}
+
+modules="xxx"
+steps="src_get src_package src_install src_config src_build bin_package bin_install "
+build_modules_x_steps
+
+#modules="kernela2632"
+#steps="src_get src_package src_install src_config src_build bin_package bin_install "
+#build_modules_x_steps
+
+#modules="vivante hdmi uboot jtag diag c2_goodies "
+#steps="src_package src_install src_config src_build bin_package bin_install "
+#build_modules_x_steps
+
+#modules="sw_media qt470 c2box "
+#steps="src_package src_install src_config src_build bin_package bin_install "
+#build_modules_x_steps
 
 recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerror error(s). "
 ## --------------------------- report part ----------------------------
@@ -320,8 +339,8 @@ export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{prin
 WWW_ROOT=/var/www/html/hguo
 WWW_SERVER=${THISIP}
 WWW_HTTPHEAD=http
-WWW_TITLE="${SDK_TARGET_ARCH}-${TREE_PREFIX} SDK daily Build Results"
-HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_sdk_daily.html
+WWW_TITLE="${SDK_TARGET_ARCH}-${TREE_PREFIX} SDK android-gcc-kernel daily Build Results"
+HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_gcc_kernela2632_sdk_daily.html
 PKG_DIR=`make PKG_DIR`
 SSH_SERVER=10.16.13.200
 SSH_SCPDIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
@@ -346,6 +365,9 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
     [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
     [ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
     [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
+    echo "More build environment reference info:"
+    make mktest
+    echo ""
     echo "send to list: $SENDTO"
     echo "You receive this email because you are in the relative software maintainer list"
     echo "For more other request about this email, please send contact with me"
@@ -385,6 +407,7 @@ fi
 
 if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     cp $DIST_DIR/$HTML_REPORT  ${WWW_ROOT}/
+    cp $DIST_DIR/$HTML_REPORT  ${WWW_ROOT}/build
 fi
 
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
