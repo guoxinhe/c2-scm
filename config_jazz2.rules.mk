@@ -617,6 +617,81 @@ help_kernelnand: sdk_folders mktest
 	@echo targets: $(mission_kernelnand)
 	@echo $@ done
 
+mission_ak2632 := help_ak2632 clean_ak2632 src_get_ak2632  \
+	src_package_ak2632 src_install_ak2632 src_config_ak2632 src_build_ak2632 \
+	bin_package_ak2632 bin_install_ak2632
+mission_modules += mission_ak2632
+mission_targets += $(mission_ak2632)
+.PHONY: $(mission_ak2632)
+src_get_ak2632:  sdk_folders
+	@echo start $@
+	cd $(SOURCE_LOCAL); if [ ! -d kernel ]; then git clone hguo@git.bj.c2micro.com:/mentor-mirror/build/kernel.git; fi
+	cd $(SOURCE_LOCAL)/kernel; git checkout devel;  git pull origin devel
+	@echo $@ done
+src_package_ak2632: sdk_folders 
+	@echo start $@
+	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.src.tar.gz
+	@cd $(SOURCE_LOCAL); \
+	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.src.tar.gz \
+		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
+		kernel
+	@echo $@ done
+src_install_ak2632: sdk_folders 
+	@echo start $@
+	@echo Create: $(TEST_ROOT_DIR)/build_ak2632
+	@-rm -rf $(TEST_ROOT_DIR)/build_ak2632
+	@mkdir -p $(TEST_ROOT_DIR)/build_ak2632
+	cd $(TEST_ROOT_DIR)/build_ak2632 ; \
+	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.src.tar.gz
+	@echo $@ done
+src_config_ak2632: sdk_folders
+	@echo start $@
+	@echo Config software
+	@cd $(TEST_ROOT_DIR)/build_ak2632/kernel; \
+		cp arch/c2/configs/c2_nfsdroid_defconfig .config; \
+		make oldconfig
+	@echo $@ done
+src_build_ak2632: sdk_folders
+	@echo start $@
+	@echo build $(TEST_ROOT_DIR)/ak2632
+	@cd $(TEST_ROOT_DIR)/build_ak2632/kernel; \
+		make -j 5
+	@echo $@ done
+bin_package_ak2632: sdk_folders 
+	@echo start $@
+	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.bin.tar.gz
+	@-rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.bin.tar.gz
+	@cd $(TEST_ROOT_DIR)/build_ak2632/; \
+	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-ak2632.bin.tar.gz \
+		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
+		kernel/vmlinux \
+		kernel/vmlinux.bin \
+		kernel/vmlinux.dump \
+		kernel/System.map \
+		kernel/Makefile \
+		kernel/MAINTAINERS \
+		kernel/REPORTING-BUGS \
+		kernel/CREDITS \
+		kernel/COPYING \
+		kernel/usr \
+		kernel/.config \
+		kernel/initramfs_data.cpio.gz \
+		;
+	@echo $@ done
+bin_install_ak2632: sdk_folders
+	@echo start $@
+	@echo Install software
+	@echo $@ done
+clean_ak2632: sdk_folders
+	@echo start $@
+	@echo clean ak2632
+	@-rm -rf $(TEST_ROOT_DIR)/build_ak2632
+	@echo $@ done
+test_ak2632: $(mission_ak2632)
+help_ak2632: sdk_folders mktest
+	@echo targets: $(mission_ak2632)
+	@echo $@ done
+
 mission_uboot := help_uboot clean_uboot       src_get_uboot  \
 	src_package_uboot src_install_uboot src_config_uboot src_build_uboot \
 	bin_package_uboot bin_install_uboot
@@ -1332,6 +1407,7 @@ src_get_xxx:  sdk_folders
 	@mkdir -p $(TEMP_DIR)/xxx
 	@echo "int main(int argc, char **argv){return argv[argc-1][0];}" >$(TEMP_DIR)/xxx/xxx.c
 	@echo "all:xxx"    		 >$(TEMP_DIR)/xxx/Makefile
+	@echo "config:" 		>>$(TEMP_DIR)/xxx/Makefile
 	@echo "xxx:xxx.c" 		>>$(TEMP_DIR)/xxx/Makefile
 	@echo "	gcc xxx.c -o xxx" 	>>$(TEMP_DIR)/xxx/Makefile
 	@echo $@ done
@@ -1339,44 +1415,49 @@ src_package_xxx: sdk_folders
 	@echo start $@
 	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
 	@cd $(TEMP_DIR); \
-	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz \
+	    tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz \
 		--exclude=CVS --exclude=CVSROOT \
 		xxx
 	@echo $@ done
 src_install_xxx: sdk_folders 
 	@echo start $@
-	@echo Create: $(TEST_ROOT_DIR)/xxx
-	@-rm -rf $(TEST_ROOT_DIR)/xxx
-	cd $(TEST_ROOT_DIR) ; \
+	@echo Create: $(TEST_ROOT_DIR)/build_xxx
+	@-rm -rf $(TEST_ROOT_DIR)/build_xxx
+	@mkdir -p $(TEST_ROOT_DIR)/build_xxx
+	cd $(TEST_ROOT_DIR)/build_xxx ; \
 	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
 	@echo $@ done
 src_config_xxx: sdk_folders
 	@echo start $@
-	@echo Config software
+	@echo Config $(TEST_ROOT_DIR)/build_xxx
+	@cd $(TEST_ROOT_DIR)/build_xxx/xxx; \
+		make config;
 	@echo $@ done
 src_build_xxx: sdk_folders
 	@echo start $@
-	@echo build $(TEST_ROOT_DIR)/xxx
-	@cd $(TEST_ROOT_DIR)/xxx; \
-		make; sleep 2
+	@echo build $(TEST_ROOT_DIR)/build_xxx
+	@cd $(TEST_ROOT_DIR)/build_xxx/xxx; \
+		make;
 	@echo $@ done
 bin_package_xxx: sdk_folders 
 	@echo start $@
 	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
 	@-rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
-	@cd $(TEST_ROOT_DIR); \
-	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz \
+	@cd $(TEST_ROOT_DIR)/build_xxx; \
+	    tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz \
 		--exclude=CVS --exclude=CVSROOT \
 		xxx
 	@echo $@ done
 bin_install_xxx: sdk_folders
 	@echo start $@
 	@echo Install software
+	@cd $(TEST_ROOT_DIR)/usr; \
+	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz;
 	@echo $@ done
 clean_xxx: sdk_folders
 	@echo start $@
 	@echo clean xxx
-	@-rm -rf $(TEMP_DIR)/xxx $(TEST_ROOT_DIR)/xxx
+	@-rm -rf $(TEMP_DIR)/xxx $(TEST_ROOT_DIR)/build_xxx $(TEST_ROOT_DIR)/usr/xxx
 	@echo $@ done
 test_xxx: $(mission_xxx)
 help_xxx: sdk_folders mktest
