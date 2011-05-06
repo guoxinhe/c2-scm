@@ -217,10 +217,10 @@ src_package_devtools: sdk_folders $(devtools_list)
 	@echo $@ done
 src_install_devtools: sdk_folders 
 	@echo start $@
-	@-rm -rf $(DEVTOOLS_BUILD_PATH)
-	@echo Extract $(PKG_NAME_SRC_DEVTOOLS) to Target folder $(DEVTOOLS_BUILD_PATH)
-	@mkdir -p $(DEVTOOLS_BUILD_PATH)
-	cd $(DEVTOOLS_BUILD_PATH)/..; \
+	@-rm -rf $(TEST_ROOT_DIR)/build_devtools
+	@echo Extract $(PKG_NAME_SRC_DEVTOOLS)
+	@mkdir -p $(TEST_ROOT_DIR)/build_devtools
+	cd $(TEST_ROOT_DIR)/build_devtools; \
 	    tar xzf $(PKG_NAME_SRC_DEVTOOLS)
 	@touch $@
 	@echo $@ done
@@ -229,9 +229,9 @@ src_config_devtools: sdk_folders
 	@echo $@ done
 src_build_devtools: sdk_folders 
 	@echo start $@
-	cd  $(DEVTOOLS_BUILD_PATH); ./buildtools.sh
+	cd  $(TEST_ROOT_DIR)/build_devtools/devtools; ./buildtools.sh
 	# if the devtools is compiled successfully, will return 0, else error no.
-	@cd $(DEVTOOLS_BUILD_PATH)/c2; \
+	@cd $(TEST_ROOT_DIR)/build_devtools/devtools/c2; \
 	    ln -s $(TODAY) daily; \
 	    ln -s daily sw;
 	@echo $@ done
@@ -239,7 +239,7 @@ bin_package_devtools: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_BIN_DEVTOOLS)
 	@echo "Creating package $(PKG_NAME_BIN_DEVTOOLS)"
-	@cd $(DEVTOOLS_BUILD_PATH); \
+	@cd $(TEST_ROOT_DIR)/build_devtools/devtools; \
 	    tar cfz $(PKG_NAME_BIN_DEVTOOLS) \
 		--exclude=c2/$(TODAY)/tmp/*     \
 		c2
@@ -253,26 +253,15 @@ bin_install_devtools: sdk_folders
 	@echo $@ done
 clean_devtools: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
-	rm -rf  $(TEMP_DIR)/devtools $(DEVTOOLS_BUILD_PATH) $(TEST_ROOT_DIR)/c2
+	rm -rf  $(TEMP_DIR)/devtools \
+		$(TEST_ROOT_DIR)/build_devtools \
+		$(TEST_ROOT_DIR)/c2
 	@echo $@ done
 test_devtools: $(mission_devtools)
 help_devtools: sdk_folders mktest
 	@echo 
 	@echo targets: $(mission_devtools) clean_devtools test_devtools help_devtools
 	@echo $@ done
-devtools_build_check_bugversion:
-	# judge if the devtools is compiled successfully
-	@cd  $(DEVTOOLS_BUILD_PATH); \
-	if [ $(shell grep 'Moving build files...' $(DEVTOOLS_BUILD_PATH)/tools-build/buildroot/makelog.* |wc -l) -gt 0 ]; then \
-	   echo "Devtools compile successfully"; \
-	else \
-	   echo "Devtools compile failed"; \
-	   echo "force does not " exit 1; \
-	fi 
-	@-cd  $(DEVTOOLS_BUILD_PATH)/c2; \
-	    for i in  `ls 1* -d`;do echo $$i;done; ln -s $$i daily;\
-	    ln -s daily sw; 
-	@touch $@
 
 mission_sw_media := src_get_sw_media  \
 	src_package_sw_media src_install_sw_media src_config_sw_media src_build_sw_media \
@@ -297,9 +286,10 @@ src_package_sw_media: sdk_folders
 	@echo $@ done
 src_install_sw_media: sdk_folders
 	@echo start $@
-	@-rm -rf $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)
+	@-rm -rf $(TEMP_DIR)/src_sw_media_2nd
+	@mkdir -p $(TEMP_DIR)/src_sw_media_2nd
 	@echo Extract $(PKG_NAME_SRC_SW_MEDIA_ALL)
-	cd $(TEMP_DIR) ; \
+	cd $(TEMP_DIR)/src_sw_media_2nd ; \
 	    tar xzf $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	@echo $@ done
 src_config_sw_media: sdk_folders
@@ -307,17 +297,17 @@ src_config_sw_media: sdk_folders
 	@-rm -rf $(PKG_NAME_SRC_SW_MEDIA_2ND) 
 	@echo "Creating package $(PKG_NAME_SRC_SW_MEDIA_2ND)"
 	# Write version information
-	@cd $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)/media/daemon/msp/mspdaemon/; \
+	@cd $(TEMP_DIR)/src_sw_media_2nd/$(CVS_SRC_SW_MEDIA)/media/daemon/msp/mspdaemon/; \
 	    sed -i '{s, "*".*,"$(SDK_VERSION_ALL)";,g}' mspVersion.h
-	@ cd $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)/build/build/customer/build; \
+	@ cd $(TEMP_DIR)/src_sw_media_2nd/$(CVS_SRC_SW_MEDIA)/build/build/customer/build; \
 	    cp globalconfig-C2-PVR-REAL-$(SDK_TARGET_ARCH) globalconfig-C2-PVR
 	
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_sw_media_2nd; \
 	    time $(CVS_SRC_SW_MEDIA)/scripts/customizesdk_$(SDK_TARGET_ARCH) $(CVS_SRC_SW_MEDIA) temp_sw_media.tar; \
 	    gzip temp_sw_media.tar; \
 	    mv temp_sw_media.tar.gz $(PKG_NAME_SRC_SW_MEDIA_2ND); \
 	    mv temp_sw_media-bin-test.tar.gz $(PKG_NAME_TEST_BIN_SW_MEDIA)
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_sw_media_2nd; \
 	    if [ -d $(PKG_DIR)/plugins ];then mv $(PKG_DIR)/plugins $(PKG_DIR)/plugins-`date +%Y%m%d%H%M%S` ;fi; \
 	    mkdir $(PKG_DIR)/plugins; \
 	    for d in *.tar.gz; do \
@@ -326,24 +316,26 @@ src_config_sw_media: sdk_folders
 	@echo --------------------------start second part---------------------------
 	@-rm -rf $(PKG_NAME_SRC_SW_MEDIA)
 	@echo "Creating package $(PKG_NAME_SRC_SW_MEDIA)"
-	@mkdir -p $(TEMP_DIR)/mk_sw_media_3rdsrc; 
-	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc; \
+	@-rm -rf $(TEMP_DIR)/src_sw_media_3rd; 
+	@mkdir -p $(TEMP_DIR)/src_sw_media_3rd; 
+	@cd $(TEMP_DIR)/src_sw_media_3rd; \
 	    rm -rf $(CVS_SRC_SW_MEDIA); \
 	    tar xfz $(PKG_NAME_SRC_SW_MEDIA_2ND)
-	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc/$(CVS_SRC_SW_MEDIA); \
+	@cd $(TEMP_DIR)/src_sw_media_3rd/$(CVS_SRC_SW_MEDIA); \
 	    rm -rf media/plugins/real; \
 	    cp build/build/customer/build/globalconfig-C2-PVR-$(SDK_TARGET_ARCH) \
 		build/build/customer/build/globalconfig-C2-PVR
-	@cd $(TEMP_DIR)/mk_sw_media_3rdsrc; \
+	@cd $(TEMP_DIR)/src_sw_media_3rd; \
 	    tar zcf $(PKG_NAME_SRC_SW_MEDIA) $(CVS_SRC_SW_MEDIA)
 	
 	@echo $@ done
 src_build_sw_media: sdk_folders
 	@echo start $@
-	@-rm -rf $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR)
 	@echo Extract $(PKG_NAME_SRC_SW_MEDIA_2ND)
-	@-rm -rf  $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/*
-	@cd $(TEST_ROOT_DIR); \
+	@-rm -rf $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA)/*
+	@-rm -rf $(TEST_ROOT_DIR)/build_sw_media
+	@mkdir -p $(TEST_ROOT_DIR)/build_sw_media
+	@cd $(TEST_ROOT_DIR)/build_sw_media; \
 	    tar xfz $(PKG_NAME_SRC_SW_MEDIA_2ND); \
 	    cd ./$(CVS_SRC_SW_MEDIA); \
 	    time make -j5
@@ -352,31 +344,33 @@ bin_package_sw_media: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_BIN_SW_MEDIA)
 	@echo "Creating package $(PKG_NAME_BIN_SW_MEDIA):"
-	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA); \
+	@cd $(TEST_ROOT_DIR)/build_sw_media/$(CVS_SRC_SW_MEDIA); \
 	    tar zcf $(PKG_NAME_BIN_SW_MEDIA) \
 		--exclude=RealPluginModule.plugin.so \
 		TARGET_LINUX_C2_$(SDK_TARGET_GCC_ARCH)_RELEASE
 	
 	@-rm -rf $(PKG_NAME_BIN_SW_MEDIA_QA)
 	@echo "Creating package $(PKG_NAME_BIN_SW_MEDIA_QA)"
-	@cd $(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA); \
+	@cd $(TEST_ROOT_DIR)/build_sw_media/$(CVS_SRC_SW_MEDIA); \
             tar zcf $(PKG_NAME_BIN_SW_MEDIA_QA) \
                 TARGET_LINUX_C2_$(SDK_TARGET_GCC_ARCH)_RELEASE
 	@echo $@ done
 bin_install_sw_media: sdk_folders
 	@echo start $@
-	@-rm -rf $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/$(CVS_SRC_SW_MEDIA)/$(SW_MEDIA_INSTALL_DIR)
+	@echo Prepare for SW_MEDIA_PATH=$(SW_MEDIA_PATH)
+	@-rm -rf $(SW_MEDIA_PATH)
 	@echo Extract $(PKG_NAME_BIN_SW_MEDIA_QA)
-	@mkdir -p $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/$(CVS_SRC_SW_MEDIA)
-	cd $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/$(CVS_SRC_SW_MEDIA); \
+	@mkdir -p $(SW_MEDIA_PATH)
+	cd $(SW_MEDIA_PATH); \
 	    tar xzf $(PKG_NAME_BIN_SW_MEDIA_QA)
 	@echo $@ done
 clean_sw_media: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
 	@-rm -rf  $(TEMP_DIR)/$(CVS_SRC_SW_MEDIA)  \
-		$(TEMP_DIR)/mk_sw_media_3rdsrc \
-		$(TEST_ROOT_DIR)/$(CVS_SRC_SW_MEDIA) \
-		$(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/$(CVS_SRC_SW_MEDIA) \
+		$(TEMP_DIR)/src_sw_media_2nd \
+		$(TEMP_DIR)/src_sw_media_3rd \
+		$(TEST_ROOT_DIR)/build_sw_media \
+		$(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_MEDIA) \
 		;
 	@echo $@ done
 test_sw_media: $(mission_sw_media)
@@ -890,14 +884,15 @@ src_get_c2box:  sdk_folders
 	@echo $@ done
 src_package_c2box: sdk_folders
 	@echo start $@
-	@mkdir -p $(PKG_DIR)/c2box
-	@cd $(TEMP_DIR); rm -rf $(CVS_SRC_SW_C2APPS); \
+	@rm -rf $(TEMP_DIR)/src_c2box
+	@mkdir -p $(TEMP_DIR)/src_c2box
+	@cd $(TEMP_DIR)/src_c2box; \
 	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_SW_C2APPS) .
-	@cd $(TEMP_DIR)/$(CVS_SRC_SW_C2APPS)/pvr/filemanager/include; \
+	@cd $(TEMP_DIR)/src_c2box/$(CVS_SRC_SW_C2APPS)/pvr/filemanager/include; \
             sed -i '{s, ".*","$(SDK_VERSION_ALL)-$(BUILDTIMES)",g}' version.h
 	
 	@rm -f $(PKG_NAME_SRC_SW_C2APPS)
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_SW_C2APPS) \
 	        --exclude=CVS \
 	        --exclude=CVSROOT \
@@ -910,7 +905,7 @@ src_package_c2box: sdk_folders
 		--exclude=p2p/libThunderPlugin \
 		--exclude=filemanager \
 	        $(CVS_SRC_SW_C2APPS)
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_C2BOX_ALL) \
 	        --exclude=CVS \
 	        --exclude=CVSROOT \
@@ -923,7 +918,7 @@ src_package_c2box: sdk_folders
 		--exclude=p2p/libThunderPlugin \
 		--exclude=filemanager2 \
 	        $(CVS_SRC_SW_C2APPS)
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_C2BOX) \
 	        --exclude=CVS \
 	        --exclude=CVSROOT \
@@ -949,60 +944,59 @@ src_package_c2box: sdk_folders
 		--exclude=apps/sohu \
 		--exclude=apps/capture \
 	        $(CVS_SRC_SW_C2APPS)
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_MINIBD) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/discs
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_FLASH) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/flash
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_KARAOKE) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/karaoke
 	@if [ "$(SDK_TARGET_ARCH)" != "jazz2l" ]; then \
-	cd $(TEMP_DIR); \
+	cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_VIDEOCHAT) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videochat; \
 	fi
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_THUNDERKK) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/thunderkk
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_MVPHONE) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videophone
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_BROWSER) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/browser
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_IPCAM) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/camera
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_JVM) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/jvm
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_RECOEDING) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/capture
-	@cd $(TEMP_DIR); \
+	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_SOHU) \
 		--exclude=CVS \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/sohu
-	@-rm -rf $(TEMP_DIR)/$(CVS_SRC_SW_C2APPS)
 	
 	@echo $@ done
 src_install_c2box: sdk_folders
-	@-rm -rf $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS)
+	@-rm -rf $(TEST_ROOT_DIR)/build_c2box;
+	@mkdir -p $(TEST_ROOT_DIR)/build_c2box;
 	@echo Extract  $(PKG_NAME_SRC_C2BOX_ALL)
-	mkdir -p $(TEST_ROOT_DIR)/$(PRODUCT);
-	cd $(TEST_ROOT_DIR)/$(PRODUCT); \
+	cd $(TEST_ROOT_DIR)/build_c2box; \
 	    tar xzf $(PKG_NAME_SRC_C2BOX_ALL)
 	@echo $@ done
 src_config_c2box: sdk_folders
@@ -1013,14 +1007,14 @@ src_build_c2box: \
 src_build_c2box: sdk_folders
 	@echo start $@
 	@-rm -rf $@
-	@cd $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS); \
+	@cd $(TEST_ROOT_DIR)/build_c2box/$(CVS_SRC_SW_C2APPS); \
 		BUILD_TARGET=TARGET_LINUX_C2 TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD=RELEASE \
-		SW_MEDIA_PATH=$(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_MEDIA) \
+		SW_MEDIA_PATH=$(SW_MEDIA_PATH) \
 		ENABLE_NEW_APP=TRUE make install; \
 		rm -rf ../work; \
 		cp -a work ../
-	cd $(TEST_ROOT_DIR)/$(PRODUCT);cp -f $(TEST_ROOT_DIR)/build_hdmi/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib
-	cd $(TEST_ROOT_DIR)/$(PRODUCT);tar xfz $(PKG_NAME_BIN_VIVANTE) ;\
+	cd $(TEST_ROOT_DIR)/build_c2box;cp -f $(TEST_ROOT_DIR)/build_hdmi/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib
+	cd $(TEST_ROOT_DIR)/build_c2box;tar xfz $(PKG_NAME_BIN_VIVANTE) ;\
 		cp -f build/sdk/drivers/libGAL.so           work/lib/ ;\
 		cp -f build/sdk/drivers/galcore.ko          work/lib/ ;\
 		cp -f build/sdk/drivers/libdirectfb_gal.so  work/lib/ ;\
@@ -1029,17 +1023,19 @@ src_build_c2box: sdk_folders
 bin_package_c2box: sdk_folders
 	@-rm -rf $(PKG_NAME_C2BOX_DEMO)
 	@echo "Creating package $(PKG_NAME_C2BOX_DEMO)"
-	@cd $(TEST_ROOT_DIR)/$(PRODUCT); \
+	@cd $(TEST_ROOT_DIR)/build_c2box; \
 		tar cfz $(PKG_NAME_C2BOX_DEMO) work	
 	
 	@-rm -rf $(PKG_NAME_BIN_TOOLS)
 	@echo "Creating package $(PKG_NAME_BIN_TOOLS)"
-	@cd $(TEST_ROOT_DIR)/$(PRODUCT)/$(CVS_SRC_SW_C2APPS); \
+	@cd $(TEST_ROOT_DIR)/build_c2box/$(CVS_SRC_SW_C2APPS); \
 		tar cfz $(PKG_NAME_BIN_TOOLS) tools
 	@echo $@ done
 bin_install_c2box: sdk_folders
 	@echo $@ done
 clean_c2box: sdk_folders
+	@rm -rf $(TEMP_DIR)/src_c2box
+	@rm -rf $(TEST_ROOT_DIR)/build_c2box
 	@echo $@ done
 test_c2box: $(mission_c2box)
 help_c2box: sdk_folders mktest
