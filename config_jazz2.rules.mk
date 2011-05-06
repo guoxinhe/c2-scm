@@ -578,7 +578,8 @@ src_config_kernelnand: sdk_folders
 src_build_kernelnand: sdk_folders
 	@echo start $@
 	cd $(TEST_ROOT_DIR)/build_kernelnand/$(CVS_SRC_KERNEL); \
-	make -j5 -f configs/jazz2-pvr-nand/pvr-nand.mk
+	make -j5 -f configs/jazz2-pvr-nand/pvr-nand.mk; \
+	cp configs/jazz2-pvr-nand/mkyaffs/mkyaffs2 $(TEST_ROOT_DIR)/usr/bin/;
 	@echo $@ done
 bin_package_kernelnand: sdk_folders
 	@echo start $@
@@ -730,7 +731,8 @@ src_config_uboot: sdk_folders
 src_build_uboot: sdk_folders
 	@echo start $@
 	@cd $(TEST_ROOT_DIR)/build_uboot/$(CVS_SRC_UBOOT); \
-		./build.sh jazz2;
+		./build.sh jazz2; \
+		cp $(uboot_utilities)/mkimage  $(TEST_ROOT_DIR)/usr/bin/;
 	@echo $@ done
 bin_package_uboot: sdk_folders
 	@echo start $@
@@ -1324,10 +1326,10 @@ factory_udisk:sdk_folders
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f home/work/updat*.bmp . ; cp -f home/work/logo.bmp .
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f sw/kernel/rootfs.image .
-	cd $(TEST_ROOT_DIR)/build_facudisk ; $(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin kernel.img
-	cd $(TEST_ROOT_DIR)/build_facudisk ; $(BIN_MKIMAGE) -A c2 -O linux -n rootfs -d rootfs.image rootfs.img
-	cd $(TEST_ROOT_DIR)/build_facudisk ; $(BIN_MKYAFFS2) home home.image ;
-	cd $(TEST_ROOT_DIR)/build_facudisk ; $(BIN_MKIMAGE) -A c2 -O linux -n home   -d home.image   home.img
+	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin kernel.img
+	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -n rootfs -d rootfs.image rootfs.img
+	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKYAFFS2) home home.image ;
+	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -n home   -d home.image   home.img
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f $(uboot_file) u-boot.rom; cp -f $(uboot_factory_file) u-boot-factory.rom
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f updatingEN.bmp updating.bmp
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f updateFailEN.bmp updatefail.bmp
@@ -1355,7 +1357,7 @@ user_udisk:sdk_folders
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f build/sdk/drivers/libdirectfb_gal.so  work/lib/
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f sw/kernel/rootfs.image .
-	cd $(TEST_ROOT_DIR)/build_usrudisk ; $(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin uImage.bin
+	cd $(TEST_ROOT_DIR)/build_usrudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin uImage.bin
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; ./tools/updateFileGenerate/createArchive uImage.bin rootfs.image work -v "the version no."
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f c2_update.tar $(PKG_NAME_BIN_USER_UDISK)
 
