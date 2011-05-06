@@ -7,6 +7,14 @@ mission_targets += $(mission_devtools)
 .PHONY: $(mission_devtools)
 
 
+devtools_list += cleandevtoolsold
+src_get_cleandevtoolsold:
+	@echo $@
+cleandevtoolsold:
+	@echo $@
+	@rm -rf   $(TEMP_DIR)/devtools $(TEMP_DIR)/src_devtools
+	@mkdir -p $(TEMP_DIR)/devtools $(TEMP_DIR)/src_devtools
+
 devtools_list += thirdparty
 src_get_thirdparty:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_3RDPARTY)
@@ -21,11 +29,11 @@ src_get_buildroot:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_BUILDROOT)
 buildroot:
 	@echo $@
-	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/buildroot $(TEMP_DIR)/
-	cd $(TEMP_DIR)/buildroot; \
-	cp $(DEVTOOLS_AUTOBUILD_CONFIG) autobuild_config; \
+	@cp -rf $(SOURCE_DIR)/projects/sw/devtools/buildroot $(TEMP_DIR)/src_devtools
+	@cd $(TEMP_DIR)/src_devtools/buildroot; \
+		cp $(DEVTOOLS_AUTOBUILD_CONFIG) autobuild_config; \
 		rm autobuild_config_*
-	cd $(TEMP_DIR)/; \
+	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(BUILDROOT_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
@@ -56,8 +64,9 @@ src_get_i2ctools301:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_I2CTOOLS) 
 i2ctools301:
 	@echo $@
-	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/i2c-tools-3.0.1; \
-	    cd $(TEMP_DIR) && tar jcf $(I2CTOOLS_FILE) \
+	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/src_devtools/i2c-tools-3.0.1;
+	@cd $(TEMP_DIR)/src_devtools; \
+	    tar jcf $(I2CTOOLS_FILE) \
 	        --exclude=CVS     \
 	        --exclude=CVSROOT \
 	        i2c-tools-3.0.1; \
@@ -67,8 +76,9 @@ src_get_oprofile:
 	@cd $(SOURCE_DIR) && $(CHECKOUT)  $(CVS_SRC_OPROFILE)
 oprofile:
 	@echo $@
-	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/oprofile-0.9.1; \
-	    cd $(TEMP_DIR) && tar jcf $(OPROFILE_FILE) \
+	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/src_devtools/oprofile-0.9.1;
+	@cd $(TEMP_DIR)/src_devtools;\
+	    tar jcf $(OPROFILE_FILE) \
 	        --exclude=CVS     \
 	        --exclude=CVSROOT \
 	        oprofile-0.9.1; \
@@ -89,8 +99,8 @@ src_get_binutils:
 binutils:	
 	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/devtools/binutils; \
-	    cp -rf binutils $(TEMP_DIR)/binutils-c2.snapshot
-	@cd $(TEMP_DIR); \
+	    cp -rf binutils $(TEMP_DIR)/src_devtools/binutils-c2.snapshot
+	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(BINUTILS_FILE) \
 		--exclude=CVS \
 		--exclude=CVSROOT \
@@ -102,8 +112,8 @@ src_get_gccsrc:
 gccsrc:
 	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/devtools/gcc; \
-	    cp -rf gcc $(TEMP_DIR)/gcc-c2.snapshot
-	@cd $(TEMP_DIR); \
+	    cp -rf gcc $(TEMP_DIR)/src_devtools/gcc-c2.snapshot
+	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(GCC_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
@@ -114,25 +124,25 @@ src_get_standalone_build_script:
 	@cd $(SOURCE_DIR) && $(CHECKOUT) $(STANDALONE_BUILD)
 standalone_build_script:
 	@echo $@
-	cd $(SOURCE_DIR)/$(STANDALONE_BUILD); \
-	    cp -f buildtools.sh $(TEMP_DIR)/devtools; \
-	    cp -f autobuild $(TEMP_DIR)/devtools; \
-	    cp -f uclibc.mk $(TEMP_DIR)/devtools; \
-	    cp -f e2fsprogs.mk $(TEMP_DIR)/devtools; \
-	    cp -f binutils.mk $(TEMP_DIR)/devtools; \
-	    cp -f libpng.mk $(TEMP_DIR)/devtools; \
-	    cp -f Config.in $(TEMP_DIR)/devtools; \
+	@cd $(SOURCE_DIR)/$(STANDALONE_BUILD); \
+	    cp -f buildtools.sh        $(TEMP_DIR)/devtools; \
+	    cp -f autobuild            $(TEMP_DIR)/devtools; \
+	    cp -f uclibc.mk            $(TEMP_DIR)/devtools; \
+	    cp -f e2fsprogs.mk         $(TEMP_DIR)/devtools; \
+	    cp -f binutils.mk          $(TEMP_DIR)/devtools; \
+	    cp -f libpng.mk            $(TEMP_DIR)/devtools; \
+	    cp -f Config.in            $(TEMP_DIR)/devtools; \
 	    cp -f gcc-uclibc-3.x.mk.64 $(TEMP_DIR)/devtools; \
-	    cp -f gcc-uclibc-3.x.mk $(TEMP_DIR)/devtools; \
-	    cp -f binutils.mk.64 $(TEMP_DIR)/devtools
+	    cp -f gcc-uclibc-3.x.mk    $(TEMP_DIR)/devtools; \
+	    cp -f binutils.mk.64       $(TEMP_DIR)/devtools;
 devtools_list += kernel_include
 src_get_kernel_include:
 	@-cd $(SOURCE_DIR) && $(CHECKOUT) $(CVS_SRC_KERNEL)
 kernel_include:
 	@echo $@
-	@-rm -rf $(TEMP_DIR)/kernel
-	@-cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/
-	@-cd $(TEMP_DIR)/kernel; \
+	@-rm -rf $(TEMP_DIR)/src_devtools/kernel
+	@-cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/src_devtools/
+	@-cd $(TEMP_DIR)/src_devtools/kernel; \
 		rm -rf linux-libc-headers-$(SDK_KERNEL_VERSION).0 ; \
 		echo FIXME: remove this line: cp -rf $(LINUXDIR) linux-libc-headers-$(SDK_KERNEL_VERSION).0; \
 		mkdir -p linux-libc-headers-$(SDK_KERNEL_VERSION).0 ; \
@@ -150,8 +160,8 @@ src_get_uclibc:
 uclibc:
 	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/devtools/; \
-	    cp -rf uClibc $(TEMP_DIR)/uClibc-0.9.27
-	@cd $(TEMP_DIR); \
+	    cp -rf uClibc $(TEMP_DIR)/src_devtools/uClibc-0.9.27
+	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(UCLIBC_FILE) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
@@ -167,28 +177,28 @@ src_get_mxtool:
 	cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA)/intrinsics ; $(UPDATE);
 mxtool:	
 	@echo $@
-	@-rm -rf $(TEMP_DIR)/mxtool_tmp/
-	@mkdir -p $(TEMP_DIR)/mxtool_tmp
+	@-rm -rf $(TEMP_DIR)/src_devtools/mxtool_tmp/
+	@mkdir -p $(TEMP_DIR)/src_devtools/mxtool_tmp
 	@cd $(SOURCE_DIR)/$(CVS_SRC_SW_MEDIA); \
-	    cp -r build arch csim intrinsics $(TEMP_DIR)/mxtool_tmp
+	    cp -r build arch csim intrinsics $(TEMP_DIR)/src_devtools/mxtool_tmp
 	@# test subdir needs ene tools, so skip building it 
-	@cd $(TEMP_DIR)/mxtool_tmp/csim/device/test; mv Makefile Makefile.real
-	@cd $(TEMP_DIR)/mxtool_tmp/csim/device/test; echo "all:" > Makefile
+	@cd $(TEMP_DIR)/src_devtools/mxtool_tmp/csim/device/test; mv Makefile Makefile.real
+	@cd $(TEMP_DIR)/src_devtools/mxtool_tmp/csim/device/test; echo "all:" > Makefile
 	
-	@cd $(TEMP_DIR)/mxtool_tmp/build/build; \
+	@cd $(TEMP_DIR)/src_devtools/mxtool_tmp/build/build; \
 	    make BUILD_TARGET=TARGET_LINUX_X86 BOARD_TARGET=C2_CC289 \
 		TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)
-	@cd $(TEMP_DIR)/mxtool_tmp/arch; \
+	@cd $(TEMP_DIR)/src_devtools/mxtool_tmp/arch; \
             make BUILD_TARGET=TARGET_LINUX_X86 BOARD_TARGET=C2_CC289 \
             TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)
-	@cd $(TEMP_DIR)/mxtool_tmp/csim; \
+	@cd $(TEMP_DIR)/src_devtools/mxtool_tmp/csim; \
             make BUILD_TARGET=TARGET_LINUX_X86 BOARD_TARGET=C2_CC289 \
             TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)
-	@cd $(TEMP_DIR)/mxtool_tmp/intrinsics/mpu; \
+	@cd $(TEMP_DIR)/src_devtools/mxtool_tmp/intrinsics/mpu; \
             make BUILD_TARGET=TARGET_LINUX_X86 BOARD_TARGET=C2_CC289 \
             TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)
 	@mkdir -p $(TEMP_DIR)/devtools/tarballs/bin
-	@cd $(TEMP_DIR)/mxtool_tmp/intrinsics/mpu/mxtool; \
+	@cd $(TEMP_DIR)/src_devtools/mxtool_tmp/intrinsics/mpu/mxtool; \
             make BUILD_TARGET=TARGET_LINUX_X86 BOARD_TARGET=C2_CC289 \
             TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) \
             MXTOOL_INSTALL_DIR=$(TEMP_DIR)/devtools/tarballs \
@@ -207,12 +217,12 @@ src_get_devtools:  sdk_folders $(addprefix src_get_,$(devtools_list))
 src_package_devtools: sdk_folders $(devtools_list)
 	@echo start $@
 	@echo Creating $(PKG_NAME_SRC_DEVTOOLS)
-	@cd $(TEMP_DIR) ; tar cvfz $(PKG_NAME_SRC_DEVTOOLS) \
+	@cd $(TEMP_DIR) ; tar czvf $(PKG_NAME_SRC_DEVTOOLS) \
 		--exclude=CVS     \
 		--exclude=CVSROOT \
-		./devtools/tarballs ./devtools/buildtools.sh ./devtools/autobuild \
-		./devtools/uclibc.mk ./devtools/e2fsprogs.mk ./devtools/binutils.mk \
-		./devtools/libpng.mk ./devtools/Config.in ./devtools/binutils.mk.64 \
+		./devtools/tarballs          ./devtools/buildtools.sh    ./devtools/autobuild      \
+		./devtools/uclibc.mk         ./devtools/e2fsprogs.mk     ./devtools/binutils.mk    \
+		./devtools/libpng.mk         ./devtools/Config.in        ./devtools/binutils.mk.64 \
 		./devtools/gcc-uclibc-3.x.mk ./devtools/gcc-uclibc-3.x.mk.64
 	@echo $@ done
 src_install_devtools: sdk_folders 
@@ -254,6 +264,7 @@ bin_install_devtools: sdk_folders
 clean_devtools: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
 	rm -rf  $(TEMP_DIR)/devtools \
+		$(TEMP_DIR)/src_devtools \
 		$(TEST_ROOT_DIR)/build_devtools \
 		$(TEST_ROOT_DIR)/c2
 	@echo $@ done
