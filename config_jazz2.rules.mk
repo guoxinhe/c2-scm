@@ -311,6 +311,8 @@ src_config_sw_media: sdk_folders
 	@cd $(TEMP_DIR)/src_sw_media_2nd/$(CVS_SRC_SW_MEDIA)/media/daemon/msp/mspdaemon/; \
 	    sed -i '{s, "*".*,"$(SDK_VERSION_ALL)";,g}' mspVersion.h
 	@ cd $(TEMP_DIR)/src_sw_media_2nd/$(CVS_SRC_SW_MEDIA)/build/build/customer/build; \
+	    if [ ! -f globalconfig-C2-PVR-REAL-jazz2t ]; then  \
+	        ln -s globalconfig-C2-PVR-REAL-jazz2 globalconfig-C2-PVR-REAL-jazz2t ; fi\
 	    cp globalconfig-C2-PVR-REAL-$(SDK_TARGET_ARCH) globalconfig-C2-PVR
 	
 	@cd $(TEMP_DIR)/src_sw_media_2nd; \
@@ -1500,7 +1502,7 @@ help_xxx: sdk_folders mktest
 
 sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR) \
 	$(PKG_DIR)/Basic $(PKG_DIR)/Premium $(PKG_DIR)/Advanced \
-	$(PKG_DIR)/C2QAOnly $(PKG_DIR)/sdkmake \
+	$(PKG_DIR)/C2QAOnly $(PKG_DIR)/sdkmake $(PKG_DIR)/c2box $(PKG_DIR)/plugin\
 	$(TEST_ROOT_DIR)/usr  $(TEST_ROOT_DIR)/usr/bin
 
 .PHONY: sdk_folders ls mktest mc help c2

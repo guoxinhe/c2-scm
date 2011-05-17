@@ -31,6 +31,7 @@ SDK_VERSION_ALL			:= $(SDK_TARGET_ARCH)-sdk-$(TODAY)
 DEVTOOLS_AUTOBUILD_CONFIG 	:= autobuild_config_$(SDK_TARGET_ARCH)
 TEST_ROOT_DIR			:= $(TOP_DIR)/test_root
 SOURCE_DIR			:= $(TOP_DIR)/source
+SOURCE_LOCAL			:= $(TOP_DIR)/source_local
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
 
@@ -44,8 +45,11 @@ UPDATE                  := echo "cvs -q update -CAPd $(CHECKOUT_OPTION)"
 
 # build installation configures
 TOOLCHAIN_PATH			:= /c2/local/c2/daily-jazz2t/bin
-SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/$(SDK_TARGET_ARCH)-sdk/sw_media
-SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
+TOOLCHAIN_PATH			:= /c2/local/c2/110512/jazz2t-linux-2.6.23/bin
+#TOOLCHAIN_PATH			:= $(TEST_ROOT_DIR)/c2/daily/bin
+#TOOLCHAIN_PATH			:= $(shell readlink -f $(TOP_DIR)/c2/daily/bin)
+SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/sw_media_installed
+SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_JAZZ2T_RELEASE
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
@@ -74,8 +78,6 @@ UCLIBC_FILE             	:= $(TEMP_DIR)/devtools/tarballs/uClibc-0.9.27.tar.bz2
 DIRECTFB_FILE           	:= $(TEMP_DIR)/devtools/tarballs/DirectFB-1.4.5.tar.bz2
 PKG_NAME_SRC_DEVTOOLS   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-src.tar.gz
 PKG_NAME_BIN_DEVTOOLS		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-bin.tar.gz
-DEVTOOLS_BUILD_PATH		:= $(TEST_ROOT_DIR)/devtools_build_folder/devtools
-DEVTOOLS_DIR			:= $(TOP_DIR)/c2/daily
 
 # QT 4.7 package
 CVS_SRC_QT470			:= sw/Qt/qt-everywhere-opensource-src-4.7.0
@@ -98,9 +100,12 @@ PKG_NAME_DOC_SW_MEDIA		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-sw_media-doc.tar.gz
 PKG_NAME_SRC_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-src.tar.gz
 PKG_NAME_BIN_KERNEL		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-bin.tar.gz
 PKG_NAME_BIN_KERNEL_NAND	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-nand-bin.tar.gz
+PKG_NAME_SRC_KERNEL_2632	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-2.6.32-src.tar.gz
+PKG_NAME_BIN_KERNEL_2632	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-2.6.32-bin.tar.gz
+LINUXDIR_2632			:= linux-2.6.32
 
 # vivante package
-CVS_SRC_VIVANTE         	:= projects/sw/bsp/vivante/VIVANTE_GAL2D_Unified
+CVS_SRC_VIVANTE         	:= projects/sw/bsp/vivante/VIVANTE_GAL2D_Unified_20100203
 PKG_NAME_SRC_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-src.tar.gz
 PKG_NAME_BIN_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-bin.tar.gz
 PKG_NAME_TEST_SRC_VIVANTE	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-test-src.tar.gz
@@ -233,12 +238,13 @@ FACUDISK_FILES := 	updating.bmp	updatefail.bmp	updatesucc.bmp	logo.bmp	\
 			u-boot.rom	u-boot-factory.rom
 uboot_file		:= $(uboot_utilities)/u-boot-jazz2-autodetect.rom
 uboot_factory_file	:= $(uboot_utilities)/u-boot-jazz2-factory-autodetect.rom
-BIN_MKIMAGE  		:= $(TEST_ROOT_DIR)/$(uboot_utilities)/mkimage
-BIN_MKYAFFS2 		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
+BIN_MKIMAGE  		:= $(uboot_utilities)/mkimage
+BIN_MKYAFFS2 		:= sw/kernel/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
 BIN_MKJFFS2  		:= $(TOOLCHAIN_PATH)/mkfs.jffs2
 BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
 
-override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
+SYSPATH			:=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
+override PATH 		:= $(TOOLCHAIN_PATH):$(TEST_ROOT_DIR)/usr/bin:$(TEST_ROOT_DIR)/bin:$(SYSPATH)
 
 definedenvlist :=	\
    TODAY                     \
@@ -279,7 +285,6 @@ definedenvlist :=	\
 
 define makefile_test
     echo "   TODAY                     = "$(TODAY)
-    echo "   TOP_DIR                   = "$(TOP_DIR)
     echo "   SDK_KERNEL_VERSION        = "$(SDK_KERNEL_VERSION)
     echo "   SDK_GCC_VERSION           = "$(SDK_GCC_VERSION)
     echo "   SDK_QT_VERSION            = "$(SDK_QT_VERSION)
@@ -301,17 +306,22 @@ define makefile_test
     echo "   CHECKOUT                  = "$(CHECKOUT)
     echo "   UPDATE                    = "$(UPDATE)
     echo "   DEVTOOLS_AUTOBUILD_CONFIG = "$(DEVTOOLS_AUTOBUILD_CONFIG)
-    echo "   TEST_ROOT_DIR             = "$(TEST_ROOT_DIR)
-    echo "   SOURCE_DIR                = "$(SOURCE_DIR)
-    echo "   TEMP_DIR                  = "$(TEMP_DIR)
-    echo "   PKG_DIR                   = "$(PKG_DIR)
-    echo "   KERNEL_PATH               = "$(KERNEL_PATH)
-    echo "   TOOLCHAIN_PATH            = "$(TOOLCHAIN_PATH)
-    echo "   SW_MEDIA_PATH             = "$(SW_MEDIA_PATH)
     echo "   SW_MEDIA_INSTALL_DIR      = "$(SW_MEDIA_INSTALL_DIR)
-    echo "   QT_INSTALL_DIR            = "$(QT_INSTALL_DIR)
-    echo "   PATH                      = "$(PATH)
     echo "   INSTALL_DIR               = "$(INSTALL_DIR)
     echo "   PUBLISH_DIR               = "$(PUBLISH_DIR)
+
+    echo "   Folder settings"
+    echo "   TOP_DIR                   = "$(TOP_DIR)
+    echo "   SOURCE_DIR                = "$(SOURCE_DIR)
+    echo "   PKG_DIR                   = "$(PKG_DIR)
+    echo "   TEMP_DIR                  = "$(TEMP_DIR)
+    echo "   TEST_ROOT_DIR             = "$(TEST_ROOT_DIR)
+    echo "   Path settings"
+    echo "   PATH                      = "$(PATH)
+    echo "   TOOLCHAIN_PATH            = "$(TOOLCHAIN_PATH)
+    echo "   KERNEL_PATH               = "$(KERNEL_PATH)
+    echo "   SW_MEDIA_PATH             = "$(SW_MEDIA_PATH)
+    echo "   QT_INSTALL_DIR            = "$(QT_INSTALL_DIR)
+
 endef
 
