@@ -335,6 +335,9 @@ src_config_sw_media: sdk_folders
 	@cd $(TEMP_DIR)/src_sw_media_3rd; \
 	    rm -rf $(CVS_SRC_SW_MEDIA); \
 	    tar xfz $(PKG_NAME_SRC_SW_MEDIA_2ND)
+	@cd $(TEMP_DIR)/src_sw_media_3rd/$(CVS_SRC_SW_MEDIA)/build/build/customer/build; \
+	    if [ ! -f globalconfig-C2-PVR-REAL-jazz2t ]; then  \
+	        ln -s globalconfig-C2-PVR-REAL-jazz2 globalconfig-C2-PVR-REAL-jazz2t ; fi
 	@cd $(TEMP_DIR)/src_sw_media_3rd/$(CVS_SRC_SW_MEDIA); \
 	    rm -rf media/plugins/real; \
 	    cp build/build/customer/build/globalconfig-C2-PVR-$(SDK_TARGET_ARCH) \
@@ -1026,17 +1029,17 @@ src_build_c2box: sdk_folders
 		SW_MEDIA_PATH=$(SW_MEDIA_PATH) \
 		ENABLE_NEW_APP=TRUE make install; \
 		rm -rf ../work; \
-		cp -a work ../
-	cd $(TEST_ROOT_DIR)/build_c2box;cp -f $(TEST_ROOT_DIR)/build_hdmi/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib
+		cp -a work ../ ;
+	@echo $@ done
+bin_package_c2box: sdk_folders
+	@-rm -rf $(PKG_NAME_C2BOX_DEMO)
+	@echo "Creating package $(PKG_NAME_C2BOX_DEMO)"
+	#cd $(TEST_ROOT_DIR)/build_c2box;cp -f $(TEST_ROOT_DIR)/build_hdmi/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib
 	cd $(TEST_ROOT_DIR)/build_c2box;tar xfz $(PKG_NAME_BIN_VIVANTE) ;\
 		cp -f build/sdk/drivers/libGAL.so           work/lib/ ;\
 		cp -f build/sdk/drivers/galcore.ko          work/lib/ ;\
 		cp -f build/sdk/drivers/libdirectfb_gal.so  work/lib/ ;\
 	
-	@echo $@ done
-bin_package_c2box: sdk_folders
-	@-rm -rf $(PKG_NAME_C2BOX_DEMO)
-	@echo "Creating package $(PKG_NAME_C2BOX_DEMO)"
 	@cd $(TEST_ROOT_DIR)/build_c2box; \
 		tar cfz $(PKG_NAME_C2BOX_DEMO) work	
 	
