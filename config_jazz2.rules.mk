@@ -641,7 +641,7 @@ mission_targets += $(mission_kernela2632)
 .PHONY: $(mission_kernela2632)
 src_get_kernela2632:  sdk_folders
 	@echo start $@
-	cd $(SOURCE_LOCAL); if [ ! -d kernel ]; then git clone hguo@git.bj.c2micro.com:/mentor-mirror/build/kernel.git; fi
+	cd $(SOURCE_LOCAL); if [ ! -d kernel ]; then git clone $(USER)@git.bj.c2micro.com:/mentor-mirror/build/kernel.git; fi
 	cd $(SOURCE_LOCAL)/kernel; git checkout devel;  git pull origin devel
 	@echo $@ done
 src_package_kernela2632: sdk_folders 
