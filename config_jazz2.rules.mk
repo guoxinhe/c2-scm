@@ -302,9 +302,11 @@ src_install_sw_media: sdk_folders
 	@echo Extract $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	cd $(TEMP_DIR)/src_sw_media_2nd ; \
 	    tar xzf $(PKG_NAME_SRC_SW_MEDIA_ALL)
-	@ cd $(TEMP_DIR)/src_sw_media_2nd/$(CVS_SRC_SW_MEDIA)/build/build/customer/build; \
+	@cd $(TEMP_DIR)/src_sw_media_2nd/$(CVS_SRC_SW_MEDIA)/build/build/customer/build; \
 	    if [ ! -f globalconfig-C2-PVR-REAL-jazz2t ]; then  \
-	        ln -s globalconfig-C2-PVR-REAL-jazz2 globalconfig-C2-PVR-REAL-jazz2t ; fi
+	        ln -s globalconfig-C2-PVR-REAL-jazz2 globalconfig-C2-PVR-REAL-jazz2t ; fi; \
+	    if [ ! -f globalconfig-C2-PVR-jazz2t ]; then  \
+	        ln -s globalconfig-C2-PVR-jazz2 globalconfig-C2-PVR-jazz2t ; fi;
 	@echo $@ done
 src_config_sw_media: sdk_folders
 	@echo start $@
@@ -335,9 +337,6 @@ src_config_sw_media: sdk_folders
 	@cd $(TEMP_DIR)/src_sw_media_3rd; \
 	    rm -rf $(CVS_SRC_SW_MEDIA); \
 	    tar xfz $(PKG_NAME_SRC_SW_MEDIA_2ND)
-	@cd $(TEMP_DIR)/src_sw_media_3rd/$(CVS_SRC_SW_MEDIA)/build/build/customer/build; \
-	    if [ ! -f globalconfig-C2-PVR-REAL-jazz2t ]; then  \
-	        ln -s globalconfig-C2-PVR-REAL-jazz2 globalconfig-C2-PVR-REAL-jazz2t ; fi
 	@cd $(TEMP_DIR)/src_sw_media_3rd/$(CVS_SRC_SW_MEDIA); \
 	    rm -rf media/plugins/real; \
 	    cp build/build/customer/build/globalconfig-C2-PVR-$(SDK_TARGET_ARCH) \
