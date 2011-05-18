@@ -1033,7 +1033,10 @@ src_build_c2box: sdk_folders
 bin_package_c2box: sdk_folders
 	@-rm -rf $(PKG_NAME_C2BOX_DEMO)
 	@echo "Creating package $(PKG_NAME_C2BOX_DEMO)"
-	#cd $(TEST_ROOT_DIR)/build_c2box;cp -f $(TEST_ROOT_DIR)/build_hdmi/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib
+	cd $(TEST_ROOT_DIR)/build_c2box; \
+	if [ -f $(TEST_ROOT_DIR)/build_hdmi/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko ]; then \
+		cp -f $(TEST_ROOT_DIR)/build_hdmi/jazz2hdmi/jazz2hdmi_drv/hdmi_jazz2.ko work/lib; \
+	fi
 	cd $(TEST_ROOT_DIR)/build_c2box;tar xfz $(PKG_NAME_BIN_VIVANTE) ;\
 		cp -f build/sdk/drivers/libGAL.so           work/lib/ ;\
 		cp -f build/sdk/drivers/galcore.ko          work/lib/ ;\
