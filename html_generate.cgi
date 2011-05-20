@@ -43,6 +43,15 @@ sub check_for_results_string {
   return ($n_warning, $n_error);
 }
 
+sub print_project_build_info {
+    print <<HTML;
+  <b><font color=blue  >Project  : </font></b> $ENV{SDKENV_Project}<br>
+  <b><font color=blue  >Server   : </font></b> $ENV{SDKENV_Server}<br>
+  <b><font color=blue  >Script   : </font></b> $ENV{SDKENV_Script}<br>
+  <b><font color=blue  >Overview : </font></b> $ENV{SDKENV_Overview}<br>
+  <b><font color=blue  >Setting  : </font></b> $ENV{SDKENV_Setting}<br>
+HTML
+}
 sub print_top_results {
 
   my $results_dir; 
@@ -149,5 +158,6 @@ print start_html(-title=>"C2 $ENV{SDK_TARGET_ARCH} SDK Daily Build Results",
 print h1("C2 $ENV{SDK_TARGET_ARCH} SDK Daily Build Results");
 
 print_top_results();
+print_project_build_info();
 
 print end_html;

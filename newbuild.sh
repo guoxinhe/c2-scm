@@ -232,7 +232,7 @@ list_fail_url_tail()
                 ;;
             *)
                 echo $m fail :
-                echo "    " "${WWW_HTTPHEAD}://$WWW_SERVER/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
+                echo "    " "${WWW_HTTPHEAD}://$WWW_SERVER/${USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
                 ;;
             esac
         fi
@@ -336,19 +336,19 @@ export SDK_RESULTS_DIR=$DIST_DIR/
 export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{print $2}'`
 [ $SDK_CVS_USER ] || export SDK_CVS_USER=`whoami`
 
-WWW_ROOT=/var/www/html/hguo
+WWW_ROOT=/var/www/html/$USER
 WWW_SERVER=${THISIP}
 WWW_HTTPHEAD=http
-WWW_TITLE="${SDK_TARGET_ARCH}-${TREE_PREFIX} SDK android-gcc-kernel daily Build Results"
+WWW_TITLE="-${TREE_PREFIX} SDK android-gcc-kernel daily Build Results"
 HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_gcc_kernela2632_sdk_daily.html
 PKG_DIR=`make PKG_DIR`
 SSH_SERVER=10.16.13.200
-SSH_SCPDIR=/home/$SDK_CVS_USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
+SSH_SCPDIR=/home/$USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
 mkdir -p ${WWW_ROOT}
 
 CONFIG_BUILD_PUBLISH=
-CONFIG_BUILD_PUBLISHLOG=
-CONFIG_BUILD_PUBLISHHTML=
+CONFIG_BUILD_PUBLISHLOG=1
+CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=
 
 addto_send hguo@c2micro.com
@@ -358,8 +358,8 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
     echo "$mail_title"
     echo ""
     echo "Get build package at:       ${SSH_SERVER}:$SSH_SCPDIR/"
-    echo "Click here to watch report: ${WWW_HTTPHEAD}://${WWW_SERVER}/${SDK_CVS_USER}/$HTML_REPORT"
-    echo "Click here to watch logs:   ${WWW_HTTPHEAD}://${WWW_SERVER}/${SDK_CVS_USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
+    echo "Click here to watch report: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/$HTML_REPORT"
+    echo "Click here to watch logs:   ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
     list_fail_url_tail
     echo ""
     [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
@@ -372,22 +372,27 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
     echo "You receive this email because you are in the relative software maintainer list"
     echo "For more other request about this email, please send contact with me"
     echo ""
-    echo "For more reports: ${WWW_HTTPHEAD}://${WWW_SERVER}/${SDK_CVS_USER}/allinone.htm"
-    echo "    or https://access.c2micro.com/~${SDK_CVS_USER}/allinone.htm"
+    echo "For more reports: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/allinone.htm"
+    echo "    or https://access.c2micro.com/~${USER}/allinone.htm"
     echo ""
     echo "Regards,"
-    echo "`whoami`@`hostname`"
-    echo "$THISIP":"`readlink -f $0`"
+    echo "`whoami`,`hostname`($THISIP)"
+    echo "`readlink -f $0`"
     date
 ) >$log/email.log 2>&1
 
 #    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
-#    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$SDK_CVS_USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
+#    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
+export SDKENV_Project="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
+export SDKENV_Overview="No overview yet"
+export SDKENV_Setting="<pre>`make mktest`</pre>"
+export SDKENV_Server="`whoami` on $THISIP(`hostname`)"
+export SDKENV_Script="`readlink -f $0`"
 ./html_generate.cgi  >$DIST_DIR/$HTML_REPORT
 #fix: // in url like:  href='https://access.c2micro.com/jazz2_msp_dev_logs//100829.log
 sed -i 's:_logs//1:_logs/1:g' $DIST_DIR/$HTML_REPORT
-sed -i "s:SDK Daily Build Results:${WWW_TITLE}:g" $DIST_DIR/$HTML_REPORT
-sed -i "s,https://access.c2micro.com/~${SDK_CVS_USER}/,${WWW_HTTPHEAD}://${WWW_SERVER}/${SDK_CVS_USER}/,g" $DIST_DIR/$HTML_REPORT
+sed -i "s: SDK Daily Build Results:${WWW_TITLE}:g" $DIST_DIR/$HTML_REPORT
+sed -i "s,https://access.c2micro.com/~${USER}/,${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/,g" $DIST_DIR/$HTML_REPORT
 
 scp_upload_logs()
 {
@@ -404,8 +409,8 @@ if [ $CONFIG_BUILD_PUBLISHLOG ]; then
 fi
 
 if [ $CONFIG_BUILD_PUBLISH ]; then
-    ssh ${SDK_CVS_USER}@${SSH_SERVER}     "mkdir -p $SSH_SCPDIR"
-    scp -r $PKG_DIR/* ${SDK_CVS_USER}@${SSH_SERVER}:$SSH_SCPDIR/
+    ssh ${USER}@${SSH_SERVER}     "mkdir -p $SSH_SCPDIR"
+    scp -r $PKG_DIR/* ${USER}@${SSH_SERVER}:$SSH_SCPDIR/
 fi
 
 if [ $CONFIG_BUILD_PUBLISHHTML ]; then
