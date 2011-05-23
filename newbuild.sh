@@ -14,33 +14,16 @@ cd `pwd`
 [ -f newbuild.sh       ] || ln -s $fullfod/newbuild.sh           newbuild.sh
 [ -f html_generate.cgi ] || ln -s $fullfod/html_generate.cgi     html_generate.cgi
 
-modules="
-xxx
-"
+modules="xxx"
 modules_jump="
 devtools 
-sw_media 
-qt470 
-kernela2632
-kernel 
-kernelnand 
-uboot 
-vivante 
-hdmi 
-c2box 
-jtag 
-diag 
-c2_goodies 
-facudisk 
-usrudisk
-xxx
-"
-
-steps="
-help
-"
+kernela2632 kernel kernelnand vivante hdmi
+uboot jtag diag c2_goodies 
+sw_media qt470 c2box 
+facudisk usrudisk
+xxx"
+steps="help"
 steps_jump="
-clean
 src_get
 src_package
 src_install
@@ -50,6 +33,41 @@ bin_package
 bin_install
 "
 
+DATE=`date +%y%m%d`
+
+#wor folder settings
+PKG_DIR=`make PKG_DIR`
+DIST_DIR=`pwd`/log
+log=${DIST_DIR}/$DATE.log
+indexlog=${DIST_DIR}/$DATE.txt
+mkdir -p  ${DIST_DIR}/$DATE ${DIST_DIR}/$DATE.log
+[ -h $DIST_DIR/l ] && rm $DIST_DIR/l
+[ -h $DIST_DIR/r ] && rm $DIST_DIR/r
+[ -h $DIST_DIR/i ] && rm $DIST_DIR/i
+ln -s $DIST_DIR/$DATE      $DIST_DIR/i
+ln -s $DIST_DIR/$DATE.log  $DIST_DIR/l
+ln -s $DIST_DIR/$DATE.txt  $DIST_DIR/r
+make  mktest >$log/mktest.log
+make  help   >$log/help.log
+make  sdk_folders
+make  backup
+
+#these 4 exports are used by html_generate.cgi
+export SDK_TARGET_ARCH=`make SDK_TARGET_ARCH`
+export TREE_PREFIX=dev
+export SDK_RESULTS_DIR=$DIST_DIR/
+export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{print $2}'`
+[ $SDK_CVS_USER ] || export SDK_CVS_USER=`whoami`
+
+#web server folder settings
+WWW_SERVER=${THISIP}
+WWW_HTTPHEAD=http
+WWW_ROOT=/var/www/html/$USER
+WWW_LOGDIR=${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
+WWW_TITLE="-${TREE_PREFIX} SDK android-gcc-kernel daily Build Results"
+HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_gcc_kernela2632_sdk_daily.html
+SSH_SERVER=10.16.13.200
+SSH_SCPDIR=/home/$USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
 ##  cron debug message code, these setting does not pass to Makefile
 #----------------------------------------------------------------------
 #export MISSION=`echo $0 | sed 's:.*/\(.*\):\1:'`
@@ -80,6 +98,13 @@ update_indexlog()
     else
         echo "$1" >>$2
         recho "debug: $2 not find $m, appended: $1"
+    fi
+
+    #create blame system
+    if [ "$x" != "0" ]; then
+        mkdir -p ${DIST_DIR}/$DATE/blame
+        BLAME=${DIST_DIR}/$DATE/blame/$DATE-$m-${SDK_TARGET_ARCH}-${TREE_PREFIX}.log
+        [ -f $BLAME ] || ln -s ${WWW_ROOT}/${WWW_LOGDIR}/$l  $BLAME;
     fi
 }
 
@@ -156,11 +181,11 @@ addto_reportedfail()
 recho_time_consumed()
 {
     tm_b=`date +%s`
-    tm_c=$(($tm_b-$1))
-    tm_h=$(($tm_c/3600))
-    tm_m=$(($tm_c/60))
-    tm_m=$(($tm_m%60))
-    tm_s=$(($tm_c%60))
+    tm_c=$((tm_b-$1))
+    tm_h=$((tm_c/3600))
+    tm_m=$((tm_c/60))
+    tm_m=$((tm_m%60))
+    tm_s=$((tm_c%60))
     shift
     echo "$@" "$tm_c seconds / $tm_h:$tm_m:$tm_s consumed."
 }
@@ -232,7 +257,7 @@ list_fail_url_tail()
                 ;;
             *)
                 echo $m fail :
-                echo "    " "${WWW_HTTPHEAD}://$WWW_SERVER/${USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log/$l"
+                echo "    " "${WWW_HTTPHEAD}://$WWW_SERVER/${USER}/${WWW_LOGDIR}/$l"
                 ;;
             esac
         fi
@@ -257,24 +282,6 @@ list_fail_url_tail()
     export nr_failurl
 }
 
-if [ "$1" == "init" ]; then
-  shift
-fi
-DATE=`date +%y%m%d`
-DIST_DIR=`pwd`/log
-log=${DIST_DIR}/$DATE.log
-indexlog=${DIST_DIR}/$DATE.txt
-mkdir -p  ${DIST_DIR}/$DATE ${DIST_DIR}/$DATE.log
-[ -h $DIST_DIR/l ] && rm $DIST_DIR/l
-[ -h $DIST_DIR/r ] && rm $DIST_DIR/r
-[ -h $DIST_DIR/i ] && rm $DIST_DIR/i
-ln -s $DIST_DIR/$DATE      $DIST_DIR/i
-ln -s $DIST_DIR/$DATE.log  $DIST_DIR/l
-ln -s $DIST_DIR/$DATE.txt  $DIST_DIR/r
-make  mktest >$log/mktest.log
-make  help   >$log/help.log
-make  sdk_folders
-make  backup
 nr_totalerror=0
 nr_totalmodule=0
 tm_total=`date +%s`
@@ -329,29 +336,13 @@ build_modules_x_steps
 
 recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerror error(s). "
 ## --------------------------- report part ----------------------------
-#these 4 exports are used by html_generate.cgi
-export SDK_TARGET_ARCH=`make SDK_TARGET_ARCH`
-export TREE_PREFIX=dev
-export SDK_RESULTS_DIR=$DIST_DIR/
-export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{print $2}'`
-[ $SDK_CVS_USER ] || export SDK_CVS_USER=`whoami`
-
-WWW_ROOT=/var/www/html/$USER
-WWW_SERVER=${THISIP}
-WWW_HTTPHEAD=http
-WWW_TITLE="-${TREE_PREFIX} SDK android-gcc-kernel daily Build Results"
-HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_gcc_kernela2632_sdk_daily.html
-PKG_DIR=`make PKG_DIR`
-SSH_SERVER=10.16.13.200
-SSH_SCPDIR=/home/$USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
-mkdir -p ${WWW_ROOT}
 
 CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=
 
-addto_send hguo@c2micro.com
+addto_send ruishengfu@c2micro.com hguo@c2micro.com
 checkadd_fail_send_list
 mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_totalerror error(s)."
 (
@@ -359,7 +350,7 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
     echo ""
     echo "Get build package at:       ${SSH_SERVER}:$SSH_SCPDIR/"
     echo "Click here to watch report: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/$HTML_REPORT"
-    echo "Click here to watch logs:   ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log"
+    echo "Click here to watch logs:   ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/${WWW_LOGDIR}"
     list_fail_url_tail
     echo ""
     [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
@@ -374,6 +365,7 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
     echo ""
     echo "For more reports: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/allinone.htm"
     echo "    or https://access.c2micro.com/~${USER}/allinone.htm"
+    echo "Check blame history: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/blame"
     echo ""
     echo "Regards,"
     echo "`whoami`,`hostname`($THISIP)"
@@ -383,6 +375,7 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
 
 #    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
 #    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
+export SDKENV_Title="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
 export SDKENV_Project="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
 export SDKENV_Overview="No overview yet"
 export SDKENV_Setting="<pre>`make mktest`</pre>"
@@ -396,13 +389,19 @@ sed -i "s,https://access.c2micro.com/~${USER}/,${WWW_HTTPHEAD}://${WWW_SERVER}/$
 
 scp_upload_logs()
 {
-    SCP_TARGET=${WWW_ROOT}/${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
+    SCP_TARGET=${WWW_ROOT}/${WWW_LOGDIR}
     mkdir -p $SCP_TARGET
     cp $log/* $SCP_TARGET/
     pushd $SCP_TARGET;  
     unix2dos * ;
     popd
+
+    #copy these links to web server blame folder
+    mkdir -p ${WWW_ROOT}/blame
+    cp -a ${DIST_DIR}/$DATE/blame/* ${WWW_ROOT}/blame/
 }
+
+mkdir -p ${WWW_ROOT}
 
 if [ $CONFIG_BUILD_PUBLISHLOG ]; then
     scp_upload_logs
@@ -415,7 +414,6 @@ fi
 
 if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     cp $DIST_DIR/$HTML_REPORT  ${WWW_ROOT}/
-    cp $DIST_DIR/$HTML_REPORT  ${WWW_ROOT}/build
 fi
 
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
