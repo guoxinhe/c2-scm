@@ -152,10 +152,15 @@ sub print_top_results {
 }
 
 print header;
+if (defined($ENV{SDKENV_Title})) {
+    print start_html(-title=>"$ENV{SDKENV_Title}", -style=>{'code'=>$CSS});
+    print h1("$ENV{SDKENV_Title}");
+}else{
 print start_html(-title=>"C2 $ENV{SDK_TARGET_ARCH} SDK Daily Build Results",
                  -style=>{'code'=>$CSS});
 
 print h1("C2 $ENV{SDK_TARGET_ARCH} SDK Daily Build Results");
+}
 
 print_top_results();
 print_project_build_info();
