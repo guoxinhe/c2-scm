@@ -44,6 +44,7 @@ sub check_for_results_string {
 }
 
 sub print_project_build_info {
+    print "  <b><font color=blue  >Done time: </font></b> " . localtime() . " (gmtime: " . gmtime(). ")<br>\n";
     print <<HTML;
   <b><font color=blue  >Project  : </font></b> $ENV{SDKENV_Project}<br>
   <b><font color=blue  >Server   : </font></b> $ENV{SDKENV_Server}<br>
