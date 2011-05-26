@@ -37,35 +37,38 @@ DATE=`date +%y%m%d`
 
 #wor folder settings
 PKG_DIR=`make PKG_DIR`
-DIST_DIR=`pwd`/log
+DIST_DIR=`pwd`/build_result
 log=${DIST_DIR}/$DATE.log
 indexlog=${DIST_DIR}/$DATE.txt
-mkdir -p  ${DIST_DIR}/$DATE ${DIST_DIR}/$DATE.log
-[ -h $DIST_DIR/l ] && rm $DIST_DIR/l
-[ -h $DIST_DIR/r ] && rm $DIST_DIR/r
-[ -h $DIST_DIR/i ] && rm $DIST_DIR/i
-ln -s $DIST_DIR/$DATE      $DIST_DIR/i
-ln -s $DIST_DIR/$DATE.log  $DIST_DIR/l
-ln -s $DIST_DIR/$DATE.txt  $DIST_DIR/r
+mkdir -p ${DIST_DIR}/$DATE ${DIST_DIR}/$DATE.log
+ln -s -f $DIST_DIR            log
+ln -s -f $DIST_DIR/$DATE      $DIST_DIR/i
+ln -s -f $DIST_DIR/$DATE.log  $DIST_DIR/l
+ln -s -f $DIST_DIR/$DATE.txt  $DIST_DIR/r
 make  mktest >$log/mktest.log
 make  help   >$log/help.log
 make  sdk_folders
 make  backup
 
-#these 4 exports are used by html_generate.cgi
+#these exports are used by html_generate.cgi
 export SDK_TARGET_ARCH=`make SDK_TARGET_ARCH`
 export TREE_PREFIX=dev
 export SDK_RESULTS_DIR=$DIST_DIR/
 export SDK_CVS_USER=`echo $CVSROOT | sed 's/:/ /g' | sed 's/\@/ /g' | awk '{print $2}'`
-[ $SDK_CVS_USER ] || export SDK_CVS_USER=`whoami`
+export SDKENV_Title="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
+export SDKENV_Project="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
+export SDKENV_Overview="No overview yet"
+export SDKENV_Setting="<pre>`make mktest`</pre>"
+export SDKENV_Server="`whoami` on $THISIP(`hostname`)"
+export SDKENV_Script="`readlink -f $0`"
 
 #web server folder settings
 WWW_SERVER=${THISIP}
 WWW_HTTPHEAD=http
 WWW_ROOT=/var/www/html/$USER
 WWW_LOGDIR=${SDK_TARGET_ARCH}_${TREE_PREFIX}_logs/$DATE.log
-WWW_TITLE="-${TREE_PREFIX} SDK android-gcc-kernel daily Build Results"
-HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_gcc_kernela2632_sdk_daily.html
+WWW_TITLE="-${TREE_PREFIX} SDK daily Build Results"
+HTML_REPORT=${SDK_TARGET_ARCH}_${TREE_PREFIX}_sdk_daily.html
 SSH_SERVER=10.16.13.200
 SSH_SCPDIR=/home/$USER/sdkdailybuild/$SDK_TARGET_ARCH/$TREE_PREFIX/weekly/$DATE
 ##  cron debug message code, these setting does not pass to Makefile
@@ -100,11 +103,11 @@ update_indexlog()
         recho "debug: $2 not find $m, appended: $1"
     fi
 
-    #create blame system
+    #create broken log system
     if [ "$x" != "0" ]; then
-        mkdir -p ${DIST_DIR}/$DATE/blame
-        BLAME=${DIST_DIR}/$DATE/blame/$DATE-$m-${SDK_TARGET_ARCH}-${TREE_PREFIX}.log
-        [ -f $BLAME ] || ln -s ${WWW_ROOT}/${WWW_LOGDIR}/$l  $BLAME;
+        mkdir -p ${DIST_DIR}/$DATE/blog
+        BLOG=${DIST_DIR}/$DATE/blog/$DATE-${SDK_TARGET_ARCH}-${TREE_PREFIX}-$m.log
+        [ -f $BLOG ] || ln -s $f  $BLOG;
     fi
 }
 
@@ -338,8 +341,8 @@ recho_time_consumed $tm_total "Build all $nr_totalmodule module(s) $nr_totalerro
 ## --------------------------- report part ----------------------------
 
 CONFIG_BUILD_PUBLISH=
-CONFIG_BUILD_PUBLISHLOG=1
-CONFIG_BUILD_PUBLISHHTML=1
+CONFIG_BUILD_PUBLISHLOG=
+CONFIG_BUILD_PUBLISHHTML=
 CONFIG_BUILD_PUBLISHEMAIL=
 
 addto_send ruishengfu@c2micro.com hguo@c2micro.com
@@ -365,7 +368,7 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
     echo ""
     echo "For more reports: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/allinone.htm"
     echo "    or https://access.c2micro.com/~${USER}/allinone.htm"
-    echo "Check blame history: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/blame"
+    echo "Check broken log history: ${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/blog"
     echo ""
     echo "Regards,"
     echo "`whoami`,`hostname`($THISIP)"
@@ -375,17 +378,11 @@ mail_title="`make SDK_TARGET_ARCH` Build all $nr_totalmodule module(s) $nr_total
 
 #    #the cgi need 4 variable pre-defined. it need a tail '/' in SDK_RESULTS_DIR, otherwise, we need fix the dev_logs//100829.log
 #    #SDK_RESULTS_DIR=$DIST_DIR/ SDK_CVS_USER=$USER SDK_TARGET_ARCH=$SDK_TARGET_ARCH TREE_PREFIX=dev
-export SDKENV_Title="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
-export SDKENV_Project="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
-export SDKENV_Overview="No overview yet"
-export SDKENV_Setting="<pre>`make mktest`</pre>"
-export SDKENV_Server="`whoami` on $THISIP(`hostname`)"
-export SDKENV_Script="`readlink -f $0`"
 ./html_generate.cgi  >$DIST_DIR/$HTML_REPORT
 #fix: // in url like:  href='https://access.c2micro.com/jazz2_msp_dev_logs//100829.log
 sed -i 's:_logs//1:_logs/1:g' $DIST_DIR/$HTML_REPORT
 sed -i "s: SDK Daily Build Results:${WWW_TITLE}:g" $DIST_DIR/$HTML_REPORT
-sed -i "s,https://access.c2micro.com/~${USER}/,${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/,g" $DIST_DIR/$HTML_REPORT
+sed -i "s,https://access.c2micro.com/~${SDK_CVS_USER}/,${WWW_HTTPHEAD}://${WWW_SERVER}/${USER}/,g" $DIST_DIR/$HTML_REPORT
 
 scp_upload_logs()
 {
@@ -396,9 +393,9 @@ scp_upload_logs()
     unix2dos * ;
     popd
 
-    #copy these links to web server blame folder
-    mkdir -p ${WWW_ROOT}/blame
-    cp -a ${DIST_DIR}/$DATE/blame/* ${WWW_ROOT}/blame/
+    #copy these links to web server blog folder
+    mkdir -p ${WWW_ROOT}/blog
+    cp -a ${DIST_DIR}/$DATE/blog/* ${WWW_ROOT}/blog/
 }
 
 mkdir -p ${WWW_ROOT}
