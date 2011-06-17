@@ -715,17 +715,18 @@ mission_targets += $(mission_uboot)
 .PHONY: $(mission_uboot)
 src_get_uboot:  sdk_folders
 	@echo start $@
-	@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_UBOOT)
+	#@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_UBOOT)
 	@echo $@ done
 src_package_uboot: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_UBOOT)
 	@echo "Creating package $(PKG_NAME_SRC_UBOOT)"
-	@cd $(SOURCE_DIR); \
+	@cd $(SOURCE_GITDIR); \
 	    tar cfz $(PKG_NAME_SRC_UBOOT) \
 	        --exclude=CVS \
 	        --exclude=CVSROOT \
-	        $(CVS_SRC_UBOOT)
+	        --exclude=.git \
+	        $(GIT_SRC_UBOOT)
 	@echo $@ done
 src_install_uboot: sdk_folders
 	@echo start $@
@@ -740,15 +741,15 @@ src_config_uboot: sdk_folders
 	@echo $@ done
 src_build_uboot: sdk_folders
 	@echo start $@
-	@cd $(TEST_ROOT_DIR)/build_uboot/$(CVS_SRC_UBOOT); \
-		./build.sh jazz2; \
+	@cd $(TEST_ROOT_DIR)/build_uboot/$(GIT_SRC_UBOOT); \
+		./build.sh $(SDK_TARGET_ARCH); \
 		cp $(uboot_utilities)/mkimage  $(TEST_ROOT_DIR)/usr/bin/;
 	@echo $@ done
 bin_package_uboot: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_BIN_UBOOT)
 	@echo "Creating package $(PKG_NAME_BIN_UBOOT)"
-	@cd $(TEST_ROOT_DIR)/build_uboot/$(CVS_SRC_UBOOT); \
+	@cd $(TEST_ROOT_DIR)/build_uboot/$(GIT_SRC_UBOOT); \
 		tar cfz $(PKG_NAME_BIN_UBOOT) $(uboot_utilities)
 	@echo $@ done
 bin_install_uboot: sdk_folders

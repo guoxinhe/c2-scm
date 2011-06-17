@@ -31,6 +31,7 @@ SDK_VERSION_ALL			:= $(SDK_TARGET_ARCH)-sdk-$(TODAY)
 DEVTOOLS_AUTOBUILD_CONFIG 	:= autobuild_config_$(SDK_TARGET_ARCH)
 TEST_ROOT_DIR			:= $(TOP_DIR)/test_root
 SOURCE_DIR			:= $(TOP_DIR)/source
+SOURCE_GITDIR			:= $(TOP_DIR)/c2sdk_source
 SOURCE_LOCAL			:= $(TOP_DIR)/source_local
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
@@ -165,6 +166,7 @@ uboot_utilities			:=u-boot-utilities
 UBOOT_BOARDTYPE         	:= jazz2evb_config
 UBOOT_MAKECONFIG        	:= MPUCLK=400 MEMCLK=400 DDR_DEVICE=MT47H64M16-25E
 CVS_SRC_UBOOT			:= sw/prom/u-boot-1.3.0
+GIT_SRC_UBOOT			:= u-boot-1.3.0
 PKG_NAME_SRC_UBOOT		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-src.tar.gz
 PKG_NAME_BIN_UBOOT		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-bin.tar.gz
 
