@@ -1,0 +1,34 @@
+
+
+
+
+
+
+the build step include
+    checkout src code   xxx
+    package src code to xxx.src.tar.gz
+    install src code to test_root/build_xxx
+    config
+    build, install
+    package build binaries for release
+    packaged binary install
+these step will create:
+    1. xxx.src.tar.gz
+    2. xxx.bin.tar.gz
+    3. usr/ install
+    4. temp/ build folder    
+    5. build log
+    6. build progress stage report
+after the project build
+    1. parse build result, generate web report
+    2. generate email report
+    3. upload logs
+    4. upload package
+    5. upload web report
+    6. send email
+
+the environment setup
+    1. build script will set a PATH environment for Makefiles
+    2. Makefile's configure part will setup the arch, etc.
+
+    
