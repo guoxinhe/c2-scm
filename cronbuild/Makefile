@@ -1,11 +1,13 @@
 # put all global configures here
 #-------------------------------------------------------------
-TODAY    := $(shell date +%y%m%d)
-TOP      := $(shell /bin/pwd)
-TOPPKG   := $(TOP)/package-$(TODAY)
-TOPTEST  := $(TOP)/test_root
-TOPUSR   := $(TOP)/test_usr
-TOPSRC   := $(TOP)/source
+TODAY                   	:= $(shell date +%y%m%d)
+TOP_DIR				:= $(shell /bin/pwd)
+SDK_TARGET_ARCH			:= jazz2
+SDK_VERSION_ALL			:= $(SDK_TARGET_ARCH)-sdk-$(TODAY)
+PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
+TEST_ROOT_DIR			:= $(TOP_DIR)/test_root
+SOURCE_DIR			:= $(TOP_DIR)/source
+TEMP_DIR			:= $(TOP_DIR)/temp
 
 MYINCFILE=generic.config.mk
 ifneq (,$(realpath $(MYINCFILE)))
@@ -42,26 +44,26 @@ mission_modules += mission_xxx
 mission_targets += $(mission_xxx)
 .PHONY: $(mission_xxx) clean_xxx help_xxx test_xxx
 src_get_xxx:     sdk_folders
-	mkdir -p $(TOPTEST)/src_xxx/xxx
+	mkdir -p $(TEST_ROOT_DIR)/src_xxx/xxx
 	@echo $@ done
 src_package_xxx: sdk_folders
-	touch $(TOPPKG)/xxx.src.tar.gz
+	touch $(PKG_DIR)/xxx.src.tar.gz
 	@echo $@ done
 src_install_xxx: sdk_folders
-	mkdir -p $(TOPTEST)/build_xxx/xxx
-	touch $(TOPTEST)/build_xxx/xxx/xxx.c
+	mkdir -p $(TEST_ROOT_DIR)/build_xxx/xxx
+	touch $(TEST_ROOT_DIR)/build_xxx/xxx/xxx.c
 	@echo $@ done
 src_config_xxx:  sdk_folders
 	@echo $@ done
 src_build_xxx:   sdk_folders
-	touch $(TOPTEST)/build_xxx/xxx/xxx.bin
+	touch $(TEST_ROOT_DIR)/build_xxx/xxx/xxx.bin
 	@echo $@ done
 bin_package_xxx: sdk_folders 
-	touch $(TOPPKG)/xxx.bin.tar.gz
+	touch $(PKG_DIR)/xxx.bin.tar.gz
 	@echo $@ done
 bin_install_xxx: sdk_folders
-	mkdir -p $(TOPUSR)/xxx/bin
-	touch $(TOPUSR)/xxx/bin/xxx
+	mkdir -p $(TEST_ROOT_DIR)/usr/bin
+	touch $(TEST_ROOT_DIR)/usr/bin/xxx
 	@echo $@ done
 clean_xxx: 
 	@echo $@ done
@@ -74,13 +76,13 @@ define safelink
     if test -h $2 ; then rm $2;echo old $2 removed;fi
     ln -s $1 $2
 endef
-sdkautodirs :=  $(TOPPKG) $(TOPTEST) $(TOPUSR) \
+sdkautodirs :=  $(PKG_DIR) $(TEST_ROOT_DIR)/usr/bin
 
 .PHONY: sdk_folders lsmod lsop lstest lsall help
 $(sdkautodirs):
 	@mkdir -p $@
 updatetoplink:
-	@$(call safelink,$(TOPPKG),p)
+	@$(call safelink,$(PKG_DIR),p)
 sdk_folders: $(sdkautodirs) updatetoplink
 
 lsmod:

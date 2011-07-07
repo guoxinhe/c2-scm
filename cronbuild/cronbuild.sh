@@ -164,7 +164,7 @@ build_modules_x_steps()
     done
 }
 
-modules="xxx"
+modules="uboot"
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
