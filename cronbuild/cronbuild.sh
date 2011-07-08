@@ -4,6 +4,8 @@
 #auto detect
 TOP=`pwd`
 cd $TOP
+tm_toptask=`date +%s`
+tm_date=`date`
 TODAY=`date +%y%m%d`
 THISSCR=`readlink -f $0`
 THISIP==`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
@@ -49,7 +51,7 @@ CONFIG_BUILD_USRUDISK=1
 CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=
+CONFIG_BUILD_PUBLISHEMAIL=1
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -75,6 +77,26 @@ softlink $CONFIG_RESULT   i
 set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
 cat $CONFIG_LOGDIR/env.sh
 
+addto_send()
+{
+    while [ $# -gt 0 ] ; do
+        email=$1
+        x=`echo $1 | grep "@"`
+        if [ $? -ne 0 ]; then
+            email=${email}@c2micro.com
+        fi
+        if [ "$CONFIG_MAILLIST" = "" ]; then
+            CONFIG_MAILLIST=$email ;
+        else
+          r=`echo $CONFIG_MAILLIST | grep $email`
+          if [ "$r" = "" ]; then
+            CONFIG_MAILLIST=$CONFIG_MAILLIST,$email ;
+          fi
+        fi
+        shift
+    done
+    export CONFIG_MAILLIST
+}
 update_indexlog()
 {
     #handle echo "Hdmi:1:$hdmilog">>$CONFIG_INDEXLOG
@@ -127,6 +149,113 @@ addto_fail()
     done
     export FAILLIST
 }
+addto_reportedfail()
+{
+    while [ $# -gt 0 ] ; do
+        if [ "$REPORTEDFAILLIST" = "" ]; then
+            REPORTEDFAILLIST=$1 ;
+        else
+          r=`echo $REPORTEDFAILLIST | grep $1`
+          if [ "$r" = "" ]; then
+            REPORTEDFAILLIST=$REPORTEDFAILLIST,$1 ;
+          fi
+        fi
+        shift
+    done
+    export REPORTEDFAILLIST
+}
+blame_devtools="saladwang hguo"
+blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli  codec_sw"
+blame_qt="mxia dashanzhou txiang slu jzhang                                         sw_apps"
+blame_c2box="mxia dashanzhou txiang slu jzhang                                      sw_apps"
+blame_jtag="jsun"
+blame_c2_goodies="jsun robinlee ali"
+blame_diag="jsun"
+blame_kernel="jsun robinlee ali roger llian simongao xingeng swine hguo janetliu    sys_sw"
+blame_vivante="llian jsun"
+blame_hdmi="jsun xingeng"
+blame_uboot="ali jsun robinlee"
+blame_facudisk="hguo"
+blame_usrudisk="hguo"
+blame_xxx="hguo"
+
+checkadd_fail_send_list()
+{
+    #pickup the fail log's tail to email for a quick preview
+    loglist=`cat $CONFIG_INDEXLOG`
+    nr_failmodule=0
+    for i in $loglist ; do
+        m=`echo $i | sed 's,\([^:]*\).*,\1,'`
+        x=`echo $i | sed 's,[^:]*:\([^:]*\).*,\1,'`
+        f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
+        l=`echo $f | sed 's:.*/\(.*\):\1:'`
+        if [ $x -ne 0 ]; then
+	    addto_reportedfail $m
+	    nr_failmodule=$(($nr_failmodule+1))
+            case $m in
+            devtools*    ) addto_send $blame_devtools   ;; 
+            sw_media*    ) addto_send $blame_sw_media   ;; 
+            qt*          ) addto_send $blame_qt         ;; 
+            c2box*       ) addto_send $blame_c2box      ;; 
+            jtag*        ) addto_send $blame_jtag       ;; 
+            c2_goodies*  ) addto_send $blame_c2_goodies ;; 
+            diag*        ) addto_send $blame_diag       ;; 
+            kernel*      ) addto_send $blame_kernel     ;; 
+            vivante*     ) addto_send $blame_vivante    ;; 
+            hdmi*        ) addto_send $blame_hdmi       ;; 
+            uboot*       ) addto_send $blame_uboot      ;; 
+            facudisk*    ) addto_send $blame_facudisk   ;; 
+            usrudisk*    ) addto_send $blame_usrudisk   ;; 
+            xxx*         ) addto_send $blame_xxx        ;; 
+            *)  	  ;;
+            esac
+        fi
+    done
+    [ $nr_failmodule -gt 0 ] && addto_send robinlee@c2micro.com
+}
+
+list_fail_url_tail()
+{
+    #pickup the fail log's tail to email for a quick preview
+    nr_failurl=0
+    loglist=`cat $CONFIG_INDEXLOG`
+    for i in $loglist ; do
+        m=`echo $i | sed 's,\([^:]*\).*,\1,'`
+        x=`echo $i | sed 's,[^:]*:\([^:]*\).*,\1,'`
+        f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
+        l=`echo $f | sed 's:.*/\(.*\):\1:'`
+        if [ $x -ne 0 ]; then
+            nr_failurl=$((nr_failurl+1))
+            case $m in
+            *_udisk) #jump these
+                ;;
+            *)
+                echo $m fail :
+                echo "    " "$SDKENV_URLPRE/${CONFIG_LOGSERVER##*/}/$l"
+                ;;
+            esac
+        fi
+    done
+    for i in $loglist ; do
+        m=`echo $i | sed 's,\([^:]*\).*,\1,'`
+        x=`echo $i | sed 's,[^:]*:\([^:]*\).*,\1,'`
+        f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
+        l=`echo $f | sed 's:.*/\(.*\):\1:'`
+        if [ $x -ne 0 ]; then
+            case $m in
+            *_udisk) #jump these
+                ;;
+            *)
+                echo
+                echo $m fail , tail of $l:
+                tail -n 40 $f
+                ;;
+            esac
+        fi
+    done
+    export nr_failurl
+}
+
 
 #set -ex
 nr_totalerror=0
@@ -180,17 +309,18 @@ fi
 export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
 export SDKENV_Title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX daily build"
 export SDKENV_Project="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
-export SDKENV_Overview="No overview yet"
+export SDKENV_Overview="<pre>Project start on $tm_date
+`recho_time_consumed $tm_toptask all done`</pre>"
 export SDKENV_Setting="<pre>`make lsvar`</pre>"
 export SDKENV_Server="`whoami` on $THISIP(`hostname`)"
 export SDKENV_Script="`readlink -f $0`"
-export SDKENV_URLPRE=http://10.16.13.195:/build/temp/jazz2-dev_logs
+export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/html,,g' -e 's,^.*@,,g'`
 ./html_generate.cgi  > $CONFIG_HTMLFILE
 
 
 #generate email
 #addto_send ruishengfu@c2micro.com hguo@c2micro.com
-#checkadd_fail_send_list
+checkadd_fail_send_list
 mail_title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule module(s) $nr_totalerror error(s)."
 (
     echo "$mail_title"
@@ -207,11 +337,11 @@ mail_title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule modu
     for i in $CONFIG_LOGSERVER; do
         echo "    ${i##*@}" | sed 's,/var/www/html,,g'
     done
-    #echo list_fail_url_tail
-    #echo ""
-    #[ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
-    #[ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
-    #[ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
+    list_fail_url_tail
+    echo ""
+    [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
+    [ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
+    [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
     echo "More build environment reference info:"
     make lsvar
     echo ""
@@ -268,7 +398,9 @@ fi
 
 #send email
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
-    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+    #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+    echo email title "$CONFIG_EMAILTITLE" 
+    echo send to: $CONFIG_MAILLIST
     echo send mail done.
 fi
 
