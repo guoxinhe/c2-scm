@@ -8,17 +8,19 @@ TODAY=`date +%y%m%d`
 THISSCR=`readlink -f $0`
 THISIP==`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 [ -t 1 -o -t 2 ] && THISTTY=y
-CONFIG_ARCH=jazz2
+CONFIG_ARCH=`make SDK_TARGET_ARCH`
+CONFIG_PKGDIR=`make PKG_DIR`
 CONFIG_TREEPREFIX=dev
-CONFIG_WEBSERVER="build@10.16.13.195:/var/www/html/build/jazz2-dev-sdk-daily.html"
-CONFIG_LOGSERVER="build@10.16.13.196:/var/www/html/build/jazz2-dev-log/$TODAY"
-CONFIG_PKGSERVER="build@10.16.13.196:/sdk-b2/jazz2/dev/weekly/$TODAY"
+CONFIG_WEBSERVER="build@10.16.13.195:/var/www/html/build/temp/jazz2-dev-sdk-daily.html"
+CONFIG_LOGSERVER="build@10.16.13.195:/var/www/html/build/temp/jazz2-dev_logs/$TODAY.log"
+CONFIG_PKGSERVER="build@10.16.13.195:/sdk-b2/temp/jazz2/dev/weekly/$TODAY"
 CONFIG_MAILLIST=hguo@c2micro.com
 CONFIG_RESULT=$TOP/build_result/$TODAY
 CONFIG_LOGDIR=$CONFIG_RESULT.log
 CONFIG_INDEXLOG=$CONFIG_RESULT.txt
-CONFIG_HTMLFILE=$CONFIG_RESULT/web.html
-CONFIG_EMAILFILE=$CONFIG_RESULT/email.txt
+CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
+CONFIG_EMAILFILE=$CONFIG_LOGDIR/email.txt
+CONFIG_EMAILTITLE="$CONFIG_ARCH $CONFIG_TREEPREFIX daily build pass"
 CONFIG_PATH=/c2/local/c2/daily-jazz2/bin:$PATH
 CONFIG_BUILD_DRY=1
 CONFIG_BUILD_HELP=1
@@ -44,10 +46,10 @@ CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
 CONFIG_BUILD_FACUDISK=1
 CONFIG_BUILD_USRUDISK=1
-CONFIG_BUILD_PUBLISH=1
+CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=1
+CONFIG_BUILD_PUBLISHEMAIL=
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -164,7 +166,7 @@ build_modules_x_steps()
     done
 }
 
-modules="uboot"
+modules="xxx"
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
@@ -173,23 +175,100 @@ if test $CONFIG_BUILD_HELP; then
     echo help done.
 fi
 
+#generate web report
+#these exports are used by html_generate.cgi
+export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
+export SDKENV_Title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX daily build"
+export SDKENV_Project="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
+export SDKENV_Overview="No overview yet"
+export SDKENV_Setting="<pre>`make lsvar`</pre>"
+export SDKENV_Server="`whoami` on $THISIP(`hostname`)"
+export SDKENV_Script="`readlink -f $0`"
+export SDKENV_URLPRE=http://10.16.13.195:/build/temp/jazz2-dev_logs
+./html_generate.cgi  > $CONFIG_HTMLFILE
+
+
+#generate email
+#addto_send ruishengfu@c2micro.com hguo@c2micro.com
+#checkadd_fail_send_list
+mail_title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule module(s) $nr_totalerror error(s)."
+(
+    echo "$mail_title"
+    echo ""
+    echo "Get build package at:"
+    for i in $CONFIG_PKGSERVER; do
+	echo "    ${i##*@}"
+    done
+    echo "Click here to watch report:"
+    for i in  $CONFIG_WEBSERVER; do
+        echo "    ${i##*@}" | sed 's,/var/www/html,,g'
+    done
+    echo "Click here to watch logs:"
+    for i in $CONFIG_LOGSERVER; do
+        echo "    ${i##*@}" | sed 's,/var/www/html,,g'
+    done
+    #echo list_fail_url_tail
+    #echo ""
+    #[ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
+    #[ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
+    #[ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
+    echo "More build environment reference info:"
+    make lsvar
+    echo ""
+    echo "send to list: $CONFIG_MAILLIST"
+    echo "You receive this email because you are in the relative software maintainer list"
+    echo "For more other request about this email, please send contact with me"
+    echo ""
+    echo "For more reports: http://10.16.13.196/build/allinone.htm"
+    echo "    or https://access.c2micro.com/~build/allinone.htm"
+    #echo "Check broken log history:  http://10.16.13.196/${USER}/blog"
+    echo ""
+    echo "Regards,"
+    echo "`whoami`,`hostname`($THISIP)"
+    echo "`readlink -f $0`"
+    date
+) >$CONFIG_EMAILFILE 2>&1
+
+
 #upload log
 if [ $CONFIG_BUILD_PUBLISHLOG ]; then
+    unix2dos -q $CONFIG_LOGDIR/*
+    for i in $CONFIG_LOGSERVER; do
+        h=${i%%:/*}
+        p=${i##*:}
+        ssh $h mkdir -p $p
+	scp -r $CONFIG_LOGDIR/* $i/
+    done
     echo publish log done.
 fi
 
 #upload package
 if [ $CONFIG_BUILD_PUBLISH ]; then
+    for i in $CONFIG_PKGSERVER; do
+        h=${i%%:/*}
+        p=${i##*:}
+        ssh $h mkdir -p $p
+	scp -r $CONFIG_PKGDIR/* $i/
+    done
     echo publish package done.
 fi
 
 #upload web report
 if [ $CONFIG_BUILD_PUBLISHHTML ]; then
+    for i in $CONFIG_WEBSERVER; do
+        h=${i%%:/*}
+        p=${i##*:}
+	f=${p##*/}
+	p=${p%/*}
+        ssh $h mkdir -p $p
+	scp -r $CONFIG_HTMLFILE $i
+    done
     echo publish web done.
 fi
 
 #send email
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
+    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
     echo send mail done.
 fi
 
