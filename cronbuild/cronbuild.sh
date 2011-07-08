@@ -51,7 +51,7 @@ CONFIG_BUILD_USRUDISK=1
 CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=1
+CONFIG_BUILD_PUBLISHEMAIL=
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -296,6 +296,7 @@ build_modules_x_steps()
 }
 
 modules="xxx"
+modules="vivante"
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
@@ -398,9 +399,9 @@ fi
 
 #send email
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
-    #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
     echo email title "$CONFIG_EMAILTITLE" 
     echo send to: $CONFIG_MAILLIST
+    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
     echo send mail done.
 fi
 

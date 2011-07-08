@@ -30,7 +30,8 @@ ifneq (,$(realpath $(MYINCFILE)))
 endif
 
 #-------------------------------------------------------------
-all: test_xxx
+.PHONY: all clean 
+all:
 
 # example code
 mission_xxx := 	src_get_xxx  \
