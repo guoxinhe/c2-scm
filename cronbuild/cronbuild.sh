@@ -296,8 +296,12 @@ build_modules_x_steps()
 }
 
 modules="xxx"
-modules="vivante"
-steps="src_get src_package src_install src_config src_build bin_package bin_install "
+#modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
+#steps="src_get src_package src_install src_config src_build bin_package bin_install "
+passed_modules_list="jtag uboot diag vivante hdmi"
+modules="c2_goodies  kernel kernelnand  vivante hdmi"
+modules="kernelnand"
+steps="src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
 #step operations
