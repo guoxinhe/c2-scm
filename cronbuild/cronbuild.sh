@@ -2,7 +2,9 @@
 
 #basic settings
 #auto detect
+/local/c2sdk/reposyncall
 TOP=`pwd`
+TOP=/build2/jazz2-daily
 cd $TOP
 tm_toptask=`date +%s`
 tm_date=`date`
@@ -13,9 +15,9 @@ THISIP==`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 CONFIG_ARCH=`make SDK_TARGET_ARCH`
 CONFIG_PKGDIR=`make PKG_DIR`
 CONFIG_TREEPREFIX=dev
-CONFIG_WEBSERVER="build@10.16.13.195:/var/www/html/build/temp/jazz2-dev-sdk-daily.html"
-CONFIG_LOGSERVER="build@10.16.13.195:/var/www/html/build/temp/jazz2-dev_logs/$TODAY.log"
-CONFIG_PKGSERVER="build@10.16.13.195:/sdk-b2/temp/jazz2/dev/weekly/$TODAY"
+CONFIG_WEBSERVER="build@10.16.13.195:/var/www/html/build/jazz2-dev-sdk-daily.html"
+CONFIG_LOGSERVER="build@10.16.13.195:/var/www/html/build/jazz2-dev_logs/$TODAY.log"
+CONFIG_PKGSERVER="build@10.16.13.195:/sdk-b2/tempb2/jazz2/dev/weekly/$TODAY"
 CONFIG_MAILLIST=hguo@c2micro.com
 CONFIG_RESULT=$TOP/build_result/$TODAY
 CONFIG_LOGDIR=$CONFIG_RESULT.log
@@ -51,7 +53,7 @@ CONFIG_BUILD_USRUDISK=1
 CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=
+CONFIG_BUILD_PUBLISHEMAIL=1
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -297,11 +299,8 @@ build_modules_x_steps()
 
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-#steps="src_get src_package src_install src_config src_build bin_package bin_install "
-passed_modules_list="jtag uboot diag vivante hdmi"
-modules="c2_goodies  kernel kernelnand  vivante hdmi"
-modules="kernelnand"
-steps="src_install src_config src_build bin_package bin_install "
+modules="sw_media qt470 kernel kernelnand uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
+steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
 #step operations
@@ -330,17 +329,19 @@ mail_title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule modu
 (
     echo "$mail_title"
     echo ""
-    echo "Get build package at:"
+    echo "Get build package at nfs service:"
     for i in $CONFIG_PKGSERVER; do
 	echo "    ${i##*@}"
     done
     echo "Click here to watch report:"
     for i in  $CONFIG_WEBSERVER; do
-        echo "    ${i##*@}" | sed 's,/var/www/html,,g'
+	echo -en "    http://"
+        echo "${i##*@}" | sed 's,:/var/www/html,,g'
     done
     echo "Click here to watch logs:"
     for i in $CONFIG_LOGSERVER; do
-        echo "    ${i##*@}" | sed 's,/var/www/html,,g'
+	echo -en "    http://"
+        echo "${i##*@}" | sed 's,:/var/www/html,,g'
     done
     list_fail_url_tail
     echo ""
@@ -405,7 +406,8 @@ fi
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
     echo email title "$CONFIG_EMAILTITLE" 
     echo send to: $CONFIG_MAILLIST
-    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+    #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
     echo send mail done.
 fi
 

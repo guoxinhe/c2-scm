@@ -1222,6 +1222,12 @@ help_diag: sdk_folders mktest
 	@echo targets: $(mission_diag) clean_diag test_diag help_diag
 	@echo $@ done
 
+SRC_FUSEPOD := $(TEMP_DIR)/src_c2_goodies/fusepod
+SRC_PERL := $(TEMP_DIR)/src_c2_goodies/perl
+SRC_SNOOPY := $(TEMP_DIR)/src_c2_goodies/snoopy
+SRC_HDD := $(TEMP_DIR)/src_c2_goodies/hdd
+SRC_BENCHMARK := $(TEMP_DIR)/src_c2_goodies/benchmark
+SRC_ETHTOOL := $(TEMP_DIR)/src_c2_goodies/ethertool
 mission_c2_goodies := src_get_c2_goodies  \
 	src_package_c2_goodies src_install_c2_goodies src_config_c2_goodies src_build_c2_goodies \
 	bin_package_c2_goodies bin_install_c2_goodies
@@ -1230,41 +1236,47 @@ mission_targets += $(mission_c2_goodies)
 .PHONY: $(mission_c2_goodies)
 src_get_c2_goodies:  sdk_folders
 	@echo start $@
-	@echo "Checkout fusepod sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d fusepod $(FUSEPOD_SCRIPT); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(DJMOUNT_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(FUSEPOD_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(LIBGPOD_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(FUSE_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(GLIB_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(TAGLIB_PKG);
+	mkdir -p $(SRC_FUSEPOD)
+	-cp -rf -t $(SRC_FUSEPOD) \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/scripts/build-fusepod.sh \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/djmount-0.71.tar.gz  \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/fusepod-0.5.1.tar    \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/libgpod-0.5.2.tar.gz \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/fuse-2.6.3.tar.gz    \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/glib-2.12.9-c2.tar   \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/taglib-1.4.tar
 	
-	@echo "Checkout perl sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d perl $(PERL_SCRIPT); 
-	@cd $(SOURCE_DIR)/c2_goodies/perl && $(CHECKOUT) -d dist $(PERL_PKG); 
+	mkdir -p $(SRC_PERL)
+	-cp -rf -t $(SRC_PERL)\
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/scripts/build-microperl.sh\
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/perl-5.8.8.tar.gz 
 	
-	@echo "Checkout snoopy sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d snoopy $(CVS_SRC_SNOOPY); 
+	mkdir -p $(SRC_SNOOPY)
+	-cp -rf -t $(SRC_SNOOPY)                         \
+	    $(SOURCE_DIR)/sw/cmd/snoopy ${SRC_SNOOPY%/*}
 	
-	@echo "Checkout hdd library sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d hdd $(HDD_SCRIPT); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(SAMBA_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(LIBUSB_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(LIBPTP_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(NTFS_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(NTFSPROGS_PKG); 
+	mkdir -p $(SRC_HDD)
+	-cp -rf -t $(SRC_HDD)                                            \
+	    $(SOURCE_DIR)/sw_c2apps/3rdParty/sdk-build-hdd.sh               \
+	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/samba-3.0.28a-c2.tar.bz2 \
+	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/libusb-0.1.12.tar.bz2    \
+	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/libptp2-1.1.10.tar.gz    \
+	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/ntfs-3g-1.2531-c2.tgz    \
+	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/ntfsprogs-2.0.0-c2.tar.gz 
 	
-	@echo "Checkout benchmark sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d benchmark $(BENCHMARK_SCRIPT);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(BONNIE_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(IOZONE_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(LMBENCH_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(UNIXBENCH_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(IPERF_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(NETPERF_PKG);
+	mkdir -p $(SRC_BENCHMARK)
+	-cp -rf -t $(SRC_BENCHMARK)                                   \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/scripts/build-benchmark.sh\
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/bonnie++-1.03d.tgz     \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/iozone3_308-c2.tgz     \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/lmbench3-c2.tgz        \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/unixbench-4.1.0-c2.tgz \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/iperf-2.0.2.c2.tar.gz  \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/netperf-2.4.4.c2.tar.gz\
 	
-	@echo "Checkout ethertools source"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d ethertool $(ETHERTOOL_PKG);
+	mkdir -p $(SRC_ETHTOOL)
+	-cp -rf -t $(SRC_ETHTOOL) \
+	    $(SOURCE_DIR)/sw/devtools/3rdParty/ethtool-6.tar.gz
 	@echo $@ done
 src_package_c2_goodies: sdk_folders
 	@echo start $@
