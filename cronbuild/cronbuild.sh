@@ -15,9 +15,10 @@ THISIP==`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 CONFIG_ARCH=`make SDK_TARGET_ARCH`
 CONFIG_PKGDIR=`make PKG_DIR`
 CONFIG_TREEPREFIX=dev
-CONFIG_WEBSERVER="build@10.16.13.195:/var/www/html/build/jazz2-dev-sdk-daily.html"
-CONFIG_LOGSERVER="build@10.16.13.195:/var/www/html/build/jazz2-dev_logs/$TODAY.log"
-CONFIG_PKGSERVER="build@10.16.13.195:/sdk-b2/tempb2/jazz2/dev/weekly/$TODAY"
+CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/jazz2-dev-b2-sdk-daily.html"
+CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/jazz2-dev_logs/$TODAY.log"
+CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/tempb2/jazz2/dev/weekly/$TODAY"
+CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
 CONFIG_RESULT=$TOP/build_result/$TODAY
 CONFIG_LOGDIR=$CONFIG_RESULT.log
@@ -50,7 +51,7 @@ CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
 CONFIG_BUILD_FACUDISK=1
 CONFIG_BUILD_USRUDISK=1
-CONFIG_BUILD_PUBLISH=
+CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=1
@@ -233,7 +234,8 @@ list_fail_url_tail()
                 ;;
             *)
                 echo $m fail :
-                echo "    " "$SDKENV_URLPRE/${CONFIG_LOGSERVER##*/}/$l"
+		echo -en "    "
+                echo "$SDKENV_URLPRE/${CONFIG_LOGSERVER##*/}/$l"
                 ;;
             esac
         fi
@@ -325,21 +327,21 @@ export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/ht
 #generate email
 #addto_send ruishengfu@c2micro.com hguo@c2micro.com
 checkadd_fail_send_list
-mail_title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule module(s) $nr_totalerror error(s)."
+CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule module(s) $nr_totalerror error(s)."
 (
-    echo "$mail_title"
+    echo "$CONFIG_EMAILTITLE"
     echo ""
     echo "Get build package at nfs service:"
-    for i in $CONFIG_PKGSERVER; do
+    for i in $CONFIG_PKGSERVERS; do
 	echo "    ${i##*@}"
     done
     echo "Click here to watch report:"
-    for i in  $CONFIG_WEBSERVER; do
+    for i in  $CONFIG_WEBSERVERS; do
 	echo -en "    http://"
         echo "${i##*@}" | sed 's,:/var/www/html,,g'
     done
     echo "Click here to watch logs:"
-    for i in $CONFIG_LOGSERVER; do
+    for i in $CONFIG_LOGSERVERS; do
 	echo -en "    http://"
         echo "${i##*@}" | sed 's,:/var/www/html,,g'
     done
@@ -369,7 +371,7 @@ mail_title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule modu
 #upload log
 if [ $CONFIG_BUILD_PUBLISHLOG ]; then
     unix2dos -q $CONFIG_LOGDIR/*
-    for i in $CONFIG_LOGSERVER; do
+    for i in $CONFIG_LOGSERVERS; do
         h=${i%%:/*}
         p=${i##*:}
         ssh $h mkdir -p $p
@@ -380,18 +382,22 @@ fi
 
 #upload package
 if [ $CONFIG_BUILD_PUBLISH ]; then
-    for i in $CONFIG_PKGSERVER; do
+    if [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] ; then
+        echo has errors, can not publish
+    else
+    for i in $CONFIG_PKGSERVERS; do
         h=${i%%:/*}
         p=${i##*:}
         ssh $h mkdir -p $p
 	scp -r $CONFIG_PKGDIR/* $i/
     done
     echo publish package done.
+    fi
 fi
 
 #upload web report
 if [ $CONFIG_BUILD_PUBLISHHTML ]; then
-    for i in $CONFIG_WEBSERVER; do
+    for i in $CONFIG_WEBSERVERS; do
         h=${i%%:/*}
         p=${i##*:}
 	f=${p##*/}

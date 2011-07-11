@@ -424,26 +424,43 @@ src_install_qt470: sdk_folders
 src_config_qt470: sdk_folders
 	@echo start $@
 	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
-	QT_CFLAGS_DIRECTFB="-I$(TOOLCHAIN_PATH)/../include/directfb -DQT_CFLAGS_DIRECTFB" \
-	QT_LIBS_DIRECTFB="-L$(TOOLCHAIN_PATH)/../lib -ldirectfb -ldirect -lfusion" \
-	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
-	C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..  \
-	./configure -embedded c2 \
-	-little-endian -qt-kbd-linuxinput -system-libpng -qt-gif -release \
-	-prefix $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic -confirm-license -opensource -qt-libjpeg \
-	-qt-libmng -qvfb -depths 8,16,32 \
-	-confirm-license -largefile -webkit -svg -dbus -I $(TEST_ROOT_DIR)/c2/daily/include/dbus-1.0 \
-	-L $(TEST_ROOT_DIR)/c2/daily/lib/  -ldbus-1 -xmlpatterns -exceptions \
-	-openssl-linked
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH) \
+	BUILD_TARGET=TARGET_LINUX_C2 \
+	BOARD_TARGET=C2_CC289 \
+	BUILD=RELEASE \
+	C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. ./configure -embedded c2 \
+		-little-endian \
+		-qt-kbd-linuxinput \
+		-qt-libpng \
+		-qt-gif \
+		-release \
+		-prefix $(QT_INSTALL_DIR) \
+		-confirm-license \
+		-opensource \
+		-qt-libjpeg \
+		-qt-libmng \
+		-qvfb \
+		-depths 8,16,32 \
+		-largefile \
+		-webkit \
+		-svg \
+		-xmlpatterns \
+		-exceptions \
+		-dbus \
+		-ldbus-1 \
+	        $(QT_EXTRA_CONFIG470) \
+		-no-rpath \
+		-R/c2/local/Trolltech/QtopiaCore-4.6.1-generic/lib
 	@echo $@ done
 src_build_qt470: sdk_folders
 	@echo start $@
-	@cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
 	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
-	make C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..
-	@cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
 	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
-	make C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. install
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. install
 	@echo $@ done
 bin_package_qt470: sdk_folders
 	@echo start $@
