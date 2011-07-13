@@ -1,4 +1,4 @@
-
+TAREXCLUDE="--exclude=CVS --exclude=CVSROOT --exclude=.git --exclude=.gitignore"
 mission_devtools := src_get_devtools  \
 	src_package_devtools src_install_devtools src_config_devtools src_build_devtools \
 	bin_package_devtools bin_install_devtools 
@@ -424,42 +424,43 @@ src_install_qt470: sdk_folders
 src_config_qt470: sdk_folders
 	@echo start $@
 	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
-	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) \
-	DISP_ARCH=$(SDK_TARGET_GCC_ARCH) \
-	BUILD_TARGET=TARGET_LINUX_C2 \
-	BOARD_TARGET=C2_CC289 \
-	BUILD=RELEASE \
-	C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. ./configure -embedded c2 \
-		-little-endian \
-		-qt-kbd-linuxinput \
-		-qt-libpng \
-		-qt-gif \
-		-release \
-		-prefix $(QT_INSTALL_DIR) \
-		-confirm-license \
-		-opensource \
-		-qt-libjpeg \
-		-qt-libmng \
-		-qvfb \
-		-depths 8,16,32 \
-		-largefile \
-		-webkit \
-		-svg \
-		-xmlpatterns \
-		-exceptions \
-		-dbus \
-		-ldbus-1 \
-	        $(QT_EXTRA_CONFIG470) \
-		-no-rpath \
-		-R/c2/local/Trolltech/QtopiaCore-4.6.1-generic/lib
+	QT_CFLAGS_DIRECTFB="-I$(TOOLCHAIN_PATH)/../include/directfb -DQT_CFLAGS_DIRECTFB" \
+	QT_LIBS_DIRECTFB="-L$(TOOLCHAIN_PATH)/../lib -ldirectfb -ldirect -lfusion" \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..  \
+	./configure -embedded c2 \
+	-little-endian -qt-kbd-linuxinput -system-libpng -qt-gif -release \
+	-prefix $(QT_INSTALL_DIR) -confirm-license -opensource -qt-libjpeg \
+	-qt-libmng -qvfb -depths 8,16,32 \
+	-confirm-license -largefile -webkit -svg -dbus -I $(TOOLCHAIN_PATH)/../include/dbus-1.0 \
+	-L $(TOOLCHAIN_PATH)/../lib/  -ldbus-1 -xmlpatterns -exceptions \
+	-openssl-linked -no-opengl -nomake examples -nomake demos
 	@echo $@ done
+src_build_qt470_step1:
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..
+src_build_qt470_step2:
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. install
 src_build_qt470: sdk_folders
 	@echo start $@
 	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
-	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
 	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..
 	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
-	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
 	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. install
 	@echo $@ done
 bin_package_qt470: sdk_folders
@@ -467,16 +468,16 @@ bin_package_qt470: sdk_folders
 	@-rm -rf $(PKG_NAME_BIN_QT470)
 	@echo "Creating package $(PKG_NAME_BIN_QT470)"
 	@cd $(TEST_ROOT_DIR) ; \
-	    tar czf  $(PKG_NAME_BIN_QT470) QtopiaCore-4.7.0-generic
+	    tar czf  $(PKG_NAME_BIN_QT470) $(QTINSTALL_NAME)
 	@echo $@ done
 bin_install_qt470: sdk_folders
 	@echo start $@
 	@cd $(TEST_ROOT_DIR) ; \
-	    if [ ! -d QtopiaCore-4.7.0-generic ]; then tar xzf  $(PKG_NAME_BIN_QT470);fi
+	    if [ ! -d $(QTINSTALL_NAME) ]; then tar xzf  $(PKG_NAME_BIN_QT470);fi
 	@echo $@ done
 clean_qt470: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
-	@-rm -rf $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic
+	@-rm -rf $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) $(QT_INSTALL_DIR)
 	@echo $@ done
 test_qt470: $(mission_qt470)
 help_qt470: sdk_folders
@@ -1052,10 +1053,10 @@ src_config_c2box: sdk_folders
 	@echo start $@
 	@echo $@ done
 src_build_c2box: \
-	override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin:$(QT_INSTALL_DIR)/bin
+	override PATH := $(QT_INSTALL_DIR)/bin:$(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
 src_build_c2box: sdk_folders
 	@echo start $@
-	@-rm -rf $@
+	which qmake
 	@cd $(TEST_ROOT_DIR)/build_c2box/$(CVS_SRC_SW_C2APPS); \
 		BUILD_TARGET=TARGET_LINUX_C2 TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD=RELEASE \
 		SW_MEDIA_PATH=$(SW_MEDIA_PATH) \

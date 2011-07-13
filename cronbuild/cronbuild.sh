@@ -2,7 +2,6 @@
 
 #basic settings
 #auto detect
-/local/c2sdk/reposyncall
 TOP=`pwd`
 TOP=/build2/jazz2-daily
 cd $TOP
@@ -33,7 +32,7 @@ CONFIG_BUILD_LOCAL=1
 CONFIG_BUILD_DOTAG=1
 CONFIG_BUILD_CLEAN=1
 CONFIG_BUILD_SDK=1
-CONFIG_BUILD_CHECKOUT=1
+CONFIG_BUILD_CHECKOUT=
 CONFIG_BUILD_PKGSRC=1
 CONFIG_BUILD_PKGBIN=1
 CONFIG_BUILD_DEVTOOLS=1
@@ -51,7 +50,7 @@ CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
 CONFIG_BUILD_FACUDISK=1
 CONFIG_BUILD_USRUDISK=1
-CONFIG_BUILD_PUBLISH=1
+CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=1
@@ -79,7 +78,9 @@ softlink $CONFIG_RESULT   i
 #action parse
 set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
 cat $CONFIG_LOGDIR/env.sh
-
+if [ $CONFIG_BUILD_CHECKOUT ];then
+    /local/c2sdk/reposyncall
+fi
 addto_send()
 {
     while [ $# -gt 0 ] ; do
@@ -301,7 +302,8 @@ build_modules_x_steps()
 
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-modules="sw_media qt470 kernel kernelnand uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
+#modules="kernel kernelnand vivante hdmi uboot jtag diag sw_media qt470" # c2box facudisk usrudisk"
+modules="c2box facudisk usrudisk"
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
@@ -313,7 +315,7 @@ fi
 #generate web report
 #these exports are used by html_generate.cgi
 export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
-export SDKENV_Title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX daily build"
+export SDKENV_Title="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX on $HOSTNAME daily build"
 export SDKENV_Project="${SDK_TARGET_ARCH} ${TREE_PREFIX} daily build"
 export SDKENV_Overview="<pre>Project start on $tm_date
 `recho_time_consumed $tm_toptask all done`</pre>"
@@ -327,7 +329,7 @@ export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/ht
 #generate email
 #addto_send ruishengfu@c2micro.com hguo@c2micro.com
 checkadd_fail_send_list
-CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodule module(s) $nr_totalerror error(s)."
+CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX $HOSTNAME $nr_totalmodule module(s) $nr_totalerror error(s)."
 (
     echo "$CONFIG_EMAILTITLE"
     echo ""
@@ -335,6 +337,9 @@ CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodu
     for i in $CONFIG_PKGSERVERS; do
 	echo "    ${i##*@}"
     done
+    echo ""
+    [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
+    [ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
     echo "Click here to watch report:"
     for i in  $CONFIG_WEBSERVERS; do
 	echo -en "    http://"
@@ -346,9 +351,6 @@ CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX Build $nr_totalmodu
         echo "${i##*@}" | sed 's,:/var/www/html,,g'
     done
     list_fail_url_tail
-    echo ""
-    [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
-    [ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
     [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
     echo "More build environment reference info:"
     make lsvar

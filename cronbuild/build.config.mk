@@ -50,6 +50,7 @@ TOOLCHAIN_PATH			:= $(shell readlink -f $(TOP_DIR)/c2/daily/bin)
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/sw_media_installed
 SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
+#QT_INSTALL_DIR                  := /build/jazz2/dev/sdk/test_root/QtopiaCore-4.7.0-generic
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
 CVS_SRC_KERNEL			:= kernel.sdk
@@ -81,6 +82,10 @@ PKG_NAME_SRC_DEVTOOLS   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-src.tar.gz
 PKG_NAME_BIN_DEVTOOLS		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-bin.tar.gz
 
 # QT 4.7 package
+CVS_SRC_QT    			:= sw/Qt/qt-everywhere-opensource-src-4.7.0
+PKG_NAME_SRC_QT   		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-src.tar.gz
+PKG_NAME_BIN_QT   		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-bin.tar.gz
+QT_EXTRA_CONFIG   		:= -plugin-gfx-directfb
 CVS_SRC_QT470			:= sw/Qt/qt-everywhere-opensource-src-4.7.0
 PKG_NAME_SRC_QT470		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-src.tar.gz
 PKG_NAME_BIN_QT470		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-bin.tar.gz

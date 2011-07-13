@@ -8,6 +8,8 @@ PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
 TEST_ROOT_DIR			:= $(TOP_DIR)/test_root
 SOURCE_DIR			:= $(TOP_DIR)/source
 TEMP_DIR			:= $(TOP_DIR)/temp
+SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/sw_media_installed
+QT_INSTALL_DIR                  := /build/jazz2/dev/sdk/test_root/QtopiaCore-4.7.0-generic
 varlist := TODAY TOP_DIR SDK_TARGET_ARCH SDK_VERSION_ALL PKG_DIR TEST_ROOT_DIR SOURCE_DIR TEMP_DIR
 
 mklist :=
@@ -77,7 +79,7 @@ define safelink
     if test -h $2 ; then rm $2;fi
     ln -s $1 $2
 endef
-sdkautodirs :=  $(PKG_DIR) $(TEST_ROOT_DIR)/usr/bin
+sdkautodirs :=  $(PKG_DIR)/c2box $(TEST_ROOT_DIR)/usr/bin  $(TEMP_DIR)
 
 .PHONY: sdk_folders lsmod lsop lstest lsall help
 $(sdkautodirs):
