@@ -246,12 +246,12 @@ FACUDISK_FILES := 	updating.bmp	updatefail.bmp	updatesucc.bmp	logo.bmp	\
 uboot_file		:= $(uboot_utilities)/u-boot-jazz2-autodetect.rom
 uboot_factory_file	:= $(uboot_utilities)/u-boot-jazz2-factory-autodetect.rom
 BIN_MKIMAGE  		:= $(uboot_utilities)/mkimage
-BIN_MKYAFFS2 		:= sw/kernel/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
+BIN_MKYAFFS2 		:= $(CVS_SRC_KERNEL)/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
 BIN_MKJFFS2  		:= $(TOOLCHAIN_PATH)/mkfs.jffs2
 BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
 
 SYSPATH			:=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
-override PATH 		:= $(TOOLCHAIN_PATH):$(TEST_ROOT_DIR)/usr/bin:$(TEST_ROOT_DIR)/bin:$(SYSPATH)
+override PATH := $(QT_INSTALL_DIR)/bin:$(TOOLCHAIN_PATH):$(TEST_ROOT_DIR)/usr/bin:$(TEST_ROOT_DIR)/bin:$(SYSPATH)
 
 definedenvlist :=	\
    TODAY                     \

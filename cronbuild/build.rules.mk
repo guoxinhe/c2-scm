@@ -1052,15 +1052,14 @@ src_install_c2box: sdk_folders
 src_config_c2box: sdk_folders
 	@echo start $@
 	@echo $@ done
-src_build_c2box: \
-	override PATH := $(QT_INSTALL_DIR)/bin:$(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
 src_build_c2box: sdk_folders
 	@echo start $@
 	which qmake
 	@cd $(TEST_ROOT_DIR)/build_c2box/$(CVS_SRC_SW_C2APPS); \
 		BUILD_TARGET=TARGET_LINUX_C2 TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD=RELEASE \
 		SW_MEDIA_PATH=$(SW_MEDIA_PATH) \
-		ENABLE_NEW_APP=TRUE make install; \
+		ENABLE_NEW_APP=TRUE make install;
+	@cd $(TEST_ROOT_DIR)/build_c2box/$(CVS_SRC_SW_C2APPS); \
 		rm -rf ../work; \
 		cp -a work ../ ;
 	@echo $@ done
@@ -1385,8 +1384,8 @@ factory_udisk:sdk_folders
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f build/sdk/drivers/galcore.ko          home/work/lib/
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f build/sdk/drivers/libdirectfb_gal.so  home/work/lib/
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f home/work/updat*.bmp . ; cp -f home/work/logo.bmp .
-	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
-	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f sw/kernel/rootfs.image .
+	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f $(CVS_SRC_KERNEL)/linux-2.6/zvmlinux.bin .
+	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f $(CVS_SRC_KERNEL)/rootfs.image .
 	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin kernel.img
 	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -n rootfs -d rootfs.image rootfs.img
 	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKYAFFS2) home home.image ;
@@ -1416,8 +1415,8 @@ user_udisk:sdk_folders
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f build/sdk/drivers/libGAL.so           work/lib/
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f build/sdk/drivers/galcore.ko          work/lib/
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f build/sdk/drivers/libdirectfb_gal.so  work/lib/
-	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
-	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f sw/kernel/rootfs.image .
+	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f $(CVS_SRC_KERNEL)/linux-2.6/zvmlinux.bin .
+	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f $(CVS_SRC_KERNEL)/rootfs.image .
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin uImage.bin
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; ./tools/updateFileGenerate/createArchive uImage.bin rootfs.image work -v "the version no."
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f c2_update.tar $(PKG_NAME_BIN_USER_UDISK)

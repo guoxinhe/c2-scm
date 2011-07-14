@@ -89,11 +89,11 @@ addto_send()
         if [ $? -ne 0 ]; then
             email=${email}@c2micro.com
         fi
-        if [ "$CONFIG_MAILLIST" = "" ]; then
+        if [ "$CONFIG_MAILLIST" == "" ]; then
             CONFIG_MAILLIST=$email ;
         else
           r=`echo $CONFIG_MAILLIST | grep $email`
-          if [ "$r" = "" ]; then
+          if [ "$r" == "" ]; then
             CONFIG_MAILLIST=$CONFIG_MAILLIST,$email ;
           fi
         fi
@@ -138,35 +138,35 @@ recho_time_consumed()
     shift
     echo "$@" "$tm_c seconds / $tm_h:$tm_m:$tm_s consumed."
 }
-addto_fail()
+addto_buildfail()
 {
     while [ $# -gt 0 ] ; do
-        if [ "$FAILLIST" = "" ]; then
-            FAILLIST=$1 ;
+        if [ "$FAILLIST_BUILD" == "" ]; then
+            FAILLIST_BUILD=$1 ;
         else
-          r=`echo $FAILLIST | grep $1`
-          if [ "$r" = "" ]; then
-            FAILLIST=$FAILLIST,$1 ;
+          r=`echo $FAILLIST_BUILD | grep $1`
+          if [ "$r" == "" ]; then
+            FAILLIST_BUILD=$FAILLIST_BUILD,$1 ;
           fi
         fi
         shift
     done
-    export FAILLIST
+    export FAILLIST_BUILD
 }
-addto_reportedfail()
+addto_resultfail()
 {
     while [ $# -gt 0 ] ; do
-        if [ "$REPORTEDFAILLIST" = "" ]; then
-            REPORTEDFAILLIST=$1 ;
+        if [ "$FAILLIST_RESULT" == "" ]; then
+            FAILLIST_RESULT=$1 ;
         else
-          r=`echo $REPORTEDFAILLIST | grep $1`
-          if [ "$r" = "" ]; then
-            REPORTEDFAILLIST=$REPORTEDFAILLIST,$1 ;
+          r=`echo $FAILLIST_RESULT | grep $1`
+          if [ "$r" == "" ]; then
+            FAILLIST_RESULT=$FAILLIST_RESULT,$1 ;
           fi
         fi
         shift
     done
-    export REPORTEDFAILLIST
+    export FAILLIST_RESULT
 }
 blame_devtools="saladwang hguo"
 blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli  codec_sw"
@@ -194,7 +194,7 @@ checkadd_fail_send_list()
         f=`echo $i | sed 's,[^:]*:[^:]*:\([^:]*\).*,\1,'`
         l=`echo $f | sed 's:.*/\(.*\):\1:'`
         if [ $x -ne 0 ]; then
-	    addto_reportedfail $m
+	    addto_resultfail $m
 	    nr_failmodule=$(($nr_failmodule+1))
             case $m in
             devtools*    ) addto_send $blame_devtools   ;; 
@@ -290,7 +290,7 @@ build_modules_x_steps()
             fi
         done
         if [ $nr_merr -ne 0 ];then
-            addto_fail $i
+            addto_buildfail $i
         fi
         nr_totalerror=$((nr_totalerror+nr_merr))
         nr_totalmodule=$((nr_totalmodule+1))
@@ -303,9 +303,20 @@ build_modules_x_steps()
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
 #modules="kernel kernelnand vivante hdmi uboot jtag diag sw_media qt470" # c2box facudisk usrudisk"
-modules="c2box facudisk usrudisk"
+modules="c2box"
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
-build_modules_x_steps
+#build_modules_x_steps
+
+r=`grep ^c2box:0 $CONFIG_INDEXLOG`
+#r=`grep ^uboot:0 $CONFIG_INDEXLOG`
+#r=`grep ^kernel:0 $CONFIG_INDEXLOG`
+if [ "$r" != "" ]; then
+    modules="facudisk usrudisk"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    build_modules_x_steps
+else
+    echo can not build, depend steps: c2box
+fi
 
 #step operations
 if test $CONFIG_BUILD_HELP; then
@@ -338,8 +349,8 @@ CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX $HOSTNAME $nr_total
 	echo "    ${i##*@}"
     done
     echo ""
-    [ $FAILLIST            ] && echo "fail in this build: $FAILLIST"
-    [ $REPORTEDFAILLIST    ] && echo "fail in all builds: $REPORTEDFAILLIST"
+    [ $FAILLIST_BUILD            ] && echo "fail in this build: $FAILLIST_BUILD"
+    [ $FAILLIST_RESULT    ] && echo "fail in all builds: $FAILLIST_RESULT"
     echo "Click here to watch report:"
     for i in  $CONFIG_WEBSERVERS; do
 	echo -en "    http://"
