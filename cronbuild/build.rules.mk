@@ -436,7 +436,8 @@ src_config_qt470: sdk_folders
 	-qt-libmng -qvfb -depths 8,16,32 \
 	-confirm-license -largefile -webkit -svg -dbus -I $(TOOLCHAIN_PATH)/../include/dbus-1.0 \
 	-L $(TOOLCHAIN_PATH)/../lib/  -ldbus-1 -xmlpatterns -exceptions \
-	-openssl-linked -no-opengl -nomake examples -nomake demos
+	-openssl-linked
+	# -no-opengl -nomake examples -nomake demos
 	@echo $@ done
 src_build_qt470_step1:
 	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \

@@ -32,7 +32,7 @@ CONFIG_BUILD_LOCAL=1
 CONFIG_BUILD_DOTAG=1
 CONFIG_BUILD_CLEAN=1
 CONFIG_BUILD_SDK=1
-CONFIG_BUILD_CHECKOUT=
+CONFIG_BUILD_CHECKOUT=1
 CONFIG_BUILD_PKGSRC=1
 CONFIG_BUILD_PKGBIN=1
 CONFIG_BUILD_DEVTOOLS=1
@@ -302,10 +302,9 @@ build_modules_x_steps()
 
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-#modules="kernel kernelnand vivante hdmi uboot jtag diag sw_media qt470" # c2box facudisk usrudisk"
-modules="c2box"
+modules="kernel kernelnand vivante hdmi uboot jtag diag sw_media qt470 c2box"
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
-#build_modules_x_steps
+build_modules_x_steps
 
 r=`grep ^c2box:0 $CONFIG_INDEXLOG`
 #r=`grep ^uboot:0 $CONFIG_INDEXLOG`
@@ -425,8 +424,8 @@ fi
 if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
     echo email title "$CONFIG_EMAILTITLE" 
     echo send to: $CONFIG_MAILLIST
-    #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
-    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
+    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+    #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
     echo send mail done.
 fi
 
