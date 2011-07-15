@@ -410,7 +410,7 @@ src_package_qt470: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_QT470)
 	@echo "Creating package $(PKG_NAME_SRC_QT470)"
-	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_QT470) --exclude=CVS --exclude=CVSROOT \
+	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_QT470) --exclude=CVS --exclude=CVSROOT --exclude=.git\
 		$(CVS_SRC_QT470)
 	@echo $@ done
 src_install_qt470: sdk_folders
@@ -420,6 +420,8 @@ src_install_qt470: sdk_folders
 	@echo Extract $(PKG_NAME_SRC_QT470)
 	cd $(TEST_ROOT_DIR)/build_qt ; \
 	    tar xzf $(PKG_NAME_SRC_QT470)
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+		rm -rf .git
 	@echo $@ done
 src_config_qt470: sdk_folders
 	@echo start $@
