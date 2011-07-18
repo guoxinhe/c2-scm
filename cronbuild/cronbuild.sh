@@ -263,6 +263,7 @@ list_fail_url_tail()
 
 
 #set -ex
+nr_failurl=0
 nr_totalerror=0
 nr_totalmodule=0
 tm_total=`date +%s`
@@ -335,10 +336,16 @@ export SDKENV_Script="`readlink -f $0`"
 export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/html,,g' -e 's,^.*@,,g'`
 ./html_generate.cgi  > $CONFIG_HTMLFILE
 
+checkadd_fail_send_list
+if [ $nr_failurl -gt 0 ] ; then
+    CONFIG_BUILD_PUBLISH=
+fi
+if [ $nr_totalerror -gt 0 ] ; then
+    CONFIG_BUILD_PUBLISH=
+fi
 
 #generate email
 #addto_send ruishengfu@c2micro.com hguo@c2micro.com
-checkadd_fail_send_list
 CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX $HOSTNAME $nr_totalmodule module(s) $nr_totalerror error(s)."
 (
     echo "$CONFIG_EMAILTITLE"
@@ -361,7 +368,7 @@ CONFIG_EMAILTITLE="`make SDK_TARGET_ARCH` $CONFIG_TREEPREFIX $HOSTNAME $nr_total
         echo "${i##*@}" | sed 's,:/var/www/html,,g'
     done
     list_fail_url_tail
-    [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] && echo ""
+    echo ""
     echo "More build environment reference info:"
     make lsvar
     echo ""
@@ -389,7 +396,8 @@ if [ $CONFIG_BUILD_PUBLISHLOG ]; then
         ip=`echo $CONFIG_LOGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
 	if [ "$ip" == "$THISIP" ];then
             mkdir -p $p
-	    cp -rf $CONFIG_LOGDIR/* $i/
+	    echo "cp -rf $CONFIG_LOGDIR/* $p/"
+	    cp -rf $CONFIG_LOGDIR/* $p/
 	else
             ssh $h mkdir -p $p
 	    scp -r $CONFIG_LOGDIR/* $i/
@@ -400,15 +408,13 @@ fi
 
 #upload package
 if [ $CONFIG_BUILD_PUBLISH ]; then
-    if [ $nr_failurl -gt 0 -o $nr_totalerror -gt 0 ] ; then
-        echo has errors, can not publish
-    else
     for i in $CONFIG_PKGSERVERS; do
         h=${i%%:/*}
         p=${i##*:}
         ip=`echo $CONFIG_PKGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
 	if [ "$ip" == "$THISIP" ];then
             mkdir -p $p
+	    echo "cp -rf $CONFIG_PKGDIR/* $p/"
 	    cp -rf $CONFIG_PKGDIR/* $p/
         else
             ssh $h mkdir -p $p
@@ -416,7 +422,6 @@ if [ $CONFIG_BUILD_PUBLISH ]; then
         fi
     done
     echo publish package done.
-    fi
 fi
 
 #upload web report
@@ -429,6 +434,7 @@ if [ $CONFIG_BUILD_PUBLISHHTML ]; then
         ip=`echo $CONFIG_WEBSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
 	if [ "$ip" == "$THISIP" ];then
             mkdir -p $p
+            echo "cp -f $CONFIG_HTMLFILE $p/$f"
             cp -f $CONFIG_HTMLFILE $p/$f
         else
             ssh $h mkdir -p $p
