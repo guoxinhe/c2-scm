@@ -303,7 +303,7 @@ build_modules_x_steps()
 
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-modules="kernel kernelnand vivante hdmi uboot jtag diag sw_media qt470 c2box"
+modules="kernel kernelnand vivante hdmi uboot sw_media qt470 c2box jtag diag c2_goodies "
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 

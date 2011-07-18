@@ -35,6 +35,7 @@ SOURCE_GITDIR			:= $(TOP_DIR)/c2sdk_source
 SOURCE_LOCAL			:= $(TOP_DIR)/source_local
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
+TAR_EXCLUDEFLAGS		:= --exclude=CVS --exclude=CVSROOT --exclude=.git --exclude=.repo
 
 ifneq ($(CVS_TAG),)
 CHECKOUT_OPTION         := -r $(CVS_TAG)

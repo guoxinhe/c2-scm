@@ -1,4 +1,3 @@
-TAREXCLUDE="--exclude=CVS --exclude=CVSROOT --exclude=.git --exclude=.gitignore"
 mission_devtools := src_get_devtools  \
 	src_package_devtools src_install_devtools src_config_devtools src_build_devtools \
 	bin_package_devtools bin_install_devtools 
@@ -35,8 +34,7 @@ buildroot:
 		rm autobuild_config_*
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(BUILDROOT_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		buildroot; \
 	    rm -rf buildroot;
 devtools_list += busybox151
@@ -46,8 +44,7 @@ busybox151:
 	@echo $@
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_5_1_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		busybox-1.5.1
 devtools_list += busybox1131
 src_get_busybox1131:
@@ -56,8 +53,7 @@ busybox1131:
 	@echo $@
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_13_3_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		busybox-1.13.3
 devtools_list += i2ctools301
 src_get_i2ctools301:
@@ -67,8 +63,7 @@ i2ctools301:
 	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/src_devtools/i2c-tools-3.0.1;
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(I2CTOOLS_FILE) \
-	        --exclude=CVS     \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        i2c-tools-3.0.1; \
 	    rm -rf i2c-tools-3.0.1
 devtools_list += oprofile
@@ -79,8 +74,7 @@ oprofile:
 	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/src_devtools/oprofile-0.9.1;
 	@cd $(TEMP_DIR)/src_devtools;\
 	    tar jcf $(OPROFILE_FILE) \
-	        --exclude=CVS     \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        oprofile-0.9.1; \
 	    rm -rf oprofile-0.9.1
 devtools_list += directfb
@@ -90,8 +84,7 @@ directfb:
 	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/directfb; \
 	    tar jcf $(DIRECTFB_FILE) \
-	        --exclude=CVS      \
-	        --exclude=CVSROOT  \
+		$(TAR_EXCLUDEFLAGS)   \
 	        DirectFB-1.4.5
 devtools_list += binutils
 src_get_binutils:	
@@ -102,8 +95,7 @@ binutils:
 	    cp -rf binutils $(TEMP_DIR)/src_devtools/binutils-c2.snapshot
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(BINUTILS_FILE) \
-		--exclude=CVS \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		binutils-c2.snapshot; \
 	    rm -rf binutils-c2.snapshot
 devtools_list += gccsrc
@@ -115,8 +107,7 @@ gccsrc:
 	    cp -rf gcc $(TEMP_DIR)/src_devtools/gcc-c2.snapshot
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(GCC_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		gcc-c2.snapshot ; \
 	    rm -rf gcc-c2.snapshot
 devtools_list += standalone_build_script
@@ -150,8 +141,7 @@ kernel_include:
 		cp -f $(SOURCE_DIR)/$(STANDALONE_BUILD)/version.h  \
 			linux-libc-headers-$(SDK_KERNEL_VERSION).0/include/linux ; \
 		tar jcf $(KERNEL_FILE) \
-			--exclude=CVS     \
-			--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 			linux-libc-headers-$(SDK_KERNEL_VERSION).0 ; \
 		rm -rf linux-libc-headers-$(SDK_KERNEL_VERSION).0
 devtools_list += uclibc
@@ -163,8 +153,7 @@ uclibc:
 	    cp -rf uClibc $(TEMP_DIR)/src_devtools/uClibc-0.9.27
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(UCLIBC_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		uClibc-0.9.27 ; \
 	    rm -rf uClibc-0.9.27
 devtools_list += mxtool
@@ -218,8 +207,7 @@ src_package_devtools: sdk_folders $(devtools_list)
 	@echo start $@
 	@echo Creating $(PKG_NAME_SRC_DEVTOOLS)
 	@cd $(TEMP_DIR) ; tar czvf $(PKG_NAME_SRC_DEVTOOLS) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		./devtools/tarballs          ./devtools/buildtools.sh    ./devtools/autobuild      \
 		./devtools/uclibc.mk         ./devtools/e2fsprogs.mk     ./devtools/binutils.mk    \
 		./devtools/libpng.mk         ./devtools/Config.in        ./devtools/binutils.mk.64 \
@@ -251,6 +239,7 @@ bin_package_devtools: sdk_folders
 	@echo "Creating package $(PKG_NAME_BIN_DEVTOOLS)"
 	@cd $(TEST_ROOT_DIR)/build_devtools/devtools; \
 	    tar cfz $(PKG_NAME_BIN_DEVTOOLS) \
+		$(TAR_EXCLUDEFLAGS)   \
 		--exclude=c2/$(TODAY)/tmp/*     \
 		c2
 	@echo $@ done
@@ -292,7 +281,8 @@ src_package_sw_media: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	@echo "Creating package $(PKG_NAME_SRC_SW_MEDIA_ALL)"
-	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_SW_MEDIA_ALL) --exclude=CVS --exclude=CVSROOT \
+	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_SW_MEDIA_ALL) \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_MEDIA)
 	@echo $@ done
 src_install_sw_media: sdk_folders
@@ -362,6 +352,7 @@ bin_package_sw_media: sdk_folders
 	@echo "Creating package $(PKG_NAME_BIN_SW_MEDIA):"
 	@cd $(TEST_ROOT_DIR)/build_sw_media/$(CVS_SRC_SW_MEDIA); \
 	    tar zcf $(PKG_NAME_BIN_SW_MEDIA) \
+		$(TAR_EXCLUDEFLAGS)   \
 		--exclude=RealPluginModule.plugin.so \
 		TARGET_LINUX_C2_$(SDK_TARGET_GCC_ARCH)_RELEASE
 	
@@ -410,7 +401,8 @@ src_package_qt470: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_QT470)
 	@echo "Creating package $(PKG_NAME_SRC_QT470)"
-	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_QT470) --exclude=CVS --exclude=CVSROOT --exclude=.git\
+	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_QT470) \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_QT470)
 	@echo $@ done
 src_install_qt470: sdk_folders
@@ -525,8 +517,7 @@ src_package_kernel: sdk_folders
 	@# package up kernel src
 	@cd $(TEMP_DIR)/src_kernel; \
 	    tar cfz $(PKG_NAME_SRC_KERNEL) \
-    		--exclude=CVS \
-    		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
     		./$(CVS_SRC_KERNEL);
 	@echo $@ done
 src_install_kernel: sdk_folders
@@ -676,7 +667,7 @@ src_package_kernela2632: sdk_folders
 	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.src.tar.gz
 	@cd $(SOURCE_LOCAL); \
 	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.src.tar.gz \
-		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
+		$(TAR_EXCLUDEFLAGS)   \
 		kernel
 	@echo $@ done
 src_install_kernela2632: sdk_folders 
@@ -706,7 +697,7 @@ bin_package_kernela2632: sdk_folders
 	@-rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.bin.tar.gz
 	@cd $(TEST_ROOT_DIR)/build_kernela2632/; \
 	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.bin.tar.gz \
-		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
+		$(TAR_EXCLUDEFLAGS)   \
 		kernel/vmlinux \
 		kernel/vmlinux.bin \
 		kernel/vmlinux.dump \
@@ -757,9 +748,7 @@ src_package_uboot: sdk_folders
 	@echo "Creating package $(PKG_NAME_SRC_UBOOT)"
 	@cd $(SOURCE_DIR); \
 	    tar cfz $(PKG_NAME_SRC_UBOOT) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
-	        --exclude=.git \
+		$(TAR_EXCLUDEFLAGS)   \
 	        $(GIT_SRC_UBOOT)
 	@echo $@ done
 src_install_uboot: sdk_folders
@@ -816,16 +805,14 @@ src_package_vivante: sdk_folders
 	@echo "Creating package $(PKG_NAME_SRC_VIVANTE)"
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_SRC_VIVANTE) \
-		--exclude=CVS \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_VIVANTE)
 	
 	@-rm -rf $(PKG_NAME_TEST_SRC_VIVANTE)
 	@echo "Creating package $(PKG_NAME_TEST_SRC_VIVANTE)"
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_TEST_SRC_VIVANTE) \
-		--exclude=CVS \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_VIVANTE)/gfxtst
 	@echo $@ done
 src_install_vivante: sdk_folders
@@ -882,8 +869,7 @@ src_package_hdmi: sdk_folders
 	cp -arf $(SOURCE_DIR)/$(CVS_SRC_HDMI_JAZZ2) $(TEMP_DIR)/src_hdmi;
 	@cd $(TEMP_DIR)/src_hdmi; \
 	   tar cfz $(PKG_NAME_SRC_HDMI_JAZZ2) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        jazz2hdmi
 	@echo $@ done
 src_install_hdmi: sdk_folders
@@ -947,8 +933,7 @@ src_package_c2box: sdk_folders
 	@rm -f $(PKG_NAME_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_SW_C2APPS) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        --exclude=ipcam \
 		--exclude=dtv \
 		--exclude=p2p/PiPlugin \
@@ -960,8 +945,7 @@ src_package_c2box: sdk_folders
 	        $(CVS_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_C2BOX_ALL) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        --exclude=ipcam \
 		--exclude=dtv \
 		--exclude=p2p/PiPlugin \
@@ -973,8 +957,7 @@ src_package_c2box: sdk_folders
 	        $(CVS_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_C2BOX) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        --exclude=ipcam \
 		--exclude=dtv \
 		--exclude=p2p/PiPlugin \
@@ -999,49 +982,49 @@ src_package_c2box: sdk_folders
 	        $(CVS_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_MINIBD) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/discs
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_FLASH) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/flash
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_KARAOKE) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/karaoke
 	@if [ "$(SDK_TARGET_ARCH)" != "jazz2l" ]; then \
 	cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_VIDEOCHAT) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videochat; \
 	fi
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_THUNDERKK) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/thunderkk
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_MVPHONE) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videophone
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_BROWSER) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/browser
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_IPCAM) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/camera
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_JVM) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/jvm
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_RECOEDING) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/capture
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_SOHU) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/sohu
 	
 	@echo $@ done
@@ -1119,8 +1102,7 @@ src_package_jtag: sdk_folders
 	@echo "Creating package $(PKG_NAME_SRC_JTAG)"
 	@cd $(TEMP_DIR)/src_jtag; \
 	    tar cfz $(PKG_NAME_SRC_JTAG) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        $(CVS_SRC_JTAG)
 	@echo $@ done
 src_install_jtag: sdk_folders
@@ -1191,8 +1173,7 @@ src_package_diag: sdk_folders
 	@echo "Creating package $(PKG_NAME_SRC_DIAG)"
 	@cd $(TEMP_DIR)/src_diag; \
 	    tar cfz $(PKG_NAME_SRC_DIAG) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_DIAG)/example \
 		$(CVS_SRC_DIAG)/include \
 		$(CVS_SRC_DIAG)/jtag_scripts \
@@ -1256,56 +1237,14 @@ mission_targets += $(mission_c2_goodies)
 .PHONY: $(mission_c2_goodies)
 src_get_c2_goodies:  sdk_folders
 	@echo start $@
-	mkdir -p $(SRC_FUSEPOD)
-	-cp -rf -t $(SRC_FUSEPOD) \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/scripts/build-fusepod.sh \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/djmount-0.71.tar.gz  \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/fusepod-0.5.1.tar    \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/libgpod-0.5.2.tar.gz \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/fuse-2.6.3.tar.gz    \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/glib-2.12.9-c2.tar   \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/taglib-1.4.tar
-	
-	mkdir -p $(SRC_PERL)
-	-cp -rf -t $(SRC_PERL)\
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/scripts/build-microperl.sh\
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/perl-5.8.8.tar.gz 
-	
-	mkdir -p $(SRC_SNOOPY)
-	-cp -rf -t $(SRC_SNOOPY)                         \
-	    $(SOURCE_DIR)/sw/cmd/snoopy ${SRC_SNOOPY%/*}
-	
-	mkdir -p $(SRC_HDD)
-	-cp -rf -t $(SRC_HDD)                                            \
-	    $(SOURCE_DIR)/sw_c2apps/3rdParty/sdk-build-hdd.sh               \
-	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/samba-3.0.28a-c2.tar.bz2 \
-	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/libusb-0.1.12.tar.bz2    \
-	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/libptp2-1.1.10.tar.gz    \
-	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/ntfs-3g-1.2531-c2.tgz    \
-	    $(SOURCE_DIR)/sw_c2apps/3rdParty/dist/ntfsprogs-2.0.0-c2.tar.gz 
-	
-	mkdir -p $(SRC_BENCHMARK)
-	-cp -rf -t $(SRC_BENCHMARK)                                   \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/scripts/build-benchmark.sh\
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/bonnie++-1.03d.tgz     \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/iozone3_308-c2.tgz     \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/lmbench3-c2.tgz        \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/unixbench-4.1.0-c2.tgz \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/iperf-2.0.2.c2.tar.gz  \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/netperf-2.4.4.c2.tar.gz\
-	
-	mkdir -p $(SRC_ETHTOOL)
-	-cp -rf -t $(SRC_ETHTOOL) \
-	    $(SOURCE_DIR)/sw/devtools/3rdParty/ethtool-6.tar.gz
 	@echo $@ done
 src_package_c2_goodies: sdk_folders
 	@echo start $@
 	@rm -f $(PKG_NAME_SRC_GOODIES)
 	@echo "Creating package $(PKG_NAME_SRC_GOODIES)"
-	@cd $(SOURCE_DIR); \
+	@cd $(SOURCE_DIR)/sw; \
 	tar cfz $(PKG_NAME_SRC_GOODIES) \
-    		--exclude=CVS \
-    		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
     		./c2_goodies
 	@echo $@ done
 src_install_c2_goodies: sdk_folders
