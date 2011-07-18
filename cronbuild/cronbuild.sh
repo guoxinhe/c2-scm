@@ -9,14 +9,14 @@ tm_toptask=`date +%s`
 tm_date=`date`
 TODAY=`date +%y%m%d`
 THISSCR=`readlink -f $0`
-THISIP==`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
+THISIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 [ -t 1 -o -t 2 ] && THISTTY=y
 CONFIG_ARCH=`make SDK_TARGET_ARCH`
 CONFIG_PKGDIR=`make PKG_DIR`
 CONFIG_TREEPREFIX=dev
 CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/jazz2-dev-b2-sdk-daily.html"
 CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/jazz2-dev_logs/$TODAY.log"
-CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/tempb2/jazz2/dev/weekly/$TODAY"
+CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/jazz2/dev/weekly/$TODAY"
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
 CONFIG_RESULT=$TOP/build_result/$TODAY
@@ -50,7 +50,7 @@ CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
 CONFIG_BUILD_FACUDISK=1
 CONFIG_BUILD_USRUDISK=1
-CONFIG_BUILD_PUBLISH=
+CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=1
@@ -386,8 +386,14 @@ if [ $CONFIG_BUILD_PUBLISHLOG ]; then
     for i in $CONFIG_LOGSERVERS; do
         h=${i%%:/*}
         p=${i##*:}
-        ssh $h mkdir -p $p
-	scp -r $CONFIG_LOGDIR/* $i/
+        ip=`echo $CONFIG_LOGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
+	if [ "$ip" == "$THISIP" ];then
+            mkdir -p $p
+	    cp -rf $CONFIG_LOGDIR/* $i/
+	else
+            ssh $h mkdir -p $p
+	    scp -r $CONFIG_LOGDIR/* $i/
+	fi
     done
     echo publish log done.
 fi
@@ -400,8 +406,14 @@ if [ $CONFIG_BUILD_PUBLISH ]; then
     for i in $CONFIG_PKGSERVERS; do
         h=${i%%:/*}
         p=${i##*:}
-        ssh $h mkdir -p $p
-	scp -r $CONFIG_PKGDIR/* $i/
+        ip=`echo $CONFIG_PKGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
+	if [ "$ip" == "$THISIP" ];then
+            mkdir -p $p
+	    cp -rf $CONFIG_PKGDIR/* $p/
+        else
+            ssh $h mkdir -p $p
+	    scp -r $CONFIG_PKGDIR/* $i/
+        fi
     done
     echo publish package done.
     fi
@@ -414,8 +426,14 @@ if [ $CONFIG_BUILD_PUBLISHHTML ]; then
         p=${i##*:}
 	f=${p##*/}
 	p=${p%/*}
-        ssh $h mkdir -p $p
-	scp -r $CONFIG_HTMLFILE $i
+        ip=`echo $CONFIG_WEBSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
+	if [ "$ip" == "$THISIP" ];then
+            mkdir -p $p
+            cp -f $CONFIG_HTMLFILE $p/$f
+        else
+            ssh $h mkdir -p $p
+	    scp -r $CONFIG_HTMLFILE $i
+        fi
     done
     echo publish web done.
 fi
