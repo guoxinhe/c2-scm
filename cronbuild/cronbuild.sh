@@ -168,6 +168,22 @@ addto_resultfail()
     done
     export FAILLIST_RESULT
 }
+BR=master
+c2androiddir=`make SOURCE_DIR`
+checkout_script=$CONFIG_PKGDIR/checkout-gits-tags.sh
+create_ckeckout_script(){
+    #create checkout script of this build code
+    echo '#!/bin/sh'                 >$checkout_script
+    echo ""                         >>$checkout_script
+    echo "repo start --all $BR"     >>$checkout_script
+    echo ""                         >>$checkout_script
+    repo forall -c "echo pushd \$(pwd); 
+        echo -en 'git checkout '; 
+        git  log -n 1 | grep ^commit\ | sed 's/commit //g';
+        echo 'popd'; echo ' ';" >>$checkout_script
+    sed -i -e "s,$c2androiddir/,,g"   $checkout_script
+    chmod 755                         $checkout_script
+}
 blame_devtools="saladwang hguo"
 blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli  codec_sw"
 blame_qt="mxia dashanzhou txiang slu jzhang                                         sw_apps"
@@ -317,7 +333,7 @@ if [ "$r" != "" ]; then
 else
     echo can not build, depend steps: c2box
 fi
-
+create_ckeckout_script
 #step operations
 if test $CONFIG_BUILD_HELP; then
     echo help done.
