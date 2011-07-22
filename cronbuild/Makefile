@@ -11,8 +11,10 @@ TEMP_DIR			:= $(TOP_DIR)/temp
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/sw_media_installed
 QT_INSTALL_DIR                  := /build/jazz2/dev/sdk/test_root/QtopiaCore-4.7.0-generic
 TAR_EXCLUDEFLAGS		:= --exclude=CVS --exclude=CVSROOT --exclude=.git --exclude=.repo
-varlist := TODAY TOP_DIR SDK_TARGET_ARCH SDK_VERSION_ALL PKG_DIR TEST_ROOT_DIR SOURCE_DIR TEMP_DIR
-
+varlist := TODAY TOP_DIR SDK_TARGET_ARCH SDK_VERSION_ALL PKG_DIR TEST_ROOT_DIR SOURCE_DIR TEMP_DIR \
+	SDK_GCC_VERSION		SDK_TARGET_GCC_ARCH			\
+	SDK_KERNEL_VERSION	LINUXDIR                LINUX_CONFIG	\
+	SDK_QT_VERSION		QTINSTALL_NAME
 mklist :=
 MYINCFILE := build.config.mk
 ifneq (,$(realpath $(MYINCFILE)))
@@ -82,7 +84,7 @@ define safelink
 endef
 sdkautodirs :=  $(PKG_DIR)/c2box $(TEST_ROOT_DIR)/usr/bin  $(TEMP_DIR)
 
-.PHONY: sdk_folders lsmod lsop lstest lsall help
+.PHONY: sdk_folders lsmod lsop lstest lsall lsmk lsvar lsvars $(varlist) help
 $(sdkautodirs):
 	@mkdir -p $@
 updatetoplink:
@@ -99,8 +101,8 @@ lsall:
 	@echo "support mission targets:" $(mission_targets)
 lsmk:
 	@echo "included files         :" $(mklist)
-lsvar: lsvars $(varlist)
-.PHONY: lsvars  $(varlist)
+lsvar:
+	@$(foreach i,$(varlist),$i=$($i);echo)
 lsvars:
 	@echo $(varlist)
 $(varlist):
