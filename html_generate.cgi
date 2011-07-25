@@ -17,6 +17,7 @@ td.category {vertical-align:top}
 .pass {background: #00ff00; font-weight:bold}
 .fail {background: red;  font-weight:bold}
 .na   {background: grey}
+.doing {background: #ffff00; font-weight:bold}
 -->
 EOCSS
 
@@ -56,9 +57,7 @@ HTML
 sub print_top_results {
 
   my $results_dir; 
-  my $tree_prefix;
-  my $sdk_target_arch;
-  my $user;
+  my $urlpre;
 
   if (defined($ENV{SDK_RESULTS_DIR})) {
     $results_dir = $ENV{SDK_RESULTS_DIR};
@@ -66,22 +65,10 @@ sub print_top_results {
     $results_dir = "$ENV{PWD}/../build_result";
   }
 
-  if (defined($ENV{TREE_PREFIX})) {
-    $tree_prefix = $ENV{TREE_PREFIX};
+  if (defined($ENV{SDKENV_URLPRE})) {
+    $urlpre = $ENV{SDKENV_URLPRE};
   }else{
-    $tree_prefix = "msp_dev";
-  }
-
-  if (defined($ENV{SDK_TARGET_ARCH})) {
-    $sdk_target_arch = $ENV{SDK_TARGET_ARCH};
-  }else{
-    $sdk_target_arch = "jazzb";
-  }
-
-  if (defined($ENV{SDK_CVS_USER})) {
-    $user = $ENV{SDK_CVS_USER};
-  }else{
-    $user = "roger";
+    $urlpre = "http://127.0.0.1"
   }
 
   opendir(DIR, $results_dir) or die "Couldn't open $results_dir: $!\n";
@@ -119,7 +106,13 @@ sub print_top_results {
       # Make test red if the most recent test failed
       my $testclass = "na";
       if (exists($results{$test}{$dates[0]})) {
-        $testclass = $results{$test}{$dates[0]}[0] == 0 ? "pass" : "fail";
+        if($results{$test}{$dates[0]}[0] == 0) {
+            $testclass = "pass";
+        } else if($results{$test}{$dates[0]}[0] == 2) {
+            $testclass = "doing";
+        } else {
+            $testclass = "fail";
+        }
       }
 
 
@@ -137,7 +130,7 @@ sub print_top_results {
 
           $status = ($n_error) ? "${n_warning}/${n_error}" : uc($class);
 
-          $log =~ s-$results_dir-https://access.c2micro.com/~${user}/${sdk_target_arch}_${tree_prefix}_logs/-;
+          $log =~ s-$results_dir-$urlpre-;
 
           $status = "<a href='$log' title='gettin jiggy'>${status}</a>";
         }

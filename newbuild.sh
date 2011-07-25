@@ -121,11 +121,11 @@ addto_send()
         if [ $? -ne 0 ]; then
             email=${email}@c2micro.com
         fi
-        if [ "$CONFIG_MAILLIST" == "" ]; then
+        if [ "$CONFIG_MAILLIST" = "" ]; then
             CONFIG_MAILLIST=$email ;
         else
           r=`echo $CONFIG_MAILLIST | grep $email`
-          if [ "$r" == "" ]; then
+          if [ "$r" = "" ]; then
             CONFIG_MAILLIST=$CONFIG_MAILLIST,$email ;
           fi
         fi
@@ -173,11 +173,11 @@ recho_time_consumed()
 addto_buildfail()
 {
     while [ $# -gt 0 ] ; do
-        if [ "$FAILLIST_BUILD" == "" ]; then
+        if [ "$FAILLIST_BUILD" = "" ]; then
             FAILLIST_BUILD=$1 ;
         else
           r=`echo $FAILLIST_BUILD | grep $1`
-          if [ "$r" == "" ]; then
+          if [ "$r" = "" ]; then
             FAILLIST_BUILD=$FAILLIST_BUILD,$1 ;
           fi
         fi
@@ -188,11 +188,11 @@ addto_buildfail()
 addto_resultfail()
 {
     while [ $# -gt 0 ] ; do
-        if [ "$FAILLIST_RESULT" == "" ]; then
+        if [ "$FAILLIST_RESULT" = "" ]; then
             FAILLIST_RESULT=$1 ;
         else
           r=`echo $FAILLIST_RESULT | grep $1`
-          if [ "$r" == "" ]; then
+          if [ "$r" = "" ]; then
             FAILLIST_RESULT=$FAILLIST_RESULT,$1 ;
           fi
         fi
@@ -203,7 +203,7 @@ addto_resultfail()
 BR=$CONFIG_BRANCH
 c2androiddir=`make SOURCE_DIR`
 checkout_script=$CONFIG_PKGDIR/checkout-gits-tags.sh
-create_ckeckout_script(){
+create_checkout_script(){
     #create checkout script of this build code
     echo '#!/bin/sh'                 >$checkout_script
     echo ""                         >>$checkout_script
@@ -368,7 +368,7 @@ else
     echo can not build, depend steps: c2box
 fi
 
-create_ckeckout_script
+create_checkout_script
 
 #step operations
 if test $CONFIG_BUILD_HELP; then
@@ -451,7 +451,7 @@ if [ $CONFIG_BUILD_PUBLISHLOG ]; then
         h=${i%%:/*}
         p=${i##*:}
         ip=`echo $CONFIG_LOGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
-	if [ "$ip" == "$THISIP" ];then
+	if [ "$ip" = "$THISIP" ];then
             mkdir -p $p
 	    echo "cp -rf $CONFIG_LOGDIR/* $p/"
 	    cp -rf $CONFIG_LOGDIR/* $p/
@@ -469,7 +469,7 @@ if [ $CONFIG_BUILD_PUBLISH ]; then
         h=${i%%:/*}
         p=${i##*:}
         ip=`echo $CONFIG_PKGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
-	if [ "$ip" == "$THISIP" ];then
+	if [ "$ip" = "$THISIP" ];then
             mkdir -p $p
 	    echo "cp -rf $CONFIG_PKGDIR/* $p/"
 	    cp -rf $CONFIG_PKGDIR/* $p/
@@ -489,7 +489,7 @@ if [ $CONFIG_BUILD_PUBLISHHTML ]; then
 	f=${p##*/}
 	p=${p%/*}
         ip=`echo $CONFIG_WEBSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
-	if [ "$ip" == "$THISIP" ];then
+	if [ "$ip" = "$THISIP" ];then
             mkdir -p $p
             echo "cp -f $CONFIG_HTMLFILE $p/$f"
             cp -f $CONFIG_HTMLFILE $p/$f
