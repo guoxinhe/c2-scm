@@ -1,7 +1,12 @@
 #!/bin/sh
 
-#basic settings
-#auto detect
+#basic settings auto detect
+#---------------------------------------------------------------
+CONFIG_TODAY=`date +%y%m%d`
+CONFIG_MYIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
+CONFIG_SCRIPT=`readlink -f $0`
+CONFIG_STARTTIME=`date`
+CONFIG_STARTTID=`date +%s`
 if [ -t 1 -o -t 2 ]; then
 CONFIG_TTY=y
 TOP=`pwd`
@@ -9,30 +14,9 @@ else
 TOP=/build2/jazz2-daily
 fi
 cd $TOP
-jobtimeout=6000
-lock=`pwd`/${0##*/}.lock
-if [ -f $lock ]; then
-    burn=`stat -c%Z $lock`
-    now=`date +%s`
-    age=$((now-burn))
-    #24 hour = 86400 seconds = 24 * 60 * 60 seconds.
-    if [ $age -gt $jobtimeout ]; then
-        rm -rf $lock
-    else
-        echo "an active task is running for $age seconds: `cat $lock`"
-	echo "close it before restart: $lock"
-        exit 1
-    fi
-fi
-echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >$lock
 
-#detect env
-TODAY=`date +%y%m%d`
-THISIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
-
-CONFIG_SCRIPT=`readlink -f $0`
-CONFIG_STARTTIME=`date`
-CONFIG_STARTTID=`date +%s`
+#---------------------------------------------------------------
+CONFIG_SYNCSRC=/local/c2sdk/reposyncall
 CONFIG_ARCH=`make SDK_TARGET_ARCH`  #jazz2 jzz2t jazz2l
 CONFIG_PKGDIR=`make PKG_DIR`        
 CONFIG_TREEPREFIX=sdkdev               #sdkdev sdkrel anddev andrel, etc, easy to understand
@@ -40,22 +24,22 @@ CONFIG_GCCPATH=/c2/local/c2/daily-jazz2/bin
 CONFIG_GCC=`$CONFIG_GCCPATH/c2-linux-gcc --version`
 CONFIG_KERNEL=`make SDK_KERNEL_VERSION`
 CONFIG_LIBC=uClibc-0.9.27
-CONFIG_BRANCH=master
-CONFIG_PROJECT=SDK
+CONFIG_BRANCH=master  #one of: master, devel, etc.
+CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
 CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/$CONFIG_WEBFILE"
-CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$TODAY.log"
-CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$TODAY"
+CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log"
+CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY"
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
-CONFIG_RESULT=$TOP/build_result/$TODAY
+CONFIG_RESULT=$TOP/build_result/$CONFIG_TODAY
 CONFIG_LOGDIR=$CONFIG_RESULT.log
 CONFIG_INDEXLOG=$CONFIG_RESULT.txt
 CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
 CONFIG_EMAILFILE=$CONFIG_LOGDIR/email.txt
 CONFIG_EMAILTITLE="$CONFIG_ARCH $CONFIG_TREEPREFIX daily build pass"
-CONFIG_PATH=/c2/local/c2/daily-jazz2/bin:$PATH
+CONFIG_PATH=$CONFIG_GCCPATH:$PATH
 CONFIG_BUILD_DRY=1
 CONFIG_BUILD_HELP=1
 CONFIG_BUILD_LOCAL=1
@@ -90,29 +74,46 @@ while [ $# -gt 0 ] ; do
     case $1 in
     --noco)      CONFIG_BUILD_CHECKOUT= ; shift;;
     --help)       CONFIG_BUILD_HELP=y ; shift;;
-    --set)   set | grep CONFIG_    ;   rm -rf $lock; exit 0; shift;;
+    --set)   set | grep CONFIG_  ;  exit 0; shift;;
     *) 	echo "not support option: $1"; CONFIG_BUILD_HELP=1;  shift  ;;
     esac
 done
+
+#step operations
+if test $CONFIG_BUILD_HELP; then
+    echo help done.
+    exit 0;
+fi
+
+
+#---------------------------------------------------------------
+jobtimeout=6000
+lock=`pwd`/${0##*/}.lock
+lock_job()
+{
+  if [ -f $lock ]; then
+    burn=`stat -c%Z $lock`
+    now=`date +%s`
+    age=$((now-burn))
+    #24 hour = 86400 seconds = 24 * 60 * 60 seconds.
+    if [ $age -gt $jobtimeout ]; then
+        rm -rf $lock
+    else
+        echo "an active task is running for $age seconds: `cat $lock`"
+	echo "close it before restart: $lock"
+	echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >>$lock.log
+        exit 1
+    fi
+  fi
+  >$lock.log
+  echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >$lock
+}
 softlink()
 {
     [ -h $2 ] && rm $2
     #[ -d ${2%/*} ] || mkdir -p ${2%/*}
     ln -s $1 $2
 }
-mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
-touch $CONFIG_INDEXLOG
-touch $CONFIG_HTMLFILE
-touch $CONFIG_EMAILFILE
-softlink $CONFIG_INDEXLOG r
-softlink $CONFIG_LOGDIR   l
-softlink $CONFIG_RESULT   i
-#action parse
-set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
-cat $CONFIG_LOGDIR/env.sh
-if [ $CONFIG_BUILD_CHECKOUT ];then
-    /local/c2sdk/reposyncall
-fi
 addto_send()
 {
     while [ $# -gt 0 ] ; do
@@ -200,10 +201,13 @@ addto_resultfail()
     done
     export FAILLIST_RESULT
 }
-BR=$CONFIG_BRANCH
-c2androiddir=`make SOURCE_DIR`
-checkout_script=$CONFIG_PKGDIR/checkout-gits-tags.sh
+
 create_checkout_script(){
+    BR=$CONFIG_BRANCH
+    c2androiddir=`make SOURCE_DIR`
+    checkout_script=$CONFIG_PKGDIR/checkout-gits-tags.sh
+
+    pushd $c2androiddir
     #create checkout script of this build code
     echo '#!/bin/sh'                 >$checkout_script
     echo ""                         >>$checkout_script
@@ -215,24 +219,26 @@ create_checkout_script(){
         echo 'popd'; echo ' ';" >>$checkout_script
     sed -i -e "s,$c2androiddir/,,g"   $checkout_script
     chmod 755                         $checkout_script
+    popd
 }
-blame_devtools="saladwang hguo"
-blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli  codec_sw"
-blame_qt="mxia dashanzhou txiang slu jzhang                                         sw_apps"
-blame_c2box="mxia dashanzhou txiang slu jzhang                                      sw_apps"
-blame_jtag="jsun"
-blame_c2_goodies="jsun robinlee ali"
-blame_diag="jsun"
-blame_kernel="jsun robinlee ali roger llian simongao xingeng swine hguo janetliu    sys_sw"
-blame_vivante="llian jsun"
-blame_hdmi="jsun xingeng"
-blame_uboot="ali jsun robinlee"
-blame_facudisk="hguo"
-blame_usrudisk="hguo"
-blame_xxx="hguo"
 
 checkadd_fail_send_list()
 {
+    blame_devtools="saladwang hguo"
+    blame_sw_media="jliu fzhang czheng kkuang summychen weli thang bcang lji qunyingli  codec_sw"
+    blame_qt="mxia dashanzhou txiang slu jzhang                                         sw_apps"
+    blame_c2box="mxia dashanzhou txiang slu jzhang                                      sw_apps"
+    blame_jtag="jsun"
+    blame_c2_goodies="jsun robinlee ali"
+    blame_diag="jsun"
+    blame_kernel="jsun robinlee ali roger llian simongao xingeng swine hguo janetliu    sys_sw"
+    blame_vivante="llian jsun"
+    blame_hdmi="jsun xingeng"
+    blame_uboot="ali jsun robinlee"
+    blame_facudisk="hguo"
+    blame_usrudisk="hguo"
+    blame_xxx="hguo"
+
     #pickup the fail log's tail to email for a quick preview
     loglist=`cat $CONFIG_INDEXLOG`
     nr_failmodule=0
@@ -309,7 +315,6 @@ list_fail_url_tail()
     export nr_failurl
 }
 
-
 #set -ex
 nr_failurl=0
 nr_totalerror=0
@@ -349,32 +354,8 @@ build_modules_x_steps()
     done
 }
 
-modules="xxx"
-#modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-modules="kernel kernelnand vivante hdmi uboot sw_media qt470 c2box jtag diag c2_goodies "
-steps="src_get src_package src_install src_config src_build bin_package bin_install "
-build_modules_x_steps
-
-r=`grep ^c2box:0 $CONFIG_INDEXLOG`
-#r=`grep ^uboot:0 $CONFIG_INDEXLOG`
-#r=`grep ^kernel:0 $CONFIG_INDEXLOG`
-if [ "$r" != "" ]; then
-    modules=
-    [ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
-    [ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
-    steps="src_get src_package src_install src_config src_build bin_package bin_install "
-    build_modules_x_steps
-else
-    echo can not build, depend steps: c2box
-fi
-
-create_checkout_script
-
-#step operations
-if test $CONFIG_BUILD_HELP; then
-    echo help done.
-fi
-
+generate_web_report()
+{
 #generate web report
 #these exports are used by html_generate.cgi
 export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
@@ -388,23 +369,17 @@ export SDKENV_Setting="<pre>Makefile settings:
 build script settings:
 `set | grep CONFIG_ `
 </pre>"
-export SDKENV_Server="`whoami` on $THISIP(`hostname`)"
+export SDKENV_Server="`whoami` on $CONFIG_MYIP(`hostname`)"
 export SDKENV_Script="`readlink -f $0`"
 export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/html,,g' -e 's,^.*@,,g'`
 ./html_generate.cgi  > $CONFIG_HTMLFILE
+}
 
-checkadd_fail_send_list
-if [ $nr_failurl -gt 0 ] ; then
-    CONFIG_BUILD_PUBLISH=
-fi
-if [ $nr_totalerror -gt 0 ] ; then
-    CONFIG_BUILD_PUBLISH=
-fi
-
-#generate email
-#addto_send ruishengfu@c2micro.com hguo@c2micro.com
-CONFIG_EMAILTITLE="${CONFIG_ARCH} $CONFIG_TREEPREFIX $HOSTNAME $nr_totalmodule module(s) $nr_totalerror error(s)."
-(
+generate_email()
+{
+  #addto_send ruishengfu@c2micro.com hguo@c2micro.com
+  CONFIG_EMAILTITLE="${CONFIG_ARCH} $CONFIG_TREEPREFIX $HOSTNAME $nr_totalmodule module(s) $nr_totalerror error(s)."
+  (
     echo "$CONFIG_EMAILTITLE"
     echo ""
     echo "Get build package at nfs service:"
@@ -438,58 +413,22 @@ CONFIG_EMAILTITLE="${CONFIG_ARCH} $CONFIG_TREEPREFIX $HOSTNAME $nr_totalmodule m
     #echo "Check broken log history:  http://10.16.13.196/${USER}/blog"
     echo ""
     echo "Regards,"
-    echo "`whoami`,`hostname`($THISIP)"
+    echo "`whoami`,`hostname`($CONFIG_MYIP)"
     echo "`readlink -f $0`"
     date
-) >$CONFIG_EMAILFILE 2>&1
+  ) >$CONFIG_EMAILFILE 2>&1
+}
 
-
-#upload log
-if [ $CONFIG_BUILD_PUBLISHLOG ]; then
-    unix2dos -q $CONFIG_LOGDIR/*
-    for i in $CONFIG_LOGSERVERS; do
-        h=${i%%:/*}
-        p=${i##*:}
-        ip=`echo $CONFIG_LOGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
-	if [ "$ip" = "$THISIP" ];then
-            mkdir -p $p
-	    echo "cp -rf $CONFIG_LOGDIR/* $p/"
-	    cp -rf $CONFIG_LOGDIR/* $p/
-	else
-            ssh $h mkdir -p $p
-	    scp -r $CONFIG_LOGDIR/* $i/
-	fi
-    done
-    echo publish log done.
-fi
-
-#upload package
-if [ $CONFIG_BUILD_PUBLISH ]; then
-    for i in $CONFIG_PKGSERVERS; do
-        h=${i%%:/*}
-        p=${i##*:}
-        ip=`echo $CONFIG_PKGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
-	if [ "$ip" = "$THISIP" ];then
-            mkdir -p $p
-	    echo "cp -rf $CONFIG_PKGDIR/* $p/"
-	    cp -rf $CONFIG_PKGDIR/* $p/
-        else
-            ssh $h mkdir -p $p
-	    scp -r $CONFIG_PKGDIR/* $i/
-        fi
-    done
-    echo publish package done.
-fi
-
-#upload web report
-if [ $CONFIG_BUILD_PUBLISHHTML ]; then
+upload_web_report()
+{
+  if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     for i in $CONFIG_WEBSERVERS; do
         h=${i%%:/*}
         p=${i##*:}
 	f=${p##*/}
 	p=${p%/*}
         ip=`echo $CONFIG_WEBSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
-	if [ "$ip" = "$THISIP" ];then
+	if [ "$ip" = "$CONFIG_MYIP" ];then
             mkdir -p $p
             echo "cp -f $CONFIG_HTMLFILE $p/$f"
             cp -f $CONFIG_HTMLFILE $p/$f
@@ -499,15 +438,111 @@ if [ $CONFIG_BUILD_PUBLISHHTML ]; then
         fi
     done
     echo publish web done.
-fi
+  fi
+}
 
-#send email
-if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
+upload_logs()
+{
+  if [ $CONFIG_BUILD_PUBLISHLOG ]; then
+    unix2dos -q $CONFIG_LOGDIR/*
+    for i in $CONFIG_LOGSERVERS; do
+        h=${i%%:/*}
+        p=${i##*:}
+        ip=`echo $CONFIG_LOGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
+	if [ "$ip" = "$CONFIG_MYIP" ];then
+            mkdir -p $p
+	    echo "cp -rf $CONFIG_LOGDIR/* $p/"
+	    cp -rf $CONFIG_LOGDIR/* $p/
+	else
+            ssh $h mkdir -p $p
+	    scp -r $CONFIG_LOGDIR/* $i/
+	fi
+    done
+    echo publish log done.
+  fi
+}
+
+upload_packages()
+{
+  if [ $CONFIG_BUILD_PUBLISH ]; then
+    for i in $CONFIG_PKGSERVERS; do
+        h=${i%%:/*}
+        p=${i##*:}
+        ip=`echo $CONFIG_PKGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
+	if [ "$ip" = "$CONFIG_MYIP" ];then
+            mkdir -p $p
+	    echo "cp -rf $CONFIG_PKGDIR/* $p/"
+	    cp -rf $CONFIG_PKGDIR/* $p/
+        else
+            ssh $h mkdir -p $p
+	    scp -r $CONFIG_PKGDIR/* $i/
+        fi
+    done
+    echo publish package done.
+  fi
+}
+
+send_email()
+{
+  if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
     echo email title "$CONFIG_EMAILTITLE" 
     echo send to: $CONFIG_MAILLIST
     #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
     cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
     echo send mail done.
+  fi
+}
+
+
+# let's go!
+#---------------------------------------------------------------
+lock_job
+mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
+touch $CONFIG_INDEXLOG 
+touch $CONFIG_HTMLFILE
+touch $CONFIG_EMAILFILE
+softlink $CONFIG_INDEXLOG r
+softlink $CONFIG_LOGDIR   l
+softlink $CONFIG_RESULT   i
+#action parse
+set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
+cat $CONFIG_LOGDIR/env.sh
+if [ $CONFIG_BUILD_CHECKOUT ];then
+    $CONFIG_SYNCSRC
+fi
+create_checkout_script
+
+modules="xxx"
+#modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
+modules="kernel kernelnand vivante hdmi uboot sw_media qt470 c2box jtag diag c2_goodies "
+steps="src_get src_package src_install src_config src_build bin_package bin_install "
+build_modules_x_steps
+
+dep_fail=0
+r=`grep ^c2box:0 $CONFIG_INDEXLOG`
+j=`grep ^uboot:0 $CONFIG_INDEXLOG`
+k=`grep ^kernel:0 $CONFIG_INDEXLOG`
+[ "$r" = "" ] && dep_fail=$((dep_fail+1))
+[ "$j" = "" ] && dep_fail=$((dep_fail+1))
+[ "$k" = "" ] && dep_fail=$((dep_fail+1))
+if [ $dep_fail -eq 0 ]; then
+    modules=
+    [ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
+    [ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    build_modules_x_steps
+else
+    echo can not build, depend steps: c2box uboot kernel
 fi
 
+checkadd_fail_send_list
+[ $nr_failurl    -gt 0 ] && CONFIG_BUILD_PUBLISH=
+[ $nr_totalerror -gt 0 ] && CONFIG_BUILD_PUBLISH=
+generate_web_report
+generate_email
+
+upload_logs
+upload_packages
+upload_web_report
+send_email
 rm -rf $lock
