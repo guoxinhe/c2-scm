@@ -1,5 +1,5 @@
 #!/bin/sh
-
+#set -ex
 #basic settings auto detect
 #---------------------------------------------------------------
 CONFIG_TODAY=`date +%y%m%d`
@@ -28,9 +28,17 @@ CONFIG_BRANCH=master  #one of: master, devel, etc.
 CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
-CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/$CONFIG_WEBFILE"
-CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log"
-CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY"
+CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/$CONFIG_WEBFILE
+hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/$CONFIG_WEBFILE
+build@10.0.5.193:/home/build/public_html/scriptdebug/$CONFIG_WEBFILE
+"
+CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+"
+CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
+hguo@10.16.5.166:/tmp/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
+"
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
 CONFIG_RESULT=$TOP/build_result/$CONFIG_TODAY
@@ -40,13 +48,14 @@ CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
 CONFIG_EMAILFILE=$CONFIG_LOGDIR/email.txt
 CONFIG_EMAILTITLE="$CONFIG_ARCH $CONFIG_TREEPREFIX daily build pass"
 CONFIG_PATH=$CONFIG_GCCPATH:$PATH
+CONFIG_DEBUG=1
 CONFIG_BUILD_DRY=1
-CONFIG_BUILD_HELP=1
+CONFIG_BUILD_HELP=
 CONFIG_BUILD_LOCAL=1
 CONFIG_BUILD_DOTAG=1
 CONFIG_BUILD_CLEAN=1
 CONFIG_BUILD_SDK=1
-CONFIG_BUILD_CHECKOUT=1
+CONFIG_BUILD_CHECKOUT=
 CONFIG_BUILD_PKGSRC=1
 CONFIG_BUILD_PKGBIN=1
 CONFIG_BUILD_DEVTOOLS=1
@@ -73,7 +82,7 @@ CONFIG_BUILD_PUBLISHEMAIL=1
 while [ $# -gt 0 ] ; do
     case $1 in
     --noco)      CONFIG_BUILD_CHECKOUT= ; shift;;
-    --help)       CONFIG_BUILD_HELP=y ; shift;;
+    --help)      CONFIG_BUILD_HELP=y ; shift;;
     --set)   set | grep CONFIG_  ;  exit 0; shift;;
     *) 	echo "not support option: $1"; CONFIG_BUILD_HELP=1;  shift  ;;
     esac
@@ -81,7 +90,7 @@ done
 
 #step operations
 if test $CONFIG_BUILD_HELP; then
-    echo help done.
+    set | grep CONFIG_  ;
     exit 0;
 fi
 
@@ -101,7 +110,7 @@ lock_job()
     else
         echo "an active task is running for $age seconds: `cat $lock`"
 	echo "close it before restart: $lock"
-	echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >>$lock.log
+	echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$, lock age: $age, life: $jobtimeout" >>$lock.log
         exit 1
     fi
   fi
@@ -207,6 +216,7 @@ create_checkout_script(){
     c2androiddir=`make SOURCE_DIR`
     checkout_script=$CONFIG_PKGDIR/checkout-gits-tags.sh
 
+    mkdir -p $CONFIG_PKGDIR
     pushd $c2androiddir
     #create checkout script of this build code
     echo '#!/bin/sh'                 >$checkout_script
@@ -315,45 +325,6 @@ list_fail_url_tail()
     export nr_failurl
 }
 
-#set -ex
-nr_failurl=0
-nr_totalerror=0
-nr_totalmodule=0
-tm_total=`date +%s`
-modules=xxx
-steps=help
-build_modules_x_steps()
-{
-    for i in ${modules}; do
-        nr_merr=0
-        tm_module=`date +%s`
-        for s in ${steps}; do
-            iserror=0
-            echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$i " "
-            tm_a=`date +%s`
-            echo `date +"%Y-%m-%d %H:%M:%S"` Start build  ${s}_$i >>$CONFIG_LOGDIR/progress.log
-            make ${s}_$i        >>$CONFIG_LOGDIR/$i.log 2>&1
-            if [ $? -ne 0 ];then
-              nr_merr=$((nr_merr+1))
-              iserror=$((iserror+1))
-            fi
-            echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$i, $nr_merr error >>$CONFIG_LOGDIR/progress.log
-            recho_time_consumed $tm_a "$s: $iserror error(s). "  
-            if [ $nr_merr -ne 0 ];then
-              break;
-            fi
-        done
-        if [ $nr_merr -ne 0 ];then
-            addto_buildfail $i
-        fi
-        nr_totalerror=$((nr_totalerror+nr_merr))
-        nr_totalmodule=$((nr_totalmodule+1))
-        update_indexlog "$i:$nr_merr:$CONFIG_LOGDIR/$i.log" $CONFIG_INDEXLOG
-        echo recho_time_consumed $tm_module "Build module $i $nr_merr error(s). "
-        echo "    "
-    done
-}
-
 generate_web_report()
 {
 #generate web report
@@ -382,22 +353,36 @@ generate_email()
   (
     echo "$CONFIG_EMAILTITLE"
     echo ""
-    echo "Get build package at nfs service:"
+    echo "Get build package at one of these nfs service:"
     for i in $CONFIG_PKGSERVERS; do
 	echo "    ${i##*@}"
     done
     echo ""
     [ $FAILLIST_BUILD            ] && echo "fail in this build: $FAILLIST_BUILD"
     [ $FAILLIST_RESULT    ] && echo "fail in all builds: $FAILLIST_RESULT"
-    echo "Click here to watch report:"
+    echo "Click one of these to watch report:"
     for i in  $CONFIG_WEBSERVERS; do
-	echo -en "    http://"
-        echo "${i##*@}" | sed 's,:/var/www/html,,g'
+        echo $i | grep "10.0.5" >/dev/null; #SJ server
+        if [ $? -eq 0  ]; then
+            u=`echo "${i##*/home/}" | sed 's,/public_html/.*,,g'`
+	    echo -en "    https://access.c2micro.com/~$u"
+            echo "${i##*/public_html}"
+        else
+	    echo -en "    http://"
+            echo "${i##*@}" | sed 's,:/var/www/html,,g'
+        fi
     done
-    echo "Click here to watch logs:"
+    echo "Click one of these to watch logs:"
     for i in $CONFIG_LOGSERVERS; do
-	echo -en "    http://"
-        echo "${i##*@}" | sed 's,:/var/www/html,,g'
+        echo $i | grep "10.0.5" >/dev/null; #SJ server
+        if [ $? -eq 0  ]; then
+            u=`echo "${i##*/home/}" | sed 's,/public_html/.*,,g'`
+	    echo -en "    https://access.c2micro.com/~$u"
+            echo "${i##*/public_html}"
+        else
+	    echo -en "    http://"
+            echo "${i##*@}" | sed 's,:/var/www/html,,g'
+        fi
     done
     list_fail_url_tail
     echo ""
@@ -422,19 +407,20 @@ generate_email()
 upload_web_report()
 {
   if [ $CONFIG_BUILD_PUBLISHHTML ]; then
-    for i in $CONFIG_WEBSERVERS; do
-        h=${i%%:/*}
-        p=${i##*:}
+    for sver in $CONFIG_WEBSERVERS; do
+        h=${sver%%:/*}
+        p=${sver##*:}
 	f=${p##*/}
 	p=${p%/*}
-        ip=`echo $CONFIG_WEBSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
+        ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
 	if [ "$ip" = "$CONFIG_MYIP" ];then
             mkdir -p $p
             echo "cp -f $CONFIG_HTMLFILE $p/$f"
             cp -f $CONFIG_HTMLFILE $p/$f
         else
             ssh $h mkdir -p $p
-	    scp -r $CONFIG_HTMLFILE $i
+	    echo "scp -r $CONFIG_HTMLFILE $sver"
+	    scp -r $CONFIG_HTMLFILE $sver
         fi
     done
     echo publish web done.
@@ -444,18 +430,32 @@ upload_web_report()
 upload_logs()
 {
   if [ $CONFIG_BUILD_PUBLISHLOG ]; then
+            if [ $# -gt 0 ]; then
+	       echo "logs: $@"
+            fi
     unix2dos -q $CONFIG_LOGDIR/*
-    for i in $CONFIG_LOGSERVERS; do
-        h=${i%%:/*}
-        p=${i##*:}
-        ip=`echo $CONFIG_LOGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
+    for sver in $CONFIG_LOGSERVERS; do
+        h=${sver%%:/*}
+        p=${sver##*:}
+        ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
 	if [ "$ip" = "$CONFIG_MYIP" ];then
             mkdir -p $p
-	    echo "cp -rf $CONFIG_LOGDIR/* $p/"
-	    cp -rf $CONFIG_LOGDIR/* $p/
+            if [ $# -gt 0 ]; then
+	       echo "cp -rf $@ $p/"
+	       cp -rf $@ $p/
+            else
+	       echo "cp -rf $CONFIG_LOGDIR/* $p/"
+	       cp -rf $CONFIG_LOGDIR/* $p/
+            fi
 	else
             ssh $h mkdir -p $p
-	    scp -r $CONFIG_LOGDIR/* $i/
+            if [ $# -gt 0 ]; then
+	       echo "scp -r $@ $sver/"
+	       scp -r $@ $sver/
+            else
+	       echo "scp -r $CONFIG_LOGDIR/* $sver/"
+	       scp -r $CONFIG_LOGDIR/* $sver/
+            fi
 	fi
     done
     echo publish log done.
@@ -464,33 +464,79 @@ upload_logs()
 
 upload_packages()
 {
-  if [ $CONFIG_BUILD_PUBLISH ]; then
-    for i in $CONFIG_PKGSERVERS; do
-        h=${i%%:/*}
-        p=${i##*:}
-        ip=`echo $CONFIG_PKGSERVERS | sed -e 's,.*@\(.*\):.*,\1,g'`
-	if [ "$ip" = "$CONFIG_MYIP" ];then
-            mkdir -p $p
-	    echo "cp -rf $CONFIG_PKGDIR/* $p/"
-	    cp -rf $CONFIG_PKGDIR/* $p/
-        else
-            ssh $h mkdir -p $p
-	    scp -r $CONFIG_PKGDIR/* $i/
-        fi
-    done
-    echo publish package done.
-  fi
+    if [ $CONFIG_BUILD_PUBLISH ]; then
+        for sver in $CONFIG_PKGSERVERS; do
+            h=${sver%%:/*}
+            p=${sver##*:}
+            ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
+            if [ "$ip" = "$CONFIG_MYIP" ];then
+                mkdir -p $p
+                echo "cp -rf $CONFIG_PKGDIR/* $p/"
+                cp -rf $CONFIG_PKGDIR/* $p/
+            else
+                ssh $h mkdir -p $p
+                echo "scp -r $CONFIG_PKGDIR/* $sver/"
+                scp -r $CONFIG_PKGDIR/* $sver/
+            fi
+        done
+        echo publish package done.
+    fi
 }
 
 send_email()
 {
-  if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
-    echo email title "$CONFIG_EMAILTITLE" 
-    echo send to: $CONFIG_MAILLIST
-    #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
-    cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
-    echo send mail done.
-  fi
+    if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
+        echo email title "$CONFIG_EMAILTITLE" 
+        echo send to: $CONFIG_MAILLIST
+        #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+        cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
+        echo send mail done.
+    fi
+}
+
+#set -ex
+nr_failurl=0          #set in list_fail_url_tail
+nr_totalerror=0       #set in build_modules_x_steps
+nr_totalmodule=0      #set in nr_totalmodule
+tm_total=`date +%s`   #for time stat
+modules=xxx           #for place holder
+steps=help            #for place holder
+build_modules_x_steps()
+{
+    for xmod in ${modules}; do
+        nr_merr=0
+        tm_module=`date +%s`
+        for s in ${steps}; do
+            iserror=0
+            echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$xmod " "
+            tm_a=`date +%s`
+            echo `date +"%Y-%m-%d %H:%M:%S"` Start build  ${s}_$xmod >>$CONFIG_LOGDIR/progress.log
+            make ${s}_$xmod        >>$CONFIG_LOGDIR/$xmod.log 2>&1
+            if [ $? -ne 0 ];then
+                nr_merr=$((nr_merr+1))
+                iserror=$((iserror+1))
+            fi
+            echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$xmod, $nr_merr error >>$CONFIG_LOGDIR/progress.log
+            recho_time_consumed $tm_a "$s: $iserror error(s). "  
+            if [ $nr_merr -ne 0 ];then
+                break;
+            fi
+        done
+        if [ $nr_merr -ne 0 ];then
+            addto_buildfail $xmod
+        fi
+        nr_totalerror=$((nr_totalerror+nr_merr))
+        nr_totalmodule=$((nr_totalmodule+1))
+        update_indexlog "$xmod:$nr_merr:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+
+        upload_logs $CONFIG_LOGDIR/$xmod.log
+
+        generate_web_report
+        upload_web_report
+
+        echo recho_time_consumed $tm_module "Build module $xmod $nr_merr error(s). "
+        echo "    "
+    done
 }
 
 
@@ -514,7 +560,7 @@ create_checkout_script
 
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-modules="kernel kernelnand vivante hdmi uboot sw_media qt470 c2box jtag diag c2_goodies "
+#modules="kernel kernelnand vivante hdmi uboot sw_media qt470 c2box jtag diag c2_goodies "
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
@@ -532,7 +578,7 @@ if [ $dep_fail -eq 0 ]; then
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     build_modules_x_steps
 else
-    echo can not build, depend steps: c2box uboot kernel
+    echo can not build facudisk or usrudisk, depend steps: c2box uboot kernel
 fi
 
 checkadd_fail_send_list
@@ -540,9 +586,8 @@ checkadd_fail_send_list
 [ $nr_totalerror -gt 0 ] && CONFIG_BUILD_PUBLISH=
 generate_web_report
 generate_email
-
-upload_logs
-upload_packages
 upload_web_report
 send_email
+upload_packages
+upload_logs
 rm -rf $lock
