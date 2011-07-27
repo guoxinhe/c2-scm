@@ -7,7 +7,6 @@ CONFIG_MYIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 CONFIG_SCRIPT=`readlink -f $0`
 CONFIG_STARTTIME=`date`
 CONFIG_STARTTID=`date +%s`
-CONFIG_MAKEFILE=Makefile
 if [ -t 1 -o -t 2 ]; then
 CONFIG_TTY=y
 TOP=`pwd`
@@ -17,6 +16,8 @@ fi
 cd $TOP
 
 #---------------------------------------------------------------
+CONFIG_MAKEFILE=Makefile
+CONFIG_GENHTML=`pwd`/scm/html_generate.cgi
 CONFIG_ARCH=`make -f $CONFIG_MAKEFILE SDK_TARGET_ARCH`  #jazz2 jzz2t jazz2l
 CONFIG_PKGDIR=`make -f $CONFIG_MAKEFILE PKG_DIR`
 CONFIG_TREEPREFIX=sdkdev               #sdkdev sdkrel anddev andrel, etc, easy to understand
@@ -29,15 +30,15 @@ CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
 CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/$CONFIG_WEBFILE
-		      hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/$CONFIG_WEBFILE
-                 build@10.0.5.193:/home/build/public_html/scriptdebug/$CONFIG_WEBFILE
+                #build@10.0.5.193:/home/build/public_html/scriptdebug/$CONFIG_WEBFILE
+                     #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/$CONFIG_WEBFILE
 "
 CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
-                      hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
-                 build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+                #build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+                     #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
 "
 CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
-                        hguo@10.16.5.166:/tmp/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
+                  #build@10.16.13.195:/sdk-b1/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
 "
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
@@ -55,7 +56,7 @@ CONFIG_BUILD_LOCAL=1
 CONFIG_BUILD_DOTAG=1
 CONFIG_BUILD_CLEAN=1
 CONFIG_BUILD_SDK=1
-CONFIG_BUILD_CHECKOUT=
+CONFIG_BUILD_CHECKOUT=1
 CONFIG_BUILD_PKGSRC=1
 CONFIG_BUILD_PKGBIN=1
 CONFIG_BUILD_DEVTOOLS=1
@@ -77,7 +78,7 @@ CONFIG_BUILD_XXX=1
 CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=1
+CONFIG_BUILD_PUBLISHEMAIL=
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -362,7 +363,7 @@ build script settings:
 export SDKENV_Server="`whoami` on $CONFIG_MYIP(`hostname`)"
 export SDKENV_Script="`readlink -f $0`"
 export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/html,,g' -e 's,^.*@,,g'`
-./html_generate.cgi  > $CONFIG_HTMLFILE
+$CONFIG_GENHTML  > $CONFIG_HTMLFILE
 }
 
 generate_email()
@@ -374,6 +375,7 @@ generate_email()
     echo ""
     echo "Get build package at one of these nfs service:"
     for i in $CONFIG_PKGSERVERS; do
+        [ "${i:0:1}" = "#" ] && continue; #comment line, invalid
 	echo "    ${i##*@}"
     done
     echo ""
@@ -381,6 +383,7 @@ generate_email()
     [ $FAILLIST_RESULT    ] && echo "fail in all builds: $FAILLIST_RESULT"
     echo "Click one of these to watch report:"
     for i in  $CONFIG_WEBSERVERS; do
+        [ "${i:0:1}" = "#" ] && continue; #comment line, invalid
         echo $i | grep "10.0.5" >/dev/null; #SJ server
         if [ $? -eq 0  ]; then
             u=`echo "${i##*/home/}" | sed 's,/public_html/.*,,g'`
@@ -393,6 +396,7 @@ generate_email()
     done
     echo "Click one of these to watch logs:"
     for i in $CONFIG_LOGSERVERS; do
+        [ "${i:0:1}" = "#" ] && continue; #comment line, invalid
         echo $i | grep "10.0.5" >/dev/null; #SJ server
         if [ $? -eq 0  ]; then
             u=`echo "${i##*/home/}" | sed 's,/public_html/.*,,g'`
@@ -427,6 +431,7 @@ upload_web_report()
 {
   if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     for sver in $CONFIG_WEBSERVERS; do
+        [ "${i:0:1}" = "#" ] && continue; #comment line, invalid
         h=${sver%%:/*}
         p=${sver##*:}
 	f=${p##*/}
@@ -453,7 +458,9 @@ upload_logs()
 	       echo "logs: $@"
             fi
     unix2dos -q $CONFIG_LOGDIR/*
+        [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
     for sver in $CONFIG_LOGSERVERS; do
+        [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
         h=${sver%%:/*}
         p=${sver##*:}
         ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
@@ -485,6 +492,7 @@ upload_packages()
 {
     if [ $CONFIG_BUILD_PUBLISH ]; then
         for sver in $CONFIG_PKGSERVERS; do
+            [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
             h=${sver%%:/*}
             p=${sver##*:}
             ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
@@ -562,6 +570,21 @@ build_modules_x_steps()
     done
 }
 
+setup_build_jazz2t_sw_media_env()
+{
+[ -d android ] || echo "Error, no android project folder found"
+export ANDROID_HOME=`readlink -f android`
+export ANDROID_BUILD=1
+#next added by Ben Cang.
+export UPNP_SUPPORT=1
+export D_EN_RTP=Y
+#next added by Westwood
+export PATH=/c2/local/c2/sw_media/android_toolchain_jazz2t/bin/:$PATH
+export TARGET_ARCH=JAZZ2T; 
+export BUILD_TARGET=TARGET_LINUX_C2; 
+export BUILD=RELEASE;
+export BOARD_TARGET=C2_CC302; #add this for safe build jazz2t-android-sw_media
+}
 
 # let's go!
 #---------------------------------------------------------------
@@ -582,13 +605,28 @@ if [ $CONFIG_BUILD_CHECKOUT ];then
 fi
 create_repo_checkout_script `make -f $CONFIG_MAKEFILE SOURCE_DIR` $CONFIG_PKGDIR/checkout-gits-tags.sh
 
-if [ $CONFIG_BUILD_XXX ]; then  #script debug code
-modules="xxx"
-#modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-steps="src_get src_package src_install src_config src_build bin_package bin_install "
-build_modules_x_steps
+if [ $CONFIG_BUILD_SWMEDIA ]; then
+    [ -h local.rules.mk ] && rm local.rules.mk
+    ln -s jazz2t.rules.mk local.rules.mk
+    modules="sw_mediaandroid"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    setup_build_jazz2t_sw_media_env
+    build_modules_x_steps
+
+    r=`grep ^sw_mediaandroid:0 $CONFIG_INDEXLOG`
+    if [ "$r" != "" ]; then
+        rm -rf android/prebuilt/sw_media
+        mkdir -p android/prebuilt/sw_media
+        tar xzf $CONFIG_PKGDIR/c2-*-sw_media*bin*.tar.gz -C android/prebuilt/sw_media
+    fi
 fi
 
+if [ $CONFIG_BUILD_XXX ]; then  #script debug code
+    modules="xxx"
+    #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    build_modules_x_steps
+fi
 modules=
 [ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
 [ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
