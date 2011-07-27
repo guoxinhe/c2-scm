@@ -25,7 +25,8 @@ CONFIG_GCCPATH=/c2/local/c2/daily-jazz2/bin
 CONFIG_GCC=`$CONFIG_GCCPATH/c2-linux-gcc --version`
 CONFIG_KERNEL=`make -f $CONFIG_MAKEFILE SDK_KERNEL_VERSION`
 CONFIG_LIBC=uClibc-0.9.27
-CONFIG_BRANCH=master  #one of: master, devel, etc.
+CONFIG_C2SDK_BRANCH=master  #one of: master, devel, etc.
+CONFIG_ANDROID_BRANCH=devel  #one of: master, devel, etc.
 CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
@@ -69,11 +70,13 @@ CONFIG_BUILD_QT=1
 CONFIG_BUILD_DOC=1
 CONFIG_BUILD_KERNEL=1
 CONFIG_BUILD_HDMI=1
-CONFIG_BUILD_SWMEDIA=1
+CONFIG_BUILD_SWMEDIA=
 CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
 CONFIG_BUILD_FACUDISK=
 CONFIG_BUILD_USRUDISK=
+CONFIG_BUILD_ANDROIDNAND=
+CONFIG_BUILD_ANDROIDNFS=
 CONFIG_BUILD_XXX=1
 CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
@@ -229,13 +232,37 @@ addto_resultfail()
 }
 checkout_from_repositories()
 {
-    /local/c2sdk/reposyncall
+    if [ $CONFIG_BUILD_CHECKOUT ];then
+        pushd `readlink -f source`
+        BR=$CONFIG_C2SDK_BRANCH
+        echo "ereport: `date` repo start --all $BR"
+        repo start $BR --all
+        echo "ereport: `date` Start repo sync"
+        repo sync
+        echo "ereport: `date` repo start --all $BR"
+        repo start $BR --all
+        echo "ereport: `date` repo forall -c 'git branch'"
+        repo forall -c "git branch"
+        popd
+
+        pushd `readlink -f android`
+        BR=$CONFIG_ANDROID_BRANCH
+        echo "ereport: `date` repo start --all $BR"
+        repo start $BR --all
+        echo "ereport: `date` Start repo sync"
+        repo sync
+        echo "ereport: `date` repo start --all $BR"
+        repo start $BR --all
+        echo "ereport: `date` repo forall -c 'git branch'"
+        repo forall -c "git branch"
+        popd
+    fi
 }
 create_repo_checkout_script()
 {
-    BR=$CONFIG_BRANCH
     c2androiddir=$1
-    checkout_script=$2
+    BR=$2  
+    checkout_script=$3
 
     pushd $c2androiddir
     #create checkout script of this build code
@@ -600,10 +627,9 @@ softlink $CONFIG_RESULT   i
 #action parse
 set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
 cat $CONFIG_LOGDIR/env.sh
-if [ $CONFIG_BUILD_CHECKOUT ];then
-    checkout_from_repositories
-fi
-create_repo_checkout_script `make -f $CONFIG_MAKEFILE SOURCE_DIR` $CONFIG_PKGDIR/checkout-gits-tags.sh
+checkout_from_repositories
+create_repo_checkout_script `readlink -f source` $CONFIG_C2SDK_BRANCH   $CONFIG_PKGDIR/checkout-c2sdk-tags.sh
+create_repo_checkout_script `readlink -f android`$CONFIG_ANDROID_BRANCH $CONFIG_PKGDIR/checkout-android-tags.sh
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
     [ -h local.rules.mk ] && rm local.rules.mk
@@ -619,6 +645,25 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
         mkdir -p android/prebuilt/sw_media
         tar xzf $CONFIG_PKGDIR/c2-*-sw_media*bin*.tar.gz -C android/prebuilt/sw_media
     fi
+fi
+
+if [ $CONFIG_BUILD_ANDROIDNFS ]; then
+    cp android/build/tools/make-nfs-droid-fs-usr $CONFIG_LOGDIR/
+    #hack the $CONFIG_LOGDIR/make-nfs-droid-fs-usr
+    pushd `readlink -f android`
+    #$CONFIG_LOGDIR/make-nfs-droid-fs-usr  >$CONFIG_LOGDIR/nfsdroid.log
+    popd
+    #check build result
+    #package build files
+fi
+if [ $CONFIG_BUILD_ANDROIDNAND ]; then
+    cp android/build/tools/make-nand-droid-fs $CONFIG_LOGDIR/
+    #hack the $CONFIG_LOGDIR/make-nand-droid-fs
+    pushd `readlink -f android`
+    #$CONFIG_LOGDIR/make-nand-droid-fs  >$CONFIG_LOGDIR/nanddroid.log
+    popd
+    #check build result
+    #package build files
 fi
 
 if [ $CONFIG_BUILD_XXX ]; then  #script debug code
