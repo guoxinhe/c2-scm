@@ -7,6 +7,7 @@ CONFIG_MYIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 CONFIG_SCRIPT=`readlink -f $0`
 CONFIG_STARTTIME=`date`
 CONFIG_STARTTID=`date +%s`
+CONFIG_MAKEFILE=Makefile
 if [ -t 1 -o -t 2 ]; then
 CONFIG_TTY=y
 TOP=`pwd`
@@ -16,28 +17,27 @@ fi
 cd $TOP
 
 #---------------------------------------------------------------
-CONFIG_SYNCSRC=/local/c2sdk/reposyncall
-CONFIG_ARCH=`make SDK_TARGET_ARCH`  #jazz2 jzz2t jazz2l
-CONFIG_PKGDIR=`make PKG_DIR`        
+CONFIG_ARCH=`make -f $CONFIG_MAKEFILE SDK_TARGET_ARCH`  #jazz2 jzz2t jazz2l
+CONFIG_PKGDIR=`make -f $CONFIG_MAKEFILE PKG_DIR`
 CONFIG_TREEPREFIX=sdkdev               #sdkdev sdkrel anddev andrel, etc, easy to understand
 CONFIG_GCCPATH=/c2/local/c2/daily-jazz2/bin
 CONFIG_GCC=`$CONFIG_GCCPATH/c2-linux-gcc --version`
-CONFIG_KERNEL=`make SDK_KERNEL_VERSION`
+CONFIG_KERNEL=`make -f $CONFIG_MAKEFILE SDK_KERNEL_VERSION`
 CONFIG_LIBC=uClibc-0.9.27
 CONFIG_BRANCH=master  #one of: master, devel, etc.
 CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
 CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/$CONFIG_WEBFILE
-hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/$CONFIG_WEBFILE
-build@10.0.5.193:/home/build/public_html/scriptdebug/$CONFIG_WEBFILE
+		      hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/$CONFIG_WEBFILE
+                 build@10.0.5.193:/home/build/public_html/scriptdebug/$CONFIG_WEBFILE
 "
 CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
-hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
-build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+                      hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+                 build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
 "
 CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
-hguo@10.16.5.166:/tmp/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
+                        hguo@10.16.5.166:/tmp/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
 "
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
@@ -71,12 +71,13 @@ CONFIG_BUILD_HDMI=1
 CONFIG_BUILD_SWMEDIA=1
 CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
-CONFIG_BUILD_FACUDISK=1
-CONFIG_BUILD_USRUDISK=1
-CONFIG_BUILD_PUBLISH=
+CONFIG_BUILD_FACUDISK=
+CONFIG_BUILD_USRUDISK=
+CONFIG_BUILD_XXX=1
+CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=
+CONFIG_BUILD_PUBLISHEMAIL=1
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -225,8 +226,12 @@ addto_resultfail()
     done
     export FAILLIST_RESULT
 }
-
-create_repo_checkout_script(){
+checkout_from_repositories()
+{
+    /local/c2sdk/reposyncall
+}
+create_repo_checkout_script()
+{
     BR=$CONFIG_BRANCH
     c2androiddir=$1
     checkout_script=$2
@@ -349,7 +354,7 @@ export SDKENV_Project="${CONFIG_ARCH} ${CONFIG_TREEPREFIX} daily build on $HOSTN
 export SDKENV_Overview="<pre>Project start on $CONFIG_STARTTIME, done on `date`
 `recho_time_consumed $CONFIG_STARTTID all done`</pre>"
 export SDKENV_Setting="<pre>Makefile settings:
-`make lsvar`
+`make -f $CONFIG_MAKEFILE lsvar`
 
 build script settings:
 `set | grep CONFIG_ `
@@ -362,7 +367,7 @@ export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/ht
 
 generate_email()
 {
-  #addto_send ruishengfu@c2micro.com hguo@c2micro.com
+  #addto_send hguo@c2micro.com
   CONFIG_EMAILTITLE="${CONFIG_ARCH} $CONFIG_TREEPREFIX $HOSTNAME $nr_totalmodule module(s) $nr_totalerror error(s)."
   (
     echo "$CONFIG_EMAILTITLE"
@@ -401,7 +406,7 @@ generate_email()
     list_fail_url_tail
     echo ""
     echo "More build environment reference info:"
-    make lsvar
+    make -f $CONFIG_MAKEFILE lsvar
     echo ""
     echo "send to list: $CONFIG_MAILLIST"
     echo "You receive this email because you are in the relative software maintainer list"
@@ -499,13 +504,15 @@ upload_packages()
 
 send_email()
 {
+    echo email title "$CONFIG_EMAILTITLE"
     if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
-        echo email title "$CONFIG_EMAILTITLE" 
-        echo send to: $CONFIG_MAILLIST
-        #cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+        echo "send to: $CONFIG_MAILLIST"
+        cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" $CONFIG_MAILLIST
+    else
+        echo "send to: hguo@c2micro.com(for test only)"
         cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
-        echo send mail done.
     fi
+    echo send mail done.
 }
 
 #set -ex
@@ -531,7 +538,7 @@ build_modules_x_steps()
             echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$xmod " "
             tm_a=`date +%s`
             echo `date +"%Y-%m-%d %H:%M:%S"` Start build  ${s}_$xmod >>$CONFIG_LOGDIR/progress.log
-            make ${s}_$xmod        >>$CONFIG_LOGDIR/$xmod.log 2>&1
+            make -f $CONFIG_MAKEFILE ${s}_$xmod        >>$CONFIG_LOGDIR/$xmod.log 2>&1
             if [ $? -ne 0 ];then
                 nr_merr=$((nr_merr+1))
                 iserror=$((iserror+1))
@@ -559,7 +566,7 @@ build_modules_x_steps()
 # let's go!
 #---------------------------------------------------------------
 lock_job
-make sdk_folders
+make -f $CONFIG_MAKEFILE sdk_folders
 mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
 touch $CONFIG_INDEXLOG 
 touch $CONFIG_HTMLFILE
@@ -571,15 +578,16 @@ softlink $CONFIG_RESULT   i
 set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
 cat $CONFIG_LOGDIR/env.sh
 if [ $CONFIG_BUILD_CHECKOUT ];then
-    $CONFIG_SYNCSRC
+    checkout_from_repositories
 fi
-create_repo_checkout_script `make SOURCE_DIR` $CONFIG_PKGDIR/checkout-gits-tags.sh
+create_repo_checkout_script `make -f $CONFIG_MAKEFILE SOURCE_DIR` $CONFIG_PKGDIR/checkout-gits-tags.sh
 
+if [ $CONFIG_BUILD_XXX ]; then  #script debug code
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-#modules="kernel kernelnand vivante hdmi uboot sw_media qt470 c2box jtag diag c2_goodies "
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
+fi
 
 modules=
 [ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
