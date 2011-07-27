@@ -82,7 +82,7 @@ CONFIG_BUILD_PUBLISHEMAIL=
 while [ $# -gt 0 ] ; do
     case $1 in
     --noco)      CONFIG_BUILD_CHECKOUT= ; shift;;
-    --help)      CONFIG_BUILD_HELP=y ; shift;;
+    --help | -h)      CONFIG_BUILD_HELP=y ; shift;;
     --set)   set | grep CONFIG_  ;  exit 0; shift;;
     *) 	echo "not support option: $1"; CONFIG_BUILD_HELP=1;  shift  ;;
     esac
@@ -91,6 +91,21 @@ done
 #step operations
 if test $CONFIG_BUILD_HELP; then
     set | grep CONFIG_  ;
+
+cat <<EOFHELP
+
+Please support these in Makefile
+    make SDK_TARGET_ARCH      : return arch name
+    make SDK_KERNEL_VERSION   : return kernel version name
+    make PKG_DIR              : return package folder name
+    make SOURCE_DIR           : return source folder name
+    make sdk_folders          : create build used folders
+    make lsvar                : list Makefile's important config variables
+
+module build ops used in Makefile, example module name is:xxx
+    make src_get_xxx src_package_xxx src_install_xxx src_config_xxx src_build_xxx bin_package_xxx bin_install_xxx 
+    make test_xxx clean_xxx help_xxx
+EOFHELP
     exit 0;
 fi
 
