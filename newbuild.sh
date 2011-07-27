@@ -73,10 +73,10 @@ CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
 CONFIG_BUILD_FACUDISK=1
 CONFIG_BUILD_USRUDISK=1
-CONFIG_BUILD_PUBLISH=1
+CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=1
+CONFIG_BUILD_PUBLISHEMAIL=
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -506,6 +506,12 @@ build_modules_x_steps()
     for xmod in ${modules}; do
         nr_merr=0
         tm_module=`date +%s`
+
+        #let web know this module is in "doing" status:2
+        update_indexlog "$xmod:2:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+        generate_web_report
+        upload_web_report
+
         for s in ${steps}; do
             iserror=0
             echo -en `date +"%Y-%m-%d %H:%M:%S"` build ${s}_$xmod " "
@@ -524,15 +530,11 @@ build_modules_x_steps()
         done
         if [ $nr_merr -ne 0 ];then
             addto_buildfail $xmod
+            upload_logs $CONFIG_LOGDIR/$xmod.log
         fi
         nr_totalerror=$((nr_totalerror+nr_merr))
         nr_totalmodule=$((nr_totalmodule+1))
         update_indexlog "$xmod:$nr_merr:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
-
-        upload_logs $CONFIG_LOGDIR/$xmod.log
-
-        generate_web_report
-        upload_web_report
 
         echo recho_time_consumed $tm_module "Build module $xmod $nr_merr error(s). "
         echo "    "
@@ -564,21 +566,23 @@ modules="xxx"
 steps="src_get src_package src_install src_config src_build bin_package bin_install "
 build_modules_x_steps
 
-dep_fail=0
-r=`grep ^c2box:0 $CONFIG_INDEXLOG`
-j=`grep ^uboot:0 $CONFIG_INDEXLOG`
-k=`grep ^kernel:0 $CONFIG_INDEXLOG`
-[ "$r" = "" ] && dep_fail=$((dep_fail+1))
-[ "$j" = "" ] && dep_fail=$((dep_fail+1))
-[ "$k" = "" ] && dep_fail=$((dep_fail+1))
-if [ $dep_fail -eq 0 ]; then
-    modules=
-    [ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
-    [ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
-    steps="src_get src_package src_install src_config src_build bin_package bin_install "
-    build_modules_x_steps
-else
-    echo can not build facudisk or usrudisk, depend steps: c2box uboot kernel
+modules=
+[ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
+[ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
+steps="src_get src_package src_install src_config src_build bin_package bin_install "
+if [ "$modules" != "" ]; then
+    dep_fail=0
+    r=`grep ^c2box:0 $CONFIG_INDEXLOG`
+    j=`grep ^uboot:0 $CONFIG_INDEXLOG`
+    k=`grep ^kernel:0 $CONFIG_INDEXLOG`
+    [ "$r" = "" ] && dep_fail=$((dep_fail+1))
+    [ "$j" = "" ] && dep_fail=$((dep_fail+1))
+    [ "$k" = "" ] && dep_fail=$((dep_fail+1))
+    if [ $dep_fail -eq 0 ]; then
+        build_modules_x_steps
+    else
+        echo can not build facudisk or usrudisk, depend steps: c2box uboot kernel
+    fi
 fi
 
 checkadd_fail_send_list

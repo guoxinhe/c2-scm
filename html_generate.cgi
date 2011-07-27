@@ -17,7 +17,7 @@ td.category {vertical-align:top}
 .pass {background: #00ff00; font-weight:bold}
 .fail {background: red;  font-weight:bold}
 .na   {background: grey}
-.doing {background: #ffff00; font-weight:bold}
+.run  {background: #ffff00; font-weight:bold}
 -->
 EOCSS
 
@@ -106,13 +106,7 @@ sub print_top_results {
       # Make test red if the most recent test failed
       my $testclass = "na";
       if (exists($results{$test}{$dates[0]})) {
-        if($results{$test}{$dates[0]}[0] == 0) {
-            $testclass = "pass";
-        } else if($results{$test}{$dates[0]}[0] == 2) {
-            $testclass = "doing";
-        } else {
-            $testclass = "fail";
-        }
+        $testclass = $results{$test}{$dates[0]}[0] == 0 ? "pass" : $results{$test}{$dates[0]}[0] == 2 ? "run" : "fail";
       }
 
 
@@ -124,7 +118,7 @@ sub print_top_results {
 
         if (exists($results{$test}{$d})) {
           my ($res, $log) = @{$results{$test}{$d}};
-          $class = $res == 0 ? "pass" : "fail";
+          $class = $res == 0 ? "pass" : $res == 2 ? "run" : "fail";
 
           my ($n_warning, $n_error) = check_for_results_string($log);
 
