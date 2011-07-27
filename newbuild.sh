@@ -211,12 +211,11 @@ addto_resultfail()
     export FAILLIST_RESULT
 }
 
-create_checkout_script(){
+create_repo_checkout_script(){
     BR=$CONFIG_BRANCH
-    c2androiddir=`make SOURCE_DIR`
-    checkout_script=$CONFIG_PKGDIR/checkout-gits-tags.sh
+    c2androiddir=$1
+    checkout_script=$2
 
-    mkdir -p $CONFIG_PKGDIR
     pushd $c2androiddir
     #create checkout script of this build code
     echo '#!/bin/sh'                 >$checkout_script
@@ -545,6 +544,7 @@ build_modules_x_steps()
 # let's go!
 #---------------------------------------------------------------
 lock_job
+make sdk_folders
 mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
 touch $CONFIG_INDEXLOG 
 touch $CONFIG_HTMLFILE
@@ -558,7 +558,7 @@ cat $CONFIG_LOGDIR/env.sh
 if [ $CONFIG_BUILD_CHECKOUT ];then
     $CONFIG_SYNCSRC
 fi
-create_checkout_script
+create_repo_checkout_script `make SOURCE_DIR` $CONFIG_PKGDIR/checkout-gits-tags.sh
 
 modules="xxx"
 #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
