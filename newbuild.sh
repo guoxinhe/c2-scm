@@ -431,7 +431,7 @@ upload_web_report()
 {
   if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     for sver in $CONFIG_WEBSERVERS; do
-        [ "${i:0:1}" = "#" ] && continue; #comment line, invalid
+        [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
         h=${sver%%:/*}
         p=${sver##*:}
 	f=${p##*/}
