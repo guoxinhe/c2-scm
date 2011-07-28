@@ -1,8 +1,9 @@
 #!/bin/sh
 #set -ex
-#basic settings auto detect
+#basic settings auto detect, all name with prefix CONFIG_ is reported to web
 #---------------------------------------------------------------
-CONFIG_TODAY=`date +%y%m%d`
+CONFIG_DATE=`date +%y%m%d`
+CONFIG_DATEH=`date +%y%m%d.%H`
 CONFIG_MYIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 CONFIG_SCRIPT=`readlink -f $0`
 CONFIG_STARTTIME=`date`
@@ -11,11 +12,12 @@ if [ -t 1 -o -t 2 ]; then
 CONFIG_TTY=y
 TOP=`pwd`
 else
-TOP=/build2/jazz2-daily
+TOP=/local/android/jazz2t-c2sdk_android
 fi
 cd $TOP
 
 #---------------------------------------------------------------
+CONFIG_BUILDTOP=$TOP
 CONFIG_MAKEFILE=Makefile
 CONFIG_GENHTML=`pwd`/scm/html_generate.cgi
 CONFIG_ARCH=`make -f $CONFIG_MAKEFILE SDK_TARGET_ARCH`  #jazz2 jzz2t jazz2l
@@ -34,16 +36,16 @@ CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/$CONFIG_WE
                 #build@10.0.5.193:/home/build/public_html/scriptdebug/$CONFIG_WEBFILE
                      #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/$CONFIG_WEBFILE
 "
-CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
-                #build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
-                     #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_TODAY.log
+CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+                #build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+                     #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
 "
-CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
-                  #build@10.16.13.195:/sdk-b1/scriptdebug/jazz2/dev/weekly/$CONFIG_TODAY
+CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
+                  #build@10.16.13.195:/sdk-b1/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
 "
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
-CONFIG_RESULT=$TOP/build_result/$CONFIG_TODAY
+CONFIG_RESULT=$TOP/build_result/$CONFIG_DATE
 CONFIG_LOGDIR=$CONFIG_RESULT.log
 CONFIG_INDEXLOG=$CONFIG_RESULT.txt
 CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
@@ -70,13 +72,13 @@ CONFIG_BUILD_QT=1
 CONFIG_BUILD_DOC=1
 CONFIG_BUILD_KERNEL=1
 CONFIG_BUILD_HDMI=1
-CONFIG_BUILD_SWMEDIA=
+CONFIG_BUILD_SWMEDIA=1
 CONFIG_BUILD_VIVANTE=1
 CONFIG_BUILD_C2APPS=1
 CONFIG_BUILD_FACUDISK=
 CONFIG_BUILD_USRUDISK=
-CONFIG_BUILD_ANDROIDNAND=
-CONFIG_BUILD_ANDROIDNFS=
+CONFIG_BUILD_ANDROIDNAND=1
+CONFIG_BUILD_ANDROIDNFS=1
 CONFIG_BUILD_XXX=1
 CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
@@ -185,7 +187,7 @@ update_indexlog()
     #create broken log system
     if [ "$x" != "0" ]; then
         mkdir -p ${CONFIG_RESULT}/blog
-        BLOG=${CONFIG_RESULT}/blog/$DATE-${CONFIG_ARCH}-${CONFIG_TREEPREFIX}-$m.log
+        BLOG=${CONFIG_RESULT}/blog/$CONFIG_DATE-${CONFIG_ARCH}-${CONFIG_TREEPREFIX}-$m.log
         [ -f $BLOG ] || ln -s $f  $BLOG;
     fi
 }
@@ -599,18 +601,18 @@ build_modules_x_steps()
 
 setup_build_jazz2t_sw_media_env()
 {
-[ -d android ] || echo "Error, no android project folder found"
-export ANDROID_HOME=`readlink -f android`
-export ANDROID_BUILD=1
-#next added by Ben Cang.
-export UPNP_SUPPORT=1
-export D_EN_RTP=Y
-#next added by Westwood
-export PATH=/c2/local/c2/sw_media/android_toolchain_jazz2t/bin/:$PATH
-export TARGET_ARCH=JAZZ2T; 
-export BUILD_TARGET=TARGET_LINUX_C2; 
-export BUILD=RELEASE;
-export BOARD_TARGET=C2_CC302; #add this for safe build jazz2t-android-sw_media
+    [ -d android ] || echo "Error, no android project folder found"
+    export ANDROID_HOME=`readlink -f android`
+    export ANDROID_BUILD=1
+    #next added by Ben Cang.
+    export UPNP_SUPPORT=1
+    export D_EN_RTP=Y
+    #next added by Westwood
+    export PATH=/c2/local/c2/sw_media/android_toolchain_jazz2t/bin/:$PATH
+    export TARGET_ARCH=JAZZ2T; 
+    export BUILD_TARGET=TARGET_LINUX_C2; 
+    export BUILD=RELEASE;
+    export BOARD_TARGET=C2_CC302; #add this for safe build jazz2t-android-sw_media
 }
 
 # let's go!
@@ -628,8 +630,8 @@ softlink $CONFIG_RESULT   i
 set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
 cat $CONFIG_LOGDIR/env.sh
 checkout_from_repositories
-create_repo_checkout_script `readlink -f source` $CONFIG_C2SDK_BRANCH   $CONFIG_PKGDIR/checkout-c2sdk-tags.sh
-create_repo_checkout_script `readlink -f android`$CONFIG_ANDROID_BRANCH $CONFIG_PKGDIR/checkout-android-tags.sh
+create_repo_checkout_script `readlink -f source`  $CONFIG_C2SDK_BRANCH   $CONFIG_PKGDIR/checkout-c2sdk-tags.sh
+create_repo_checkout_script `readlink -f android` $CONFIG_ANDROID_BRANCH $CONFIG_PKGDIR/checkout-android-tags.sh
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
     [ -h local.rules.mk ] && rm local.rules.mk
@@ -648,30 +650,88 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNFS ]; then
+    xmod=nfsdroid
+    update_indexlog "$xmod:2:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+    generate_web_report
+    upload_web_report
+
+    echo `date +"%Y-%m-%d %H:%M:%S"` Start build  $xmod >>$CONFIG_LOGDIR/progress.log
+    tm_a=`date +%s`
     cp android/build/tools/make-nfs-droid-fs-usr $CONFIG_LOGDIR/
-    #hack the $CONFIG_LOGDIR/make-nfs-droid-fs-usr
-    pushd `readlink -f android`
-    #$CONFIG_LOGDIR/make-nfs-droid-fs-usr  >$CONFIG_LOGDIR/nfsdroid.log
-    popd
-    #check build result
-    #package build files
-fi
-if [ $CONFIG_BUILD_ANDROIDNAND ]; then
-    cp android/build/tools/make-nand-droid-fs $CONFIG_LOGDIR/
-    #hack the $CONFIG_LOGDIR/make-nand-droid-fs
-    pushd `readlink -f android`
-    #$CONFIG_LOGDIR/make-nand-droid-fs  >$CONFIG_LOGDIR/nanddroid.log
-    popd
+    sed -i 's/sudo//g' $CONFIG_LOGDIR/make-nfs-droid-fs-usr
+
+    cd `readlink -f android`
+    cmd_opt="-m -f"
+    if [ $CONFIG_BUILD_CLEAN ]; then
+        mkdir -p nfs-droid
+        rm -rf nfs-droid/*
+    cmd_opt="-m -f"
+    fi
+    [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
+    $CONFIG_LOGDIR/make-nfs-droid-fs-usr  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log
+    cp -f build/tools/gen-nfs-burn-code.sh nfs-droid/
+    tar czf $CONFIG_PKGDIR/c2-$CONFIG_ARCH-$CONFIG_ANDROID_BRANCH.$CONFIG_DATEH-nfs-droid.tar.gz nfs-droid
+
+    cd $TOP
+    echo `date +"%Y-%m-%d %H:%M:%S"` Done build  $xmod, 0 error >>$CONFIG_LOGDIR/progress.log
+    recho_time_consumed $tm_a "The repo build $xmod"
+    update_indexlog "$xmod:0:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
     #check build result
     #package build files
 fi
 
-if [ $CONFIG_BUILD_XXX ]; then  #script debug code
-    modules="xxx"
-    #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
-    steps="src_get src_package src_install src_config src_build bin_package bin_install "
-    build_modules_x_steps
+if [ $CONFIG_BUILD_ANDROIDNAND ]; then
+    xmod=nanddroid
+    update_indexlog "$xmod:2:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+    generate_web_report
+    upload_web_report
+
+    echo `date +"%Y-%m-%d %H:%M:%S"` Start build  $xmod >>$CONFIG_LOGDIR/progress.log
+    tm_a=`date +%s`
+    cp android/build/tools/make-nand-droid-fs $CONFIG_LOGDIR/
+    sed -i 's/sudo//g' $CONFIG_LOGDIR/make-nand-droid-fs
+
+    cd `readlink -f android`
+    cmd_opt=
+    if [ $CONFIG_BUILD_CLEAN ]; then
+        mkdir -p nand-droid
+        rm -rf nand-droid/*
+    fi
+    [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
+    $CONFIG_LOGDIR/make-nand-droid-fs  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log
+    cp -f build/tools/gen-uboot-burn-code.sh  nand-droid/
+    cp -f kernel/vmlinux.bin                  nand-droid/
+    cat <<END >>nand-droid/run
+
+NAND burn guide:
+burn zvmlinux.bin ->NAND +  1MB
+burn root.image   ->NAND + 16MB
+burn system.image ->NAND +112MB
+burn data.image   ->NAND +368MB
+
+ref c2 wiki: https://access.c2micro.com/index.php/Android#Local_build_and_driver_update
+
+END
+    mkdir -p $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH
+    cp -rf nand-droid/* $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH/
+
+    cd $TOP
+    echo `date +"%Y-%m-%d %H:%M:%S"` Done build  $xmod, 0 error >>$CONFIG_LOGDIR/progress.log
+    recho_time_consumed $tm_a "The repo build $xmod"
+    if [ -f android/nand-droid/root.image -a -f android/nand-droid/system.image -a -f android/nand-droid/data.image ]; then
+        build_fail=
+        update_indexlog "nfsdroid:0:$CONFIG_LOGDIR/nfsdroid.log" $CONFIG_INDEXLOG
+        update_indexlog "$xmod:0:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+    else
+        CONFIG_BUILD_PUBLISH=
+        build_fail="yes"
+        update_indexlog "nfsdroid:1:$CONFIG_LOGDIR/nfsdroid.log" $CONFIG_INDEXLOG
+        update_indexlog "$xmod:1:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+    fi
+    #check build result
+    #package build files
 fi
+
 modules=
 [ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
 [ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
@@ -691,13 +751,20 @@ if [ "$modules" != "" ]; then
     fi
 fi
 
+if [ $CONFIG_BUILD_XXX ]; then  #script debug code
+    modules="xxx"
+    #modules="devtools sw_media qt470 kernel kernelnand kernela2632 uboot vivante hdmi c2box jtag diag c2_goodies facudisk usrudisk"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    build_modules_x_steps
+fi
+
 checkadd_fail_send_list
 [ $nr_failurl    -gt 0 ] && CONFIG_BUILD_PUBLISH=
 [ $nr_totalerror -gt 0 ] && CONFIG_BUILD_PUBLISH=
 generate_web_report
 generate_email
 upload_web_report
-send_email
 upload_packages
 upload_logs
+send_email
 rm -rf $lock
