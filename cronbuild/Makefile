@@ -83,7 +83,7 @@ define safelink
     if test -h $2 ; then rm $2;fi
     ln -s $1 $2
 endef
-sdkautodirs :=  $(PKG_DIR)/c2box $(TEST_ROOT_DIR)/usr/bin  $(TEMP_DIR)
+sdkautodirs :=  $(PKG_DIR) $(TEST_ROOT_DIR)/usr/bin $(TEMP_DIR) $(APP_DIRS)
 
 .PHONY: sdk_folders lsmod lsop lstest lsall lsmk lsvar lsvars $(varlist) help
 $(sdkautodirs):

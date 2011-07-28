@@ -40,8 +40,8 @@ CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_A
                 #build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
                      #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
 "
-CONFIG_PKGSERVERS="build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
-                  #build@10.16.13.195:/sdk-b1/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
+CONFIG_PKGSERVERS="            build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
+                              #build@10.16.13.195:/sdk-b1/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
 "
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
@@ -120,6 +120,10 @@ fi
 #---------------------------------------------------------------
 jobtimeout=6000
 lock=`pwd`/${0##*/}.lock
+unlock_job()
+{
+  rm -rf $lock.log $lock
+}
 lock_job()
 {
   if [ -f $lock ]; then
@@ -136,7 +140,7 @@ lock_job()
         exit 1
     fi
   fi
-  >$lock.log
+  rm -rf $lock.log
   echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >$lock
 }
 softlink()
@@ -767,4 +771,4 @@ upload_web_report
 upload_packages
 upload_logs
 send_email
-rm -rf $lock
+unlock_job
