@@ -34,16 +34,16 @@ CONFIG_CHECKOUT_ANDROID=checkout-android-tags.sh
 CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
-CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/$CONFIG_WEBFILE
-                #build@10.0.5.193:/home/build/public_html/scriptdebug/$CONFIG_WEBFILE
-                     #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/$CONFIG_WEBFILE
+CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/$CONFIG_WEBFILE
+                #build@10.0.5.193:/home/build/public_html/$CONFIG_WEBFILE
+                     #hguo@10.16.5.166:/var/www/html/hguo/$CONFIG_WEBFILE
 "
-CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
-                #build@10.0.5.193:/home/build/public_html/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
-                     #hguo@10.16.5.166:/var/www/html/hguo/scriptdebug/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+                #build@10.0.5.193:/home/build/public_html/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+                     #hguo@10.16.5.166:/var/www/html/hguo/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
 "
-CONFIG_PKGSERVERS="            build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
-                              #build@10.16.13.195:/sdk-b1/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
+CONFIG_PKGSERVERS="            build@10.16.13.195:/sdk-b2/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATE
+                              #build@10.16.13.195:/sdk-b1/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATE
 "
 CONFIG_C2LOCALSERVERS="        build@10.16.13.200:/c2/local/c2/sw_media/$CONFIG_DATE-android
 "
@@ -56,17 +56,17 @@ CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
 CONFIG_EMAILFILE=$CONFIG_LOGDIR/email.txt
 CONFIG_EMAILTITLE="$CONFIG_ARCH $CONFIG_TREEPREFIX daily build pass"
 CONFIG_PATH=$CONFIG_C2GCC_PATH:$PATH
-CONFIG_DEBUG=1
-CONFIG_BUILD_DRY=1
+CONFIG_DEBUG=
+CONFIG_BUILD_DRY=
 CONFIG_BUILD_HELP=
-CONFIG_BUILD_LOCAL=1
-CONFIG_BUILD_DOTAG=1
+CONFIG_BUILD_LOCAL=
+CONFIG_BUILD_DOTAG=
 CONFIG_BUILD_CLEAN=1
 CONFIG_BUILD_SDK=
 CONFIG_BUILD_CHECKOUT=1
 CONFIG_BUILD_PKGSRC=1
 CONFIG_BUILD_PKGBIN=1
-CONFIG_BUILD_DEVTOOLS=1
+CONFIG_BUILD_DEVTOOLS=
 CONFIG_BUILD_SPI=
 CONFIG_BUILD_DIAG=
 CONFIG_BUILD_JTAG=
@@ -83,11 +83,11 @@ CONFIG_BUILD_FACUDISK=
 CONFIG_BUILD_USRUDISK=
 CONFIG_BUILD_ANDROIDNAND=1
 CONFIG_BUILD_ANDROIDNFS=1
-CONFIG_BUILD_XXX=1
+CONFIG_BUILD_XXX=
 CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=
+CONFIG_BUILD_PUBLISHEMAIL=1
 CONFIG_BUILD_PUBLISHC2LOCAL=1
 
 #command line parse
@@ -536,12 +536,14 @@ upload_packages()
             ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
             if [ "$ip" = "$CONFIG_MYIP" ];then
                 mkdir -p $p
-                echo "cp -rf $CONFIG_PKGDIR/* $p/"
-                cp -rf $CONFIG_PKGDIR/* $p/
+                echo "cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/"
+                cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/
+                cp -rf $CONFIG_PKGDIR/*sw_media* $p/
             else
                 ssh $h mkdir -p $p
-                echo "scp -r $CONFIG_PKGDIR/* $sver/"
-                scp -r $CONFIG_PKGDIR/* $sver/
+                echo "scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/"
+                scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/
+                scp -r $CONFIG_PKGDIR/*sw_media* $sver/
             fi
         done
         echo publish package done.
@@ -718,15 +720,17 @@ if [ $CONFIG_BUILD_ANDROIDNFS ]; then
     sed -i 's/sudo//g' $CONFIG_LOGDIR/make-nfs-droid-fs-usr
 
     cd `readlink -f android`
-    cmd_opt="-m -f"
+    cmd_opt=
     if [ $CONFIG_BUILD_CLEAN ]; then
         mkdir -p nfs-droid
         rm -rf nfs-droid/*
-    cmd_opt="-m -f"
+        cmd_opt="-m -f"
     fi
     [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
     $CONFIG_LOGDIR/make-nfs-droid-fs-usr  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log 2>&1
     cp -f build/tools/gen-nfs-burn-code.sh nfs-droid/
+    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   nfs-droid/
+    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID nfs-droid/
     tar czf $CONFIG_PKGDIR/c2-$CONFIG_ARCH-$CONFIG_BRANCH_ANDROID.$CONFIG_DATEH-nfs-droid.tar.gz nfs-droid
 
     cd $TOP
@@ -735,6 +739,8 @@ if [ $CONFIG_BUILD_ANDROIDNFS ]; then
     update_indexlog "$xmod:0:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
     #check build result
     #package build files
+    nr_totalmodule=$((nr_totalmodule))
+    #nr_totalerror=$((nr_totalerror+1))
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNAND ]; then
@@ -769,6 +775,8 @@ burn data.image   ->NAND +368MB
 ref c2 wiki: https://access.c2micro.com/index.php/Android#Local_build_and_driver_update
 
 END
+    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   nand-droid/
+    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID nand-droid/
     mkdir -p $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH
     cp -rf nand-droid/* $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH/
 
@@ -784,9 +792,12 @@ END
         build_fail="yes"
         update_indexlog "nfsdroid:1:$CONFIG_LOGDIR/nfsdroid.log" $CONFIG_INDEXLOG
         update_indexlog "$xmod:1:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+        nr_totalerror=$((nr_totalerror+1))
+        nr_totalerror=$((nr_totalerror+1))
     fi
     #check build result
     #package build files
+    nr_totalmodule=$((nr_totalmodule))
 fi
 
 modules=
