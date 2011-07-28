@@ -23,8 +23,8 @@ CONFIG_GENHTML=`pwd`/scm/html_generate.cgi
 CONFIG_ARCH=`make -f $CONFIG_MAKEFILE SDK_TARGET_ARCH`  #jazz2 jzz2t jazz2l
 CONFIG_PKGDIR=`make -f $CONFIG_MAKEFILE PKG_DIR`
 CONFIG_TREEPREFIX=sdkdev               #sdkdev sdkrel anddev andrel, etc, easy to understand
-CONFIG_GCCPATH=/c2/local/c2/daily-jazz2/bin
-CONFIG_GCC=`$CONFIG_GCCPATH/c2-linux-gcc --version`
+CONFIG_C2GCC_PATH=`readlink -f c2/daily/bin`
+CONFIG_C2GCC_VERSION=`$CONFIG_C2GCC_PATH/c2-linux-gcc --version`
 CONFIG_KERNEL=`make -f $CONFIG_MAKEFILE SDK_KERNEL_VERSION`
 CONFIG_LIBC=uClibc-0.9.27
 CONFIG_C2SDK_BRANCH=master  #one of: master, devel, etc.
@@ -51,7 +51,7 @@ CONFIG_INDEXLOG=$CONFIG_RESULT.txt
 CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
 CONFIG_EMAILFILE=$CONFIG_LOGDIR/email.txt
 CONFIG_EMAILTITLE="$CONFIG_ARCH $CONFIG_TREEPREFIX daily build pass"
-CONFIG_PATH=$CONFIG_GCCPATH:$PATH
+CONFIG_PATH=$CONFIG_C2GCC_PATH:$PATH
 CONFIG_DEBUG=1
 CONFIG_BUILD_DRY=1
 CONFIG_BUILD_HELP=
@@ -385,8 +385,8 @@ generate_web_report()
 export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
 export SDKENV_Title=$CONFIG_WEBTITLE
 export SDKENV_Project="${CONFIG_ARCH} ${CONFIG_TREEPREFIX} daily build on $HOSTNAME"
-export SDKENV_Overview="<pre>Project start on $CONFIG_STARTTIME, done on `date`
-`recho_time_consumed $CONFIG_STARTTID all done`</pre>"
+export SDKENV_Overview="<pre>Project start on $CONFIG_STARTTIME, report on `date`
+`recho_time_consumed $CONFIG_STARTTID On report time`</pre>"
 export SDKENV_Setting="<pre>Makefile settings:
 `make -f $CONFIG_MAKEFILE lsvar`
 
@@ -612,7 +612,7 @@ setup_build_jazz2t_sw_media_env()
     export UPNP_SUPPORT=1
     export D_EN_RTP=Y
     #next added by Westwood
-    export PATH=/c2/local/c2/sw_media/android_toolchain_jazz2t/bin/:$PATH
+    export PATH=$CONFIG_C2GCC_PATH:$PATH
     export TARGET_ARCH=JAZZ2T; 
     export BUILD_TARGET=TARGET_LINUX_C2; 
     export BUILD=RELEASE;
