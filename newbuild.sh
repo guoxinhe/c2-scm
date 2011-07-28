@@ -693,7 +693,7 @@ if [ $CONFIG_BUILD_ANDROIDNFS ]; then
     cmd_opt="-m -f"
     fi
     [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
-    $CONFIG_LOGDIR/make-nfs-droid-fs-usr  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log
+    $CONFIG_LOGDIR/make-nfs-droid-fs-usr  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log 2>&1
     cp -f build/tools/gen-nfs-burn-code.sh nfs-droid/
     tar czf $CONFIG_PKGDIR/c2-$CONFIG_ARCH-$CONFIG_ANDROID_BRANCH.$CONFIG_DATEH-nfs-droid.tar.gz nfs-droid
 
@@ -723,7 +723,7 @@ if [ $CONFIG_BUILD_ANDROIDNAND ]; then
         rm -rf nand-droid/*
     fi
     [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
-    $CONFIG_LOGDIR/make-nand-droid-fs  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log
+    $CONFIG_LOGDIR/make-nand-droid-fs  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log 2>&1
     cp -f build/tools/gen-uboot-burn-code.sh  nand-droid/
     cp -f kernel/vmlinux.bin                  nand-droid/
     cat <<END >>nand-droid/run
