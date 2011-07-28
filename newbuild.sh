@@ -27,8 +27,10 @@ CONFIG_C2GCC_PATH=`readlink -f c2/daily/bin`
 CONFIG_C2GCC_VERSION=`$CONFIG_C2GCC_PATH/c2-linux-gcc --version`
 CONFIG_KERNEL=`make -f $CONFIG_MAKEFILE SDK_KERNEL_VERSION`
 CONFIG_LIBC=uClibc-0.9.27
-CONFIG_C2SDK_BRANCH=master  #one of: master, devel, etc.
-CONFIG_ANDROID_BRANCH=devel  #one of: master, devel, etc.
+CONFIG_BRANCH_C2SDK=master  #one of: master, devel, etc.
+CONFIG_BRANCH_ANDROID=devel  #one of: master, devel, etc.
+CONFIG_CHECKOUT_C2SDK=checkout-c2sdk-tags.sh
+CONFIG_CHECKOUT_ANDROID=checkout-android-tags.sh
 CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
@@ -42,6 +44,8 @@ CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/scriptdebug/${CONFIG_A
 "
 CONFIG_PKGSERVERS="            build@10.16.13.195:/sdk-b2/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
                               #build@10.16.13.195:/sdk-b1/scriptdebug/jazz2/dev/weekly/$CONFIG_DATE
+"
+CONFIG_C2LOCALSERVERS="        build@10.16.13.200:/c2/local/c2/sw_media/$CONFIG_DATE-android
 "
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
@@ -84,6 +88,7 @@ CONFIG_BUILD_PUBLISH=1
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
 CONFIG_BUILD_PUBLISHEMAIL=
+CONFIG_BUILD_PUBLISHC2LOCAL=1
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -110,7 +115,7 @@ Please support these in Makefile
     make lsvar                : list Makefile's important config variables
 
 module build ops used in Makefile, example module name is:xxx
-    make src_get_xxx src_package_xxx src_install_xxx src_config_xxx src_build_xxx bin_package_xxx bin_install_xxx 
+    make src_get_xxx src_package_xxx src_install_xxx src_config_xxx src_build_xxx bin_package_xxx bin_install_xxx
     make test_xxx clean_xxx help_xxx
 EOFHELP
     exit 0;
@@ -240,7 +245,7 @@ checkout_from_repositories()
 {
     if [ $CONFIG_BUILD_CHECKOUT ];then
         pushd `readlink -f source`
-        BR=$CONFIG_C2SDK_BRANCH
+        BR=$CONFIG_BRANCH_C2SDK
         echo "ereport: `date` repo start --all $BR"
         repo start $BR --all
         echo "ereport: `date` Start repo sync"
@@ -252,7 +257,7 @@ checkout_from_repositories()
         popd
 
         pushd `readlink -f android`
-        BR=$CONFIG_ANDROID_BRANCH
+        BR=$CONFIG_BRANCH_ANDROID
         echo "ereport: `date` repo start --all $BR"
         repo start $BR --all
         echo "ereport: `date` Start repo sync"
@@ -267,7 +272,7 @@ checkout_from_repositories()
 create_repo_checkout_script()
 {
     c2androiddir=$1
-    BR=$2  
+    BR=$2
     checkout_script=$3
 
     pushd $c2androiddir
@@ -276,8 +281,8 @@ create_repo_checkout_script()
     echo ""                         >>$checkout_script
     echo "repo start --all $BR"     >>$checkout_script
     echo ""                         >>$checkout_script
-    repo forall -c "echo pushd \$(pwd); 
-        echo -en 'git checkout '; 
+    repo forall -c "echo pushd \$(pwd);
+        echo -en 'git checkout ';
         git  log -n 1 | grep ^commit\ | sed 's/commit //g';
         echo 'popd'; echo ' ';" >>$checkout_script
     sed -i -e "s,$c2androiddir/,,g"   $checkout_script
@@ -314,20 +319,20 @@ checkadd_fail_send_list()
 	    addto_resultfail $m
 	    nr_failmodule=$(($nr_failmodule+1))
             case $m in
-            devtools*    ) addto_send $blame_devtools   ;; 
-            sw_media*    ) addto_send $blame_sw_media   ;; 
-            qt*          ) addto_send $blame_qt         ;; 
-            c2box*       ) addto_send $blame_c2box      ;; 
-            jtag*        ) addto_send $blame_jtag       ;; 
-            c2_goodies*  ) addto_send $blame_c2_goodies ;; 
-            diag*        ) addto_send $blame_diag       ;; 
-            kernel*      ) addto_send $blame_kernel     ;; 
-            vivante*     ) addto_send $blame_vivante    ;; 
-            hdmi*        ) addto_send $blame_hdmi       ;; 
-            uboot*       ) addto_send $blame_uboot      ;; 
-            facudisk*    ) addto_send $blame_facudisk   ;; 
-            usrudisk*    ) addto_send $blame_usrudisk   ;; 
-            xxx*         ) addto_send $blame_xxx        ;; 
+            devtools*    ) addto_send $blame_devtools   ;;
+            sw_media*    ) addto_send $blame_sw_media   ;;
+            qt*          ) addto_send $blame_qt         ;;
+            c2box*       ) addto_send $blame_c2box      ;;
+            jtag*        ) addto_send $blame_jtag       ;;
+            c2_goodies*  ) addto_send $blame_c2_goodies ;;
+            diag*        ) addto_send $blame_diag       ;;
+            kernel*      ) addto_send $blame_kernel     ;;
+            vivante*     ) addto_send $blame_vivante    ;;
+            hdmi*        ) addto_send $blame_hdmi       ;;
+            uboot*       ) addto_send $blame_uboot      ;;
+            facudisk*    ) addto_send $blame_facudisk   ;;
+            usrudisk*    ) addto_send $blame_usrudisk   ;;
+            xxx*         ) addto_send $blame_xxx        ;;
             *)  	  ;;
             esac
         fi
@@ -543,6 +548,32 @@ upload_packages()
     fi
 }
 
+upload_install_sw_media()
+{
+    #this only appears in ssh, no local enabled.
+    if [ $CONFIG_BUILD_PUBLISHC2LOCAL ]; then
+        for sver in $CONFIG_C2LOCALSERVERS; do
+            [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
+            h=${sver%%:/*}
+            p=${sver##*:}
+            ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
+            if [ "$ip" = "$CONFIG_MYIP" ];then
+                echo "do nothing"
+            else
+                ssh $h mkdir -p $p
+                echo "scp -r $CONFIG_PKGDIR/${PKG_NAME_BIN_SW_MEDIA} $sver/"
+                scp -r $CONFIG_PKGDIR/${PKG_NAME_BIN_SW_MEDIA} $sver/
+                ssh $h "cd $p; tar xzf ${PKG_NAME_BIN_SW_MEDIA}; rm ${PKG_NAME_BIN_SW_MEDIA};"
+                scp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK  $sver/TARGET_LINUX_C2_JAZZ2T_RELEASE/
+                if test -d $p/TARGET_LINUX_C2_JAZZ2T_RELEASE/bin -a -d $p/TARGET_LINUX_C2_TANGO_RELEASE/bin; then
+                    ssh $h  "cd ${p%/*}; rm daily-android; ln -s ${p##*/}  daily-android;"
+                fi
+            fi
+        done
+    fi
+    echo publish sw_media package to ${p%/*} done.
+}
+
 send_email()
 {
     echo email title "$CONFIG_EMAILTITLE"
@@ -585,7 +616,7 @@ build_modules_x_steps()
                 iserror=$((iserror+1))
             fi
             echo `date +"%Y-%m-%d %H:%M:%S"` Done build  ${s}_$xmod, $nr_merr error >>$CONFIG_LOGDIR/progress.log
-            recho_time_consumed $tm_a "$s: $iserror error(s). "  
+            recho_time_consumed $tm_a "$s: $iserror error(s). "
             if [ $nr_merr -ne 0 ];then
                 break;
             fi
@@ -613,8 +644,8 @@ setup_build_sw_media_for_android_env_jazz2()
     export D_EN_RTP=Y
     #next added by Westwood
     export PATH=$CONFIG_C2GCC_PATH:$PATH
-    export TARGET_ARCH=TANGO; 
-    export BUILD_TARGET=TARGET_LINUX_C2; 
+    export TARGET_ARCH=TANGO;
+    export BUILD_TARGET=TARGET_LINUX_C2;
     export BUILD=RELEASE;
     export BOARD_TARGET=C2_CC289; #add this for safe build jazz2-android-sw_media
 }
@@ -629,8 +660,8 @@ setup_build_sw_media_for_android_env_jazz2t()
     export D_EN_RTP=Y
     #next added by Westwood
     export PATH=$CONFIG_C2GCC_PATH:$PATH
-    export TARGET_ARCH=JAZZ2T; 
-    export BUILD_TARGET=TARGET_LINUX_C2; 
+    export TARGET_ARCH=JAZZ2T;
+    export BUILD_TARGET=TARGET_LINUX_C2;
     export BUILD=RELEASE;
     export BOARD_TARGET=C2_CC302; #add this for safe build jazz2t-android-sw_media
 }
@@ -640,7 +671,7 @@ setup_build_sw_media_for_android_env_jazz2t()
 lock_job
 make -f $CONFIG_MAKEFILE sdk_folders
 mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
-touch $CONFIG_INDEXLOG 
+touch $CONFIG_INDEXLOG
 touch $CONFIG_HTMLFILE
 touch $CONFIG_EMAILFILE
 softlink $CONFIG_INDEXLOG r
@@ -650,8 +681,8 @@ softlink $CONFIG_RESULT   i
 set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
 cat $CONFIG_LOGDIR/env.sh
 checkout_from_repositories
-create_repo_checkout_script `readlink -f source`  $CONFIG_C2SDK_BRANCH   $CONFIG_PKGDIR/checkout-c2sdk-tags.sh
-create_repo_checkout_script `readlink -f android` $CONFIG_ANDROID_BRANCH $CONFIG_PKGDIR/checkout-android-tags.sh
+create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
+create_repo_checkout_script `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
     [ -h local.rules.mk ] && rm local.rules.mk
@@ -695,7 +726,7 @@ if [ $CONFIG_BUILD_ANDROIDNFS ]; then
     [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
     $CONFIG_LOGDIR/make-nfs-droid-fs-usr  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log 2>&1
     cp -f build/tools/gen-nfs-burn-code.sh nfs-droid/
-    tar czf $CONFIG_PKGDIR/c2-$CONFIG_ARCH-$CONFIG_ANDROID_BRANCH.$CONFIG_DATEH-nfs-droid.tar.gz nfs-droid
+    tar czf $CONFIG_PKGDIR/c2-$CONFIG_ARCH-$CONFIG_BRANCH_ANDROID.$CONFIG_DATEH-nfs-droid.tar.gz nfs-droid
 
     cd $TOP
     echo `date +"%Y-%m-%d %H:%M:%S"` Done build  $xmod, 0 error >>$CONFIG_LOGDIR/progress.log
@@ -792,4 +823,5 @@ upload_web_report
 upload_packages
 upload_logs
 send_email
+upload_install_sw_media
 unlock_job
