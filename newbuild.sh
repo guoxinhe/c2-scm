@@ -603,7 +603,23 @@ build_modules_x_steps()
     done
 }
 
-setup_build_jazz2t_sw_media_env()
+setup_build_sw_media_for_android_env_jazz2()
+{
+    [ -d android ] || echo "Error, no android project folder found"
+    export ANDROID_HOME=`readlink -f android`
+    export ANDROID_BUILD=1
+    #next added by Ben Cang.
+    export UPNP_SUPPORT=1
+    export D_EN_RTP=Y
+    #next added by Westwood
+    export PATH=$CONFIG_C2GCC_PATH:$PATH
+    export TARGET_ARCH=TANGO; 
+    export BUILD_TARGET=TARGET_LINUX_C2; 
+    export BUILD=RELEASE;
+    export BOARD_TARGET=C2_CC289; #add this for safe build jazz2-android-sw_media
+}
+
+setup_build_sw_media_for_android_env_jazz2t()
 {
     [ -d android ] || echo "Error, no android project folder found"
     export ANDROID_HOME=`readlink -f android`
@@ -642,7 +658,7 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
     ln -s jazz2t.rules.mk local.rules.mk
     modules="sw_mediaandroid"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
-    setup_build_jazz2t_sw_media_env
+    setup_build_sw_media_for_android_env_jazz2t
     build_modules_x_steps
 
     r=`grep ^sw_mediaandroid:0 $CONFIG_INDEXLOG`
