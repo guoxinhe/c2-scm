@@ -565,6 +565,7 @@ upload_install_sw_media()
                 scp -r $CONFIG_PKGDIR/${PKG_NAME_BIN_SW_MEDIA} $sver/
                 ssh $h "cd $p; tar xzf ${PKG_NAME_BIN_SW_MEDIA}; rm ${PKG_NAME_BIN_SW_MEDIA};"
                 scp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK  $sver/TARGET_LINUX_C2_JAZZ2T_RELEASE/
+                ssh $h "cd $p; chmod -R g+w *"
                 if test -d $p/TARGET_LINUX_C2_JAZZ2T_RELEASE/bin -a -d $p/TARGET_LINUX_C2_TANGO_RELEASE/bin; then
                     ssh $h  "cd ${p%/*}; rm daily-android; ln -s ${p##*/}  daily-android;"
                 fi
