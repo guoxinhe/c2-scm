@@ -1,4 +1,3 @@
-
 mission_devtools := src_get_devtools  \
 	src_package_devtools src_install_devtools src_config_devtools src_build_devtools \
 	bin_package_devtools bin_install_devtools 
@@ -35,8 +34,7 @@ buildroot:
 		rm autobuild_config_*
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(BUILDROOT_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		buildroot; \
 	    rm -rf buildroot;
 devtools_list += busybox151
@@ -46,8 +44,7 @@ busybox151:
 	@echo $@
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_5_1_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		busybox-1.5.1
 devtools_list += busybox1131
 src_get_busybox1131:
@@ -56,8 +53,7 @@ busybox1131:
 	@echo $@
 	@cd $(SOURCE_DIR)/sw/cmd; \
 	    tar jcf $(BUSYBOX_1_13_3_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		busybox-1.13.3
 devtools_list += i2ctools301
 src_get_i2ctools301:
@@ -67,8 +63,7 @@ i2ctools301:
 	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_I2CTOOLS) $(TEMP_DIR)/src_devtools/i2c-tools-3.0.1;
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(I2CTOOLS_FILE) \
-	        --exclude=CVS     \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        i2c-tools-3.0.1; \
 	    rm -rf i2c-tools-3.0.1
 devtools_list += oprofile
@@ -79,8 +74,7 @@ oprofile:
 	@cp -arf $(SOURCE_DIR)/$(CVS_SRC_OPROFILE) $(TEMP_DIR)/src_devtools/oprofile-0.9.1;
 	@cd $(TEMP_DIR)/src_devtools;\
 	    tar jcf $(OPROFILE_FILE) \
-	        --exclude=CVS     \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        oprofile-0.9.1; \
 	    rm -rf oprofile-0.9.1
 devtools_list += directfb
@@ -90,8 +84,7 @@ directfb:
 	@echo $@
 	@cd $(SOURCE_DIR)/projects/sw/directfb; \
 	    tar jcf $(DIRECTFB_FILE) \
-	        --exclude=CVS      \
-	        --exclude=CVSROOT  \
+		$(TAR_EXCLUDEFLAGS)   \
 	        DirectFB-1.4.5
 devtools_list += binutils
 src_get_binutils:	
@@ -102,8 +95,7 @@ binutils:
 	    cp -rf binutils $(TEMP_DIR)/src_devtools/binutils-c2.snapshot
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(BINUTILS_FILE) \
-		--exclude=CVS \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		binutils-c2.snapshot; \
 	    rm -rf binutils-c2.snapshot
 devtools_list += gccsrc
@@ -115,8 +107,7 @@ gccsrc:
 	    cp -rf gcc $(TEMP_DIR)/src_devtools/gcc-c2.snapshot
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(GCC_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		gcc-c2.snapshot ; \
 	    rm -rf gcc-c2.snapshot
 devtools_list += standalone_build_script
@@ -150,8 +141,7 @@ kernel_include:
 		cp -f $(SOURCE_DIR)/$(STANDALONE_BUILD)/version.h  \
 			linux-libc-headers-$(SDK_KERNEL_VERSION).0/include/linux ; \
 		tar jcf $(KERNEL_FILE) \
-			--exclude=CVS     \
-			--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 			linux-libc-headers-$(SDK_KERNEL_VERSION).0 ; \
 		rm -rf linux-libc-headers-$(SDK_KERNEL_VERSION).0
 devtools_list += uclibc
@@ -163,8 +153,7 @@ uclibc:
 	    cp -rf uClibc $(TEMP_DIR)/src_devtools/uClibc-0.9.27
 	@cd $(TEMP_DIR)/src_devtools; \
 	    tar jcf $(UCLIBC_FILE) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		uClibc-0.9.27 ; \
 	    rm -rf uClibc-0.9.27
 devtools_list += mxtool
@@ -218,8 +207,7 @@ src_package_devtools: sdk_folders $(devtools_list)
 	@echo start $@
 	@echo Creating $(PKG_NAME_SRC_DEVTOOLS)
 	@cd $(TEMP_DIR) ; tar czvf $(PKG_NAME_SRC_DEVTOOLS) \
-		--exclude=CVS     \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		./devtools/tarballs          ./devtools/buildtools.sh    ./devtools/autobuild      \
 		./devtools/uclibc.mk         ./devtools/e2fsprogs.mk     ./devtools/binutils.mk    \
 		./devtools/libpng.mk         ./devtools/Config.in        ./devtools/binutils.mk.64 \
@@ -251,6 +239,7 @@ bin_package_devtools: sdk_folders
 	@echo "Creating package $(PKG_NAME_BIN_DEVTOOLS)"
 	@cd $(TEST_ROOT_DIR)/build_devtools/devtools; \
 	    tar cfz $(PKG_NAME_BIN_DEVTOOLS) \
+		$(TAR_EXCLUDEFLAGS)   \
 		--exclude=c2/$(TODAY)/tmp/*     \
 		c2
 	@echo $@ done
@@ -269,7 +258,7 @@ clean_devtools: sdk_folders
 		$(TEST_ROOT_DIR)/c2
 	@echo $@ done
 test_devtools: $(mission_devtools)
-help_devtools: sdk_folders mktest
+help_devtools: sdk_folders
 	@echo 
 	@echo targets: $(mission_devtools) clean_devtools test_devtools help_devtools
 	@echo $@ done
@@ -292,7 +281,8 @@ src_package_sw_media: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_SW_MEDIA_ALL)
 	@echo "Creating package $(PKG_NAME_SRC_SW_MEDIA_ALL)"
-	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_SW_MEDIA_ALL) --exclude=CVS --exclude=CVSROOT \
+	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_SW_MEDIA_ALL) \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_MEDIA)
 	@echo $@ done
 src_install_sw_media: sdk_folders
@@ -362,6 +352,7 @@ bin_package_sw_media: sdk_folders
 	@echo "Creating package $(PKG_NAME_BIN_SW_MEDIA):"
 	@cd $(TEST_ROOT_DIR)/build_sw_media/$(CVS_SRC_SW_MEDIA); \
 	    tar zcf $(PKG_NAME_BIN_SW_MEDIA) \
+		$(TAR_EXCLUDEFLAGS)   \
 		--exclude=RealPluginModule.plugin.so \
 		TARGET_LINUX_C2_$(SDK_TARGET_GCC_ARCH)_RELEASE
 	
@@ -390,7 +381,7 @@ clean_sw_media: sdk_folders
 		;
 	@echo $@ done
 test_sw_media: $(mission_sw_media)
-help_sw_media: sdk_folders mktest
+help_sw_media: sdk_folders
 	@echo 
 	@echo targets: $(mission_sw_media) clean_sw_media test_sw_media help_sw_media
 	@echo $@ done
@@ -410,7 +401,8 @@ src_package_qt470: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_QT470)
 	@echo "Creating package $(PKG_NAME_SRC_QT470)"
-	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_QT470) --exclude=CVS --exclude=CVSROOT \
+	@cd $(SOURCE_DIR); tar cfz $(PKG_NAME_SRC_QT470) \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_QT470)
 	@echo $@ done
 src_install_qt470: sdk_folders
@@ -420,49 +412,70 @@ src_install_qt470: sdk_folders
 	@echo Extract $(PKG_NAME_SRC_QT470)
 	cd $(TEST_ROOT_DIR)/build_qt ; \
 	    tar xzf $(PKG_NAME_SRC_QT470)
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+		rm -rf .git
 	@echo $@ done
 src_config_qt470: sdk_folders
 	@echo start $@
 	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
 	QT_CFLAGS_DIRECTFB="-I$(TOOLCHAIN_PATH)/../include/directfb -DQT_CFLAGS_DIRECTFB" \
 	QT_LIBS_DIRECTFB="-L$(TOOLCHAIN_PATH)/../lib -ldirectfb -ldirect -lfusion" \
-	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
 	C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..  \
 	./configure -embedded c2 \
 	-little-endian -qt-kbd-linuxinput -system-libpng -qt-gif -release \
-	-prefix $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic -confirm-license -opensource -qt-libjpeg \
+	-prefix $(QT_INSTALL_DIR) -confirm-license -opensource -qt-libjpeg \
 	-qt-libmng -qvfb -depths 8,16,32 \
-	-confirm-license -largefile -webkit -svg -dbus -I $(TEST_ROOT_DIR)/c2/daily/include/dbus-1.0 \
-	-L $(TEST_ROOT_DIR)/c2/daily/lib/  -ldbus-1 -xmlpatterns -exceptions \
+	-confirm-license -largefile -webkit -svg -dbus -I $(TOOLCHAIN_PATH)/../include/dbus-1.0 \
+	-L $(TOOLCHAIN_PATH)/../lib/  -ldbus-1 -xmlpatterns -exceptions \
 	-openssl-linked
+	# -no-opengl -nomake examples -nomake demos
 	@echo $@ done
+src_build_qt470_step1:
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..
+src_build_qt470_step2:
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. install
 src_build_qt470: sdk_folders
 	@echo start $@
-	@cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
-	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
-	make C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..
-	@cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
-	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) DISP_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
-	make C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. install
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/..
+	cd $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) ; \
+	TARGET_ARCH=$(SDK_TARGET_GCC_ARCH)  \
+	DISP_ARCH=$(SDK_TARGET_GCC_ARCH)    \
+	BUILD_TARGET=TARGET_LINUX_C2 BOARD_TARGET=C2_CC289 BUILD=RELEASE \
+	make -j 4 C2_DEVTOOLS_PATH=$(TOOLCHAIN_PATH)/.. install
 	@echo $@ done
 bin_package_qt470: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_BIN_QT470)
 	@echo "Creating package $(PKG_NAME_BIN_QT470)"
 	@cd $(TEST_ROOT_DIR) ; \
-	    tar czf  $(PKG_NAME_BIN_QT470) QtopiaCore-4.7.0-generic
+	    tar czf  $(PKG_NAME_BIN_QT470) $(QTINSTALL_NAME)
 	@echo $@ done
 bin_install_qt470: sdk_folders
 	@echo start $@
 	@cd $(TEST_ROOT_DIR) ; \
-	    if [ ! -d QtopiaCore-4.7.0-generic ]; then tar xzf  $(PKG_NAME_BIN_QT470);fi
+	    if [ ! -d $(QTINSTALL_NAME) ]; then tar xzf  $(PKG_NAME_BIN_QT470);fi
 	@echo $@ done
 clean_qt470: sdk_folders
 	@echo $@ remove binary install,build,configure,source install
-	@-rm -rf $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) $(TEST_ROOT_DIR)/QtopiaCore-4.7.0-generic
+	@-rm -rf $(TEST_ROOT_DIR)/build_qt/$(CVS_SRC_QT470) $(QT_INSTALL_DIR)
 	@echo $@ done
 test_qt470: $(mission_qt470)
-help_qt470: sdk_folders mktest
+help_qt470: sdk_folders
 	@echo 
 	@echo targets: $(mission_qt470) clean_qt470 test_qt470 help_qt470
 	@echo $@ done
@@ -483,8 +496,12 @@ src_package_kernel: sdk_folders
 	@echo "Creating package $(PKG_NAME_SRC_KERNEL)"
 	@rm -rf $(TEMP_DIR)/src_kernel
 	@mkdir -p $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)
-	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL) $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/..
-	@cd $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL) && rm -rf linux-* && cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/$(LINUXDIR) .
+	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/configs           $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/
+	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/initramfs_files   $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/
+	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/linux-2.6         $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/
+	@cp -rf $(SOURCE_DIR)/$(CVS_SRC_KERNEL)/configs/mkramfs/* $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/
+	@cd $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/; \
+		 sed -i 's/LINUX_DIR ?=.*/LINUX_DIR := $(LINUXDIR)/' Makefile;
 	@# Add -m32 switch (valid for both i386 and x86_64 builds)
 	@cd $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
 	        sed -i '{s,= gcc,= gcc -m32,g}' Makefile;
@@ -492,13 +509,15 @@ src_package_kernel: sdk_folders
 	@cd $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/$(LINUXDIR)/arch/c2/configs; \
 	    sed -i 's/CONFIG_LOCALVERSION=""/CONFIG_LOCALVERSION="[$(SDK_VERSION_ALL)]"/' $(LINUX_CONFIG)
 	@cd $(TEMP_DIR)/src_kernel/$(CVS_SRC_KERNEL)/configs/jazz2-pvr-nand; \
-	    sed -i 's/CONFIG_LOCALVERSION=""/CONFIG_LOCALVERSION="[$(SDK_VERSION_ALL)]"/' defconfig
+		sed -i 's/CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION="[$(SDK_VERSION_ALL)]"/' $(SDK_TARGET_ARCH)-$(SDK_KERNEL_VERSION)_defconfig; \
+		sed -i 's/BUILD_ARCH ?=.*/BUILD_ARCH := $(SDK_TARGET_ARCH)/' nand.mk; \
+		sed -i 's/LINUX_VERSION ?=.*/LINUX_VERSION := $(SDK_KERNEL_VERSION)/' nand.mk; \
+		sed -i 's/LINUX_DIR ?=.*/LINUX_DIR := $(LINUXDIR)/' nand.mk
 	
 	@# package up kernel src
 	@cd $(TEMP_DIR)/src_kernel; \
 	    tar cfz $(PKG_NAME_SRC_KERNEL) \
-    		--exclude=CVS \
-    		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
     		./$(CVS_SRC_KERNEL);
 	@echo $@ done
 src_install_kernel: sdk_folders
@@ -514,8 +533,7 @@ src_config_kernel: sdk_folders
 	@cd $(TEST_ROOT_DIR)/build_kernelsd/$(CVS_SRC_KERNEL)/$(LINUXDIR); \
 	cp arch/c2/configs/$(LINUX_CONFIG) .config; \
 	yes "" |make oldconfig;
-	@cd $(TEST_ROOT_DIR)/build_kernelsd/$(CVS_SRC_KERNEL); \
-	make initramfs_gen.txt;
+	@cd $(TEST_ROOT_DIR)/build_kernelsd/$(CVS_SRC_KERNEL)/configs/release; make initramfs_gen.txt;
 	@echo $@ done
 src_build_kernel: sdk_folders
 	@echo start $@
@@ -557,7 +575,7 @@ clean_kernel: sdk_folders
 	rm -rf  $(TEMP_DIR)/src_kernel $(TEST_ROOT_DIR)/build_kernelsd
 	@echo $@ done
 test_kernel: $(mission_kernel)
-help_kernel: sdk_folders mktest
+help_kernel: sdk_folders
 	@echo targets: $(mission_kernel) clean_kernel test_kernel help_kernel
 	@echo $@ done
 
@@ -629,7 +647,7 @@ clean_kernelnand: sdk_folders
 	rm -rf $(TEST_ROOT_DIR)/build_kernelnand
 	@echo $@ done
 test_kernelnand: $(mission_kernelnand)
-help_kernelnand: sdk_folders mktest
+help_kernelnand: sdk_folders
 	@echo targets: $(mission_kernelnand) clean_kernelnand test_kernelnand help_kernelnand
 	@echo $@ done
 
@@ -649,7 +667,7 @@ src_package_kernela2632: sdk_folders
 	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.src.tar.gz
 	@cd $(SOURCE_LOCAL); \
 	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.src.tar.gz \
-		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
+		$(TAR_EXCLUDEFLAGS)   \
 		kernel
 	@echo $@ done
 src_install_kernela2632: sdk_folders 
@@ -679,7 +697,7 @@ bin_package_kernela2632: sdk_folders
 	@-rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.bin.tar.gz
 	@cd $(TEST_ROOT_DIR)/build_kernela2632/; \
 	    tar cfz $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernela2632.bin.tar.gz \
-		--exclude=CVS --exclude=CVSROOT --exclude=.git*\
+		$(TAR_EXCLUDEFLAGS)   \
 		kernel/vmlinux \
 		kernel/vmlinux.bin \
 		kernel/vmlinux.dump \
@@ -703,16 +721,23 @@ clean_kernela2632: sdk_folders
 	@-rm -rf $(TEST_ROOT_DIR)/build_kernela2632
 	@echo $@ done
 test_kernela2632: $(mission_kernela2632)
-help_kernela2632: sdk_folders mktest
+help_kernela2632: sdk_folders
 	@echo targets: $(mission_kernela2632) clean_kernela2632 test_kernela2632 help_kernela2632
 	@echo $@ done
+
+# U-BOOT package
+uboot_utilities			:= u-boot-utilities
+GIT_SRC_UBOOT			:= u-boot-1.3.0
+PKG_NAME_SRC_UBOOT		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-src.tar.gz
+PKG_NAME_BIN_UBOOT		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-u-boot-bin.tar.gz
 
 mission_uboot := src_get_uboot  \
 	src_package_uboot src_install_uboot src_config_uboot src_build_uboot \
 	bin_package_uboot bin_install_uboot
 mission_modules += mission_uboot
 mission_targets += $(mission_uboot)
-.PHONY: $(mission_uboot)
+.PHONY: $(mission_uboot) clean_uboot help_uboot test_uboot
+
 src_get_uboot:  sdk_folders
 	@echo start $@
 	#@cd $(SOURCE_DIR); $(CHECKOUT) $(CVS_SRC_UBOOT)
@@ -721,11 +746,9 @@ src_package_uboot: sdk_folders
 	@echo start $@
 	@-rm -rf $(PKG_NAME_SRC_UBOOT)
 	@echo "Creating package $(PKG_NAME_SRC_UBOOT)"
-	@cd $(SOURCE_GITDIR); \
+	@cd $(SOURCE_DIR); \
 	    tar cfz $(PKG_NAME_SRC_UBOOT) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
-	        --exclude=.git \
+		$(TAR_EXCLUDEFLAGS)   \
 	        $(GIT_SRC_UBOOT)
 	@echo $@ done
 src_install_uboot: sdk_folders
@@ -764,6 +787,8 @@ help_uboot: sdk_folders mktest
 	@echo targets: $(mission_uboot) clean_uboot test_uboot help_uboot
 	@echo $@ done
 
+
+
 mission_vivante := src_get_vivante  \
 	src_package_vivante src_install_vivante src_config_vivante src_build_vivante \
 	bin_package_vivante bin_install_vivante
@@ -780,16 +805,14 @@ src_package_vivante: sdk_folders
 	@echo "Creating package $(PKG_NAME_SRC_VIVANTE)"
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_SRC_VIVANTE) \
-		--exclude=CVS \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_VIVANTE)
 	
 	@-rm -rf $(PKG_NAME_TEST_SRC_VIVANTE)
 	@echo "Creating package $(PKG_NAME_TEST_SRC_VIVANTE)"
 	@cd $(SOURCE_DIR); \
 	   tar cfz $(PKG_NAME_TEST_SRC_VIVANTE) \
-		--exclude=CVS \
-		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_VIVANTE)/gfxtst
 	@echo $@ done
 src_install_vivante: sdk_folders
@@ -823,7 +846,7 @@ clean_vivante: sdk_folders
 	rm -rf $(TEST_ROOT_DIR)/build_vivante
 	@echo $@ done
 test_vivante: $(mission_vivante)
-help_vivante: sdk_folders mktest
+help_vivante: sdk_folders
 	@echo targets: $(mission_vivante) clean_vivante test_vivante help_vivante
 	@echo $@ done
 
@@ -846,8 +869,7 @@ src_package_hdmi: sdk_folders
 	cp -arf $(SOURCE_DIR)/$(CVS_SRC_HDMI_JAZZ2) $(TEMP_DIR)/src_hdmi;
 	@cd $(TEMP_DIR)/src_hdmi; \
 	   tar cfz $(PKG_NAME_SRC_HDMI_JAZZ2) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        jazz2hdmi
 	@echo $@ done
 src_install_hdmi: sdk_folders
@@ -881,7 +903,7 @@ clean_hdmi: sdk_folders
 	rm -rf $(TEMP_DIR)/src_hdmi  $(TEST_ROOT_DIR)/build_hdmi
 	@echo $@ done
 test_hdmi: $(mission_hdmi)
-help_hdmi: sdk_folders mktest
+help_hdmi: sdk_folders
 	@echo targets: $(mission_hdmi) clean_hdmi test_hdmi help_hdmi
 	@echo $@ done
 
@@ -911,8 +933,7 @@ src_package_c2box: sdk_folders
 	@rm -f $(PKG_NAME_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_SW_C2APPS) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        --exclude=ipcam \
 		--exclude=dtv \
 		--exclude=p2p/PiPlugin \
@@ -924,8 +945,7 @@ src_package_c2box: sdk_folders
 	        $(CVS_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_C2BOX_ALL) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        --exclude=ipcam \
 		--exclude=dtv \
 		--exclude=p2p/PiPlugin \
@@ -937,8 +957,7 @@ src_package_c2box: sdk_folders
 	        $(CVS_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_C2BOX) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        --exclude=ipcam \
 		--exclude=dtv \
 		--exclude=p2p/PiPlugin \
@@ -963,49 +982,49 @@ src_package_c2box: sdk_folders
 	        $(CVS_SRC_SW_C2APPS)
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_MINIBD) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/discs
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_FLASH) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/flash
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_KARAOKE) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/karaoke
 	@if [ "$(SDK_TARGET_ARCH)" != "jazz2l" ]; then \
 	cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_VIDEOCHAT) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videochat; \
 	fi
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_THUNDERKK) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/thunderkk
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_MVPHONE) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/videophone
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_BROWSER) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/browser
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_IPCAM) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/camera
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_JVM) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/jvm
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_RECOEDING) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/capture
 	@cd $(TEMP_DIR)/src_c2box; \
 	    tar zcf $(PKG_NAME_SRC_SOHU) \
-		--exclude=CVS \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_SW_C2APPS)/pvr/filemanager/apps/sohu
 	
 	@echo $@ done
@@ -1019,15 +1038,14 @@ src_install_c2box: sdk_folders
 src_config_c2box: sdk_folders
 	@echo start $@
 	@echo $@ done
-src_build_c2box: \
-	override PATH := $(TOOLCHAIN_PATH):/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin:$(QT_INSTALL_DIR)/bin
 src_build_c2box: sdk_folders
 	@echo start $@
-	@-rm -rf $@
+	which qmake
 	@cd $(TEST_ROOT_DIR)/build_c2box/$(CVS_SRC_SW_C2APPS); \
 		BUILD_TARGET=TARGET_LINUX_C2 TARGET_ARCH=$(SDK_TARGET_GCC_ARCH) BUILD=RELEASE \
 		SW_MEDIA_PATH=$(SW_MEDIA_PATH) \
-		ENABLE_NEW_APP=TRUE make install; \
+		ENABLE_NEW_APP=TRUE make install;
+	@cd $(TEST_ROOT_DIR)/build_c2box/$(CVS_SRC_SW_C2APPS); \
 		rm -rf ../work; \
 		cp -a work ../ ;
 	@echo $@ done
@@ -1084,8 +1102,7 @@ src_package_jtag: sdk_folders
 	@echo "Creating package $(PKG_NAME_SRC_JTAG)"
 	@cd $(TEMP_DIR)/src_jtag; \
 	    tar cfz $(PKG_NAME_SRC_JTAG) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 	        $(CVS_SRC_JTAG)
 	@echo $@ done
 src_install_jtag: sdk_folders
@@ -1147,17 +1164,16 @@ src_package_diag: sdk_folders
 	@mkdir -p $(TEMP_DIR)/src_diag;
 	@cd $(TEMP_DIR)/src_diag; \
 	    mkdir -p $(CVS_SRC_DIAG); \
-	    mkdir -p $(CVS_SRC_JTAG); \
-	    cd $(CVS_SRC_DIAG); \
-	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_DIAG) ../; \
-	    cd $(TEMP_DIR)/$(CVS_SRC_JTAG); \
+	    mkdir -p $(CVS_SRC_JTAG); 
+	@cd $(TEMP_DIR)/src_diag/$(CVS_SRC_DIAG); \
+	        cp -rf $(SOURCE_DIR)/$(CVS_SRC_DIAG) ../; 
+	@cd $(TEMP_DIR)/src_diag/$(CVS_SRC_JTAG); \
 	    cp -rf $(SOURCE_DIR)/$(CVS_SRC_JTAG) ../
 	
 	@echo "Creating package $(PKG_NAME_SRC_DIAG)"
 	@cd $(TEMP_DIR)/src_diag; \
 	    tar cfz $(PKG_NAME_SRC_DIAG) \
-	        --exclude=CVS \
-	        --exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
 		$(CVS_SRC_DIAG)/example \
 		$(CVS_SRC_DIAG)/include \
 		$(CVS_SRC_DIAG)/jtag_scripts \
@@ -1207,6 +1223,12 @@ help_diag: sdk_folders mktest
 	@echo targets: $(mission_diag) clean_diag test_diag help_diag
 	@echo $@ done
 
+SRC_FUSEPOD := $(TEMP_DIR)/src_c2_goodies/fusepod
+SRC_PERL := $(TEMP_DIR)/src_c2_goodies/perl
+SRC_SNOOPY := $(TEMP_DIR)/src_c2_goodies/snoopy
+SRC_HDD := $(TEMP_DIR)/src_c2_goodies/hdd
+SRC_BENCHMARK := $(TEMP_DIR)/src_c2_goodies/benchmark
+SRC_ETHTOOL := $(TEMP_DIR)/src_c2_goodies/ethertool
 mission_c2_goodies := src_get_c2_goodies  \
 	src_package_c2_goodies src_install_c2_goodies src_config_c2_goodies src_build_c2_goodies \
 	bin_package_c2_goodies bin_install_c2_goodies
@@ -1215,50 +1237,14 @@ mission_targets += $(mission_c2_goodies)
 .PHONY: $(mission_c2_goodies)
 src_get_c2_goodies:  sdk_folders
 	@echo start $@
-	@echo "Checkout fusepod sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d fusepod $(FUSEPOD_SCRIPT); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(DJMOUNT_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(FUSEPOD_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(LIBGPOD_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(FUSE_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(GLIB_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/fusepod && $(CHECKOUT) -d dist $(TAGLIB_PKG);
-	
-	@echo "Checkout perl sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d perl $(PERL_SCRIPT); 
-	@cd $(SOURCE_DIR)/c2_goodies/perl && $(CHECKOUT) -d dist $(PERL_PKG); 
-	
-	@echo "Checkout snoopy sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d snoopy $(CVS_SRC_SNOOPY); 
-	
-	@echo "Checkout hdd library sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d hdd $(HDD_SCRIPT); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(SAMBA_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(LIBUSB_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(LIBPTP_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(NTFS_PKG); 
-	@cd $(SOURCE_DIR)/c2_goodies/hdd && $(CHECKOUT) -d dist $(NTFSPROGS_PKG); 
-	
-	@echo "Checkout benchmark sources"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d benchmark $(BENCHMARK_SCRIPT);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(BONNIE_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(IOZONE_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(LMBENCH_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(UNIXBENCH_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(IPERF_PKG);
-	@cd $(SOURCE_DIR)/c2_goodies/benchmark && $(CHECKOUT) -d dist $(NETPERF_PKG);
-	
-	@echo "Checkout ethertools source"
-	@cd $(SOURCE_DIR)/c2_goodies && $(CHECKOUT) -d ethertool $(ETHERTOOL_PKG);
 	@echo $@ done
 src_package_c2_goodies: sdk_folders
 	@echo start $@
 	@rm -f $(PKG_NAME_SRC_GOODIES)
 	@echo "Creating package $(PKG_NAME_SRC_GOODIES)"
-	@cd $(SOURCE_DIR); \
+	@cd $(SOURCE_DIR)/sw; \
 	tar cfz $(PKG_NAME_SRC_GOODIES) \
-    		--exclude=CVS \
-    		--exclude=CVSROOT \
+		$(TAR_EXCLUDEFLAGS)   \
     		./c2_goodies
 	@echo $@ done
 src_install_c2_goodies: sdk_folders
@@ -1340,8 +1326,8 @@ factory_udisk:sdk_folders
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f build/sdk/drivers/galcore.ko          home/work/lib/
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f build/sdk/drivers/libdirectfb_gal.so  home/work/lib/
 	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f home/work/updat*.bmp . ; cp -f home/work/logo.bmp .
-	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
-	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f sw/kernel/rootfs.image .
+	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f $(CVS_SRC_KERNEL)/linux-2.6/zvmlinux.bin .
+	cd $(TEST_ROOT_DIR)/build_facudisk ; cp -f $(CVS_SRC_KERNEL)/rootfs.image .
 	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin kernel.img
 	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -n rootfs -d rootfs.image rootfs.img
 	cd $(TEST_ROOT_DIR)/build_facudisk ; ./$(BIN_MKYAFFS2) home home.image ;
@@ -1371,8 +1357,8 @@ user_udisk:sdk_folders
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f build/sdk/drivers/libGAL.so           work/lib/
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f build/sdk/drivers/galcore.ko          work/lib/
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f build/sdk/drivers/libdirectfb_gal.so  work/lib/
-	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f sw/kernel/linux-2.6/zvmlinux.bin .
-	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f sw/kernel/rootfs.image .
+	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f $(CVS_SRC_KERNEL)/linux-2.6/zvmlinux.bin .
+	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f $(CVS_SRC_KERNEL)/rootfs.image .
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; ./$(BIN_MKIMAGE) -A c2 -O linux -T kernel -C none -a a0000000 -e 80000800 -n kernel -d zvmlinux.bin uImage.bin
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; ./tools/updateFileGenerate/createArchive uImage.bin rootfs.image work -v "the version no."
 	cd $(TEST_ROOT_DIR)/build_usrudisk ; cp -f c2_update.tar $(PKG_NAME_BIN_USER_UDISK)
@@ -1431,121 +1417,3 @@ test_usrudisk: $(mission_usrudisk)
 help_usrudisk: sdk_folders mktest
 	@echo targets: $(mission_usrudisk) clean_usrudisk test_usrudisk help_usrudisk
 
-
-# example code
-# the src_get_xxx never depend on anything
-# the src_install_xxx never depend on anything
-mission_xxx :=              src_get_xxx  \
-	src_package_xxx src_install_xxx src_config_xxx src_build_xxx \
-	bin_package_xxx bin_install_xxx
-mission_modules += mission_xxx
-mission_targets += $(mission_xxx)
-.PHONY: $(mission_xxx)
-src_get_xxx:  sdk_folders
-	@echo start $@
-	@echo Checkout data fro repository
-	@mkdir -p $(TEMP_DIR)/src_xxx/xxx
-	@echo "int main(int argc, char **argv){return argv[argc-1][0];}" >$(TEMP_DIR)/src_xxx/xxx/xxx.c
-	@echo "all:xxx"    		 >$(TEMP_DIR)/src_xxx/xxx/Makefile
-	@echo "config:" 		>>$(TEMP_DIR)/src_xxx/xxx/Makefile
-	@echo "install:" 		>>$(TEMP_DIR)/src_xxx/xxx/Makefile
-	@echo "xxx:xxx.c" 		>>$(TEMP_DIR)/src_xxx/xxx/Makefile
-	@echo "	gcc xxx.c -o xxx" 	>>$(TEMP_DIR)/src_xxx/xxx/Makefile
-	@echo $@ done
-src_package_xxx: sdk_folders 
-	@echo start $@
-	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
-	@cd $(TEMP_DIR)/src_xxx; \
-	    tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz \
-		--exclude=CVS --exclude=CVSROOT \
-		xxx
-	@echo $@ done
-src_install_xxx: sdk_folders 
-	@echo start $@
-	@echo Create: $(TEST_ROOT_DIR)/build_xxx
-	@-rm -rf $(TEST_ROOT_DIR)/build_xxx
-	@mkdir -p $(TEST_ROOT_DIR)/build_xxx
-	cd $(TEST_ROOT_DIR)/build_xxx ; \
-	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.src.tar.gz
-	@echo $@ done
-src_config_xxx: sdk_folders
-	@echo start $@
-	@echo Config $(TEST_ROOT_DIR)/build_xxx
-	@cd $(TEST_ROOT_DIR)/build_xxx/xxx; \
-		make config;
-	@echo $@ done
-src_build_xxx: sdk_folders
-	@echo start $@
-	@echo build $(TEST_ROOT_DIR)/build_xxx
-	@cd $(TEST_ROOT_DIR)/build_xxx/xxx; \
-		make; \
-		make install;
-	@echo $@ done
-bin_package_xxx: sdk_folders 
-	@echo start $@
-	@echo Create: $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
-	@-rm -rf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz
-	@cd $(TEST_ROOT_DIR)/build_xxx; \
-	    tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz \
-		--exclude=CVS --exclude=CVSROOT \
-		xxx/xxx
-	@echo $@ done
-bin_install_xxx: sdk_folders
-	@echo start $@
-	@echo Install software
-	@cd $(TEST_ROOT_DIR)/usr; \
-	    rm -rf xxx; \
-	    tar xzf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-xxx.bin.tar.gz;
-	@echo $@ done
-clean_xxx: sdk_folders
-	@echo start $@
-	rm -rf $(TEMP_DIR)/src_xxx $(TEST_ROOT_DIR)/build_xxx $(TEST_ROOT_DIR)/usr/xxx
-	@echo $@ done
-test_xxx: $(mission_xxx)
-help_xxx: sdk_folders mktest
-	@echo start $@
-	@echo targets: $(mission_xxx) clean_xxx test_xxx help_xxx
-	@echo $@ done
-
-sdkautodirs :=  $(TEST_ROOT_DIR) $(TEMP_DIR) $(PKG_DIR) \
-	$(PKG_DIR)/Basic $(PKG_DIR)/Premium $(PKG_DIR)/Advanced \
-	$(PKG_DIR)/C2QAOnly $(PKG_DIR)/sdkmake $(PKG_DIR)/c2box $(PKG_DIR)/plugin\
-	$(TEST_ROOT_DIR)/usr  $(TEST_ROOT_DIR)/usr/bin
-
-.PHONY: sdk_folders ls mktest mc help c2
-sdk_folders: $(sdkautodirs) $(TEST_ROOT_DIR)/usr/zlink updatetoplink
-$(sdkautodirs):
-	@mkdir -p $@
-$(TEST_ROOT_DIR)/usr/zlink:
-	ln -s $(TEST_ROOT_DIR)/c2 $(TEST_ROOT_DIR)/usr/c2
-	ln -s $(KERNEL_PATH)      $(TEST_ROOT_DIR)/usr/kernel
-	ln -s $(SW_MEDIA_PATH)    $(TEST_ROOT_DIR)/usr/sw_media
-	ln -s $(QT_INSTALL_DIR)   $(TEST_ROOT_DIR)/usr/qt
-	echo "Created Link." >$@
-updatetoplink:
-	@-if [ -h $(TOP_DIR)/deploy ]; then rm $(TOP_DIR)/deploy; fi; \
-		ln -s $(PKG_DIR)	  $(TOP_DIR)/deploy
-	@-if [ -h $(TOP_DIR)/build ]; then rm $(TOP_DIR)/build; fi; \
-		ln -s $(TEST_ROOT_DIR)	  $(TOP_DIR)/build
-	@-if [ -h $(TOP_DIR)/install ]; then rm $(TOP_DIR)/install; fi; \
-		ln -s $(TEST_ROOT_DIR)	  $(TOP_DIR)/install
-
-c2: bin_install_devtools
-mod:
-	@echo "support mission modules:" $(subst mission_,,"$(mission_modules)")
-op:
-	@echo "support mission operate:" $(shell echo $(subst _xxx,,"$(mission_xxx)") test)
-ls:
-	@echo "support mission targets:" $(mission_targets)
-test:
-	@echo "support mission test   :" $(subst mission_,test_,"$(mission_modules)")
-	
-bk backup:
-	cp -f build.config.mk build.rules.mk html_generate.cgi Makefile newbuild.sh $(PKG_DIR)/sdkmake
-mktest:
-	@$(call makefile_test)
-mc help: mktest op mod test
-	@echo "support mission test   :" $(subst mission_,test_,"$(mission_modules)")
-	@echo
-$(definedenvlist):
-	@echo ${$@}

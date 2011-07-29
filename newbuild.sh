@@ -395,7 +395,7 @@ export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
 export SDKENV_Title=$CONFIG_WEBTITLE
 export SDKENV_Project="${CONFIG_ARCH} ${CONFIG_TREEPREFIX} daily build on $HOSTNAME"
 export SDKENV_Overview="<pre>Project start on $CONFIG_STARTTIME, report on `date`
-`recho_time_consumed $CONFIG_STARTTID On report time`</pre>"
+`recho_time_consumed $CONFIG_STARTTID On report time:`</pre>"
 export SDKENV_Setting="<pre>Makefile settings:
 `make -f $CONFIG_MAKEFILE lsvar`
 

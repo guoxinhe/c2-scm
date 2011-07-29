@@ -35,6 +35,7 @@ SOURCE_GITDIR			:= $(TOP_DIR)/c2sdk_source
 SOURCE_LOCAL			:= $(TOP_DIR)/source_local
 TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
+TAR_EXCLUDEFLAGS		:= --exclude=CVS --exclude=CVSROOT --exclude=.git --exclude=.repo
 
 ifneq ($(CVS_TAG),)
 CHECKOUT_OPTION         := -r $(CVS_TAG)
@@ -52,9 +53,10 @@ SW_MEDIA_INSTALL_DIR		:= TARGET_LINUX_C2_TANGO_RELEASE
 QT_INSTALL_DIR                  := $(TEST_ROOT_DIR)/$(QTINSTALL_NAME)
 INSTALL_DIR			:= /usr/local/c2/releases/sdk/$(SDK_VERSION_ALL)
 PUBLISH_DIR			:= /home/$(USER)/public_html/sdk-releases/$(SDK_VERSION_ALL)
-CVS_SRC_KERNEL			:= sw/kernel
+CVS_SRC_KERNEL			:= kernel.sdk
 #KERNEL_PATH			:= $(TEST_ROOT_DIR)/prebuilt/$(CVS_SRC_KERNEL)/$(LINUXDIR)
-KERNEL_PATH			:= $(TEST_ROOT_DIR)/build_kernela2632/kernel
+KERNEL_PATH			:= $(TEST_ROOT_DIR)/build_kernelsd/kernel.sdk/linux-2.6
+#KERNEL_PATH			:= $(TEST_ROOT_DIR)/build_kernela2632/kernel
 
 # DEVTOOLS package
 CVS_SRC_BUILDROOT       	:= projects/sw/devtools/buildroot
@@ -80,6 +82,10 @@ PKG_NAME_SRC_DEVTOOLS   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-src.tar.gz
 PKG_NAME_BIN_DEVTOOLS		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-devtools-bin.tar.gz
 
 # QT 4.7 package
+CVS_SRC_QT    			:= sw/Qt/qt-everywhere-opensource-src-4.7.0
+PKG_NAME_SRC_QT   		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-src.tar.gz
+PKG_NAME_BIN_QT   		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-bin.tar.gz
+QT_EXTRA_CONFIG   		:= -plugin-gfx-directfb
 CVS_SRC_QT470			:= sw/Qt/qt-everywhere-opensource-src-4.7.0
 PKG_NAME_SRC_QT470		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-src.tar.gz
 PKG_NAME_BIN_QT470		:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-qt-4.7.0-bin.tar.gz
@@ -105,13 +111,13 @@ PKG_NAME_BIN_KERNEL_2632	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-kernel-2.6.32-bin.t
 LINUXDIR_2632			:= linux-2.6.32
 
 # vivante package
-CVS_SRC_VIVANTE         	:= projects/sw/bsp/vivante/VIVANTE_GAL2D_Unified
+CVS_SRC_VIVANTE         	:= sw/bsp/vivante/VIVANTE_GAL2D_Unified
 PKG_NAME_SRC_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-src.tar.gz
 PKG_NAME_BIN_VIVANTE    	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-bin.tar.gz
 PKG_NAME_TEST_SRC_VIVANTE	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-gfx_2d-test-src.tar.gz
 
 # hdmi package
-CVS_SRC_HDMI_JAZZ2      	:= projects/sw/bsp/hdmi/jazz2hdmi
+CVS_SRC_HDMI_JAZZ2      	:= sw/bsp/hdmi/jazz2hdmi
 PKG_NAME_SRC_HDMI_JAZZ2   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-hdmi-src.tar.gz
 PKG_NAME_BIN_HDMI_JAZZ2   	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-hdmi-bin.tar.gz
 
@@ -162,7 +168,7 @@ PKG_NAME_SRC_JTAG       	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jtag-src.tar.gz
 PKG_NAME_BIN_JTAG       	:= $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-jtag-bin.tar.gz
 
 # U-BOOT package
-uboot_utilities			:=u-boot-utilities
+uboot_utilities			:= u-boot-utilities
 UBOOT_BOARDTYPE         	:= jazz2evb_config
 UBOOT_MAKECONFIG        	:= MPUCLK=400 MEMCLK=400 DDR_DEVICE=MT47H64M16-25E
 CVS_SRC_UBOOT			:= sw/prom/u-boot-1.3.0
@@ -240,12 +246,12 @@ FACUDISK_FILES := 	updating.bmp	updatefail.bmp	updatesucc.bmp	logo.bmp	\
 uboot_file		:= $(uboot_utilities)/u-boot-jazz2-autodetect.rom
 uboot_factory_file	:= $(uboot_utilities)/u-boot-jazz2-factory-autodetect.rom
 BIN_MKIMAGE  		:= $(uboot_utilities)/mkimage
-BIN_MKYAFFS2 		:= sw/kernel/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
+BIN_MKYAFFS2 		:= $(CVS_SRC_KERNEL)/configs/jazz2-pvr-nand/mkyaffs/mkyaffs2
 BIN_MKJFFS2  		:= $(TOOLCHAIN_PATH)/mkfs.jffs2
 BCHTOOLS     		:= $(TEST_ROOT_DIR)/sw/kernel/configs/jazz2-pvr-nand/bch_generate
 
 SYSPATH			:=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$(HOME)/bin
-override PATH 		:= $(TOOLCHAIN_PATH):$(TEST_ROOT_DIR)/usr/bin:$(TEST_ROOT_DIR)/bin:$(SYSPATH)
+override PATH := $(QT_INSTALL_DIR)/bin:$(TOOLCHAIN_PATH):$(TEST_ROOT_DIR)/usr/bin:$(TEST_ROOT_DIR)/bin:$(SYSPATH)
 
 definedenvlist :=	\
    TODAY                     \
