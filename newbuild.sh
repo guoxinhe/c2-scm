@@ -555,6 +555,7 @@ upload_packages()
 
 upload_install_sw_media()
 {
+    PKG_NAME_BIN_SW_MEDIA=c2-`make -f $CONFIG_MAKEFILE SDK_VERSION_ALL`-sw_media-bin.tar.gz
     #this only appears in ssh, no local enabled.
     if [ $CONFIG_BUILD_PUBLISHC2LOCAL ]; then
         for sver in $CONFIG_C2LOCALSERVERS; do
