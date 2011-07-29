@@ -12,7 +12,7 @@ if [ -t 1 -o -t 2 ]; then
 CONFIG_TTY=y
 TOP=`pwd`
 else
-TOP=/local/android/jazz2t-c2sdk_android
+TOP=${CONFIG_SCRIPT%/*}
 fi
 cd $TOP
 
@@ -496,11 +496,7 @@ upload_web_report()
 upload_logs()
 {
   if [ $CONFIG_BUILD_PUBLISHLOG ]; then
-            if [ $# -gt 0 ]; then
-	       echo "logs: $@"
-            fi
     unix2dos -q $CONFIG_LOGDIR/*
-        [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
     for sver in $CONFIG_LOGSERVERS; do
         [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
         h=${sver%%:/*}
