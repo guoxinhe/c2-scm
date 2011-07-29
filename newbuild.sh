@@ -129,7 +129,8 @@ jobtimeout=6000
 lock=`pwd`/${0##*/}.lock
 unlock_job()
 {
-  rm -rf $lock.log $lock
+  #rm -rf $lock.log #if exist, left for check, will be removed next lock
+  rm -rf $lock
 }
 lock_job()
 {
