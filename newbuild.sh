@@ -95,14 +95,16 @@ while [ $# -gt 0 ] ; do
     case $1 in
     --noco)      CONFIG_BUILD_CHECKOUT= ; shift;;
     --help | -h)      CONFIG_BUILD_HELP=y ; shift;;
-    --set)   set | grep CONFIG_  ;  exit 0; shift;;
+    --set)
+        set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g';
+        exit 0; shift;;
     *) 	echo "not support option: $1"; CONFIG_BUILD_HELP=1;  shift  ;;
     esac
 done
 
 #step operations
 if test $CONFIG_BUILD_HELP; then
-    set | grep CONFIG_  ;
+    set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g';
 
 cat <<EOFHELP
 
@@ -385,6 +387,7 @@ list_fail_url_tail()
 
 generate_web_report()
 {
+set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
 #generate web report
 #these exports are used by html_generate.cgi
 export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
@@ -396,7 +399,7 @@ export SDKENV_Setting="<pre>Makefile settings:
 `make -f $CONFIG_MAKEFILE lsvar`
 
 build script settings:
-`set | grep CONFIG_ `
+`cat $CONFIG_LOGDIR/env.sh`
 </pre>"
 export SDKENV_Server="`whoami` on $CONFIG_MYIP(`hostname`)"
 export SDKENV_Script="`readlink -f $0`"
@@ -681,7 +684,7 @@ softlink $CONFIG_INDEXLOG r
 softlink $CONFIG_LOGDIR   l
 softlink $CONFIG_RESULT   i
 #action parse
-set | grep CONFIG_ >$CONFIG_LOGDIR/env.sh
+set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
 cat $CONFIG_LOGDIR/env.sh
 checkout_from_repositories
 create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
