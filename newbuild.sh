@@ -388,7 +388,7 @@ list_fail_url_tail()
 
 generate_web_report()
 {
-set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
+#set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
 #generate web report
 #these exports are used by html_generate.cgi
 export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
