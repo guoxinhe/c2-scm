@@ -405,6 +405,7 @@ build script settings:
 export SDKENV_Server="`whoami` on $CONFIG_MYIP(`hostname`)"
 export SDKENV_Script="`readlink -f $0`"
 export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/html,,g' -e 's,^.*@,,g'`
+export SDKENV_URLPRE=${SDKENV_URLPRE##*/}
 $CONFIG_GENHTML  > $CONFIG_HTMLFILE
 }
 
