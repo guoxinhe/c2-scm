@@ -529,6 +529,7 @@ upload_logs()
 
 upload_packages()
 {
+    SDK_VERSION_ALL=`make -f $CONFIG_MAKEFILE SDK_VERSION_ALL`
     if [ $CONFIG_BUILD_PUBLISH ]; then
         for sver in $CONFIG_PKGSERVERS; do
             [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
@@ -536,15 +537,15 @@ upload_packages()
             p=${sver##*:}
             ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
             if [ "$ip" = "$CONFIG_MYIP" ];then
-                mkdir -p $p
+                mkdir -p $p/c2sdk-${CONFIG_DATEH}
                 echo "cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/"
                 cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/
-                cp -rf $CONFIG_PKGDIR/*sw_media* $p/
+                cp -rf $CONFIG_PKGDIR/c2-$SDK_VERSION_ALL-*.tar.gz $p/c2sdk-${CONFIG_DATEH}/
             else
-                ssh $h mkdir -p $p
+                ssh $h mkdir -p $p/c2sdk-${CONFIG_DATEH}
                 echo "scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/"
                 scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/
-                scp -r $CONFIG_PKGDIR/*sw_media* $sver/
+                scp -r $CONFIG_PKGDIR/c2-$SDK_VERSION_ALL-*.tar.gz $sver/c2sdk-${CONFIG_DATEH}/
             fi
         done
         echo publish package done.
@@ -708,6 +709,12 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
 	rm android/env.sh
         echo `date +"%Y-%m-%d %H:%M:%S"` sw_media: reset android env.sh >>$CONFIG_LOGDIR/progress.log
     fi
+fi
+
+if [ $CONFIG_BUILD_UBOOT ]; then
+    modules="uboot"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    build_modules_x_steps
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNFS ]; then
