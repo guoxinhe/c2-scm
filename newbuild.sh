@@ -541,11 +541,15 @@ upload_packages()
                 echo "cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/"
                 cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/
                 cp -rf $CONFIG_PKGDIR/c2-$SDK_VERSION_ALL-*.tar.gz $p/c2sdk-${CONFIG_DATEH}/
+                cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   $p/c2sdk-${CONFIG_DATEH}/
+                cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID $p/c2sdk-${CONFIG_DATEH}/
             else
                 ssh $h mkdir -p $p/c2sdk-${CONFIG_DATEH}
                 echo "scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/"
                 scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/
                 scp -r $CONFIG_PKGDIR/c2-$SDK_VERSION_ALL-*.tar.gz $sver/c2sdk-${CONFIG_DATEH}/
+                scp -r $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK       $sver/c2sdk-${CONFIG_DATEH}/
+                scp -r $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID     $sver/c2sdk-${CONFIG_DATEH}/
             fi
         done
         echo publish package done.
