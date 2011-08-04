@@ -8,11 +8,10 @@ CONFIG_MYIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
 CONFIG_SCRIPT=`readlink -f $0`
 CONFIG_STARTTIME=`date`
 CONFIG_STARTTID=`date +%s`
+TOP=${CONFIG_SCRIPT%/*}
 if [ -t 1 -o -t 2 ]; then
 CONFIG_TTY=y
-TOP=`pwd`
-else
-TOP=${CONFIG_SCRIPT%/*}
+[ "${0:0:2}" = "./" ] && TOP=`pwd`
 fi
 cd $TOP
 
