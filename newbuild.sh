@@ -718,6 +718,16 @@ if [ $CONFIG_BUILD_UBOOT ]; then
     modules="uboot"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     build_modules_x_steps
+
+    r=`grep ^uboot:0 $CONFIG_INDEXLOG`
+    if [ "$r" != "" ]; then
+        rm -rf   android/prebuilt/u-boot
+        mkdir -p android/prebuilt/u-boot
+        tar xzf $CONFIG_PKGDIR/c2-*-u-boot-bin.tar.gz -C android/prebuilt/u-boot
+        echo `date +"%Y-%m-%d %H:%M:%S"` u-boot: extracted to prebuilt/u-boot/ >>$CONFIG_LOGDIR/progress.log
+    else
+        echo `date +"%Y-%m-%d %H:%M:%S"` no new u-boot used. >>$CONFIG_LOGDIR/progress.log
+    fi
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNFS ]; then
