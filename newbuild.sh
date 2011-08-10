@@ -150,6 +150,34 @@ lock_job()
   rm -rf $lock.log
   echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >$lock
 }
+remove_outofdate_files()
+{(
+    outofdate=$((86400*12)); #86400 = 24*60*60
+    [ $CONFIG_BUILD_CLEAN ] || return 0
+
+    for i in $CONFIG_ARCH-sdk-*; do
+        burn=`stat -c%Z $i`
+        now=`date +%s`
+        age=$((now-burn))
+        [ "$CONFIG_TTY" = "y" ] && echo "Checking $i"
+        if [ $age -gt $outofdate ]; then
+            [ "$CONFIG_TTY" = "y" ] && recho_time_consumed $burn "Delete file $i :"
+            rm -rf $i
+        fi
+    done
+
+    cd ${CONFIG_RESULT%/*}
+    for i in `ls`; do
+        burn=`stat -c%Z $i`
+        now=`date +%s`
+        age=$((now-burn))
+        [ "$CONFIG_TTY" = "y" ] && echo "Checking $i"
+        if [ $age -gt $outofdate ]; then
+            [ "$CONFIG_TTY" = "y" ] && recho_time_consumed $burn "Delete file $i :"
+            rm -rf $i
+        fi
+    done
+)}
 softlink()
 {
     [ -h $2 ] && rm $2
@@ -210,8 +238,17 @@ recho_time_consumed()
     tm_m=$((tm_c/60))
     tm_m=$((tm_m%60))
     tm_s=$((tm_c%60))
+    tm_days=""
+    if [ $tm_h -ge 24 ]; then
+      if [ $tm_h -ge 48 ]; then
+        tm_days="$((tm_h/24)) days"
+      else
+        tm_days="1 day"
+      fi
+        tm_h=$((tm_h%24))
+    fi
     shift
-    echo "$@" "$tm_c seconds / $tm_h:$tm_m:$tm_s consumed."
+    echo "$@" "$tm_c seconds / $tm_days $tm_h:$tm_m:$tm_s (age)."
 }
 addto_buildfail()
 {
@@ -712,21 +749,25 @@ setup_build_sw_media_for_android_env_jazz2t()
     export BUILD=RELEASE;
     export BOARD_TARGET=C2_CC302; #add this for safe build jazz2t-android-sw_media
 }
+prepare_runtime_files()
+{
+    make -f $CONFIG_MAKEFILE sdk_folders
+    mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
+    touch $CONFIG_INDEXLOG
+    touch $CONFIG_HTMLFILE
+    touch $CONFIG_EMAILFILE
+    softlink $CONFIG_INDEXLOG r
+    softlink $CONFIG_LOGDIR   l
+    softlink $CONFIG_RESULT   i
+    #action parse
+    set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
+}
 
 # let's go!
 #---------------------------------------------------------------
 lock_job
-make -f $CONFIG_MAKEFILE sdk_folders
-mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
-touch $CONFIG_INDEXLOG
-touch $CONFIG_HTMLFILE
-touch $CONFIG_EMAILFILE
-softlink $CONFIG_INDEXLOG r
-softlink $CONFIG_LOGDIR   l
-softlink $CONFIG_RESULT   i
-#action parse
-set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
-cat $CONFIG_LOGDIR/env.sh
+prepare_runtime_files
+[ "$CONFIG_TTY" = "y" ] && cat $CONFIG_LOGDIR/env.sh
 checkout_from_repositories
 create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
 create_repo_checkout_script `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
@@ -892,9 +933,10 @@ checkadd_fail_send_list
 generate_web_report
 generate_email
 upload_web_report
-package_repo_source_code android $CONFIG_PKGDIR/src-$CONFIG_DATEH
+[ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android $CONFIG_PKGDIR/src-$CONFIG_DATEH
 upload_packages
 upload_logs
 send_email
 upload_install_sw_media
 unlock_job
+remove_outofdate_files
