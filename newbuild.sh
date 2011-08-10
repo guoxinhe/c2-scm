@@ -292,6 +292,40 @@ create_repo_checkout_script()
     popd
 }
 
+package_repo_source_code(){(
+    rdir=`readlink -f $1`
+    list=`cat $rdir/.repo/project.list`;
+    p=`readlink -f $2`
+    mkdir -p $p
+    if [ "$CONFIG_TTY" = "y" ]; then
+        echo repo dir: $rdir
+        echo package dir: $p
+    fi
+    for i in $list; do
+        pn=`echo $i | sed s,/,_,g`
+        echo Create: $pn.tar.gz
+        case $i in
+        prebuilt)
+            cd $rdir
+            tar czf  $p/$pn.tar.gz\
+                    --exclude=i686-unknown-linux-gnu-4.2.1 \
+                    --exclude=mips-4.4.3     \
+                    --exclude=c2-4.0.3       \
+                    --exclude=arm-eabi-4.3.1 \
+                    --exclude=arm-eabi-4.2.1 \
+                    --exclude=android-arm    \
+                    --exclude=android-mips   \
+                    --exclude=android-mips   \
+                    --exclude=sw_media*      \
+                    --exclude=u-boot*        \
+                    prebuilt;
+                    ;;
+        *)
+            cd $rdir/$i
+            git archive --format=tar --prefix=$i/ HEAD | gzip > $p/$pn.tar.gz
+        esac
+    done
+)}
 checkadd_fail_send_list()
 {
     blame_devtools="saladwang hguo"
@@ -854,6 +888,7 @@ checkadd_fail_send_list
 generate_web_report
 generate_email
 upload_web_report
+package_repo_source_code android $CONFIG_PKGDIR/src-$CONFIG_DATEH/
 upload_packages
 upload_logs
 send_email
