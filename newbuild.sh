@@ -688,7 +688,7 @@ build_modules_x_steps()
         #let web know this module is in "doing" status:2
         update_indexlog "$xmod:2:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
         generate_web_report
-        upload_web_report
+        upload_web_report &
 
         for s in ${steps}; do
             iserror=0
@@ -708,7 +708,7 @@ build_modules_x_steps()
         done
         if [ $nr_merr -ne 0 ];then
             addto_buildfail $xmod
-            upload_logs $CONFIG_LOGDIR/$xmod.log
+            upload_logs $CONFIG_LOGDIR/$xmod.log &
         fi
         nr_totalerror=$((nr_totalerror+nr_merr))
         nr_totalmodule=$((nr_totalmodule+1))
@@ -811,61 +811,15 @@ if [ $CONFIG_BUILD_UBOOT ]; then
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNFS ]; then
-    xmod=nfsdroid
-    update_indexlog "$xmod:2:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
-    generate_web_report
-    upload_web_report
-
-    echo `date +"%Y-%m-%d %H:%M:%S"` Start build  $xmod >>$CONFIG_LOGDIR/progress.log
-    tm_a=`date +%s`
-    cp android/build/tools/make-nfs-droid-fs-usr $CONFIG_LOGDIR/
-    sed -i 's/sudo//g' $CONFIG_LOGDIR/make-nfs-droid-fs-usr
-
-    cd `readlink -f android`
-    cmd_opt=
-    if [ $CONFIG_BUILD_CLEAN ]; then
-        mkdir -p nfs-droid
-        rm -rf nfs-droid/*
-        cmd_opt="-m -f"
-    fi
-    [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
-    $CONFIG_LOGDIR/make-nfs-droid-fs-usr  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log 2>&1
-    cp -f build/tools/gen-nfs-burn-code.sh nfs-droid/
-    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   nfs-droid/
-    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID nfs-droid/
-    tar czf $CONFIG_PKGDIR/c2-$CONFIG_ARCH-$CONFIG_BRANCH_ANDROID.$CONFIG_DATEH-nfs-droid.tar.gz nfs-droid
-
-    cd $TOP
-    echo `date +"%Y-%m-%d %H:%M:%S"` Done build  $xmod, 0 error >>$CONFIG_LOGDIR/progress.log
-    recho_time_consumed $tm_a "The repo build $xmod"
-    update_indexlog "$xmod:0:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
-    #check build result
-    #package build files
-    nr_totalmodule=$((nr_totalmodule))
-    #nr_totalerror=$((nr_totalerror+1))
+    modules="nfs_droid"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    build_modules_x_steps
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNAND ]; then
-    xmod=nanddroid
-    update_indexlog "$xmod:2:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
-    generate_web_report
-    upload_web_report
-
-    echo `date +"%Y-%m-%d %H:%M:%S"` Start build  $xmod >>$CONFIG_LOGDIR/progress.log
-    tm_a=`date +%s`
-    cp android/build/tools/make-nand-droid-fs $CONFIG_LOGDIR/
-    sed -i 's/sudo//g' $CONFIG_LOGDIR/make-nand-droid-fs
-
-    cd `readlink -f android`
-    cmd_opt=
-    if [ $CONFIG_BUILD_CLEAN ]; then
-        mkdir -p nand-droid
-        rm -rf nand-droid/*
-    fi
-    [ "$CONFIG_ARCH" == "jazz2t" ] && cmd_opt="$cmd_opt -t jazz2t"
-    $CONFIG_LOGDIR/make-nand-droid-fs  $cmd_opt   >$CONFIG_LOGDIR/$xmod.log 2>&1
-    cp -f build/tools/gen-uboot-burn-code.sh  nand-droid/
-    cp -f kernel/vmlinux.bin                  nand-droid/
+    modules="nand_droid"
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    build_modules_x_steps
     cat <<END >>nand-droid/run
 
 NAND burn guide:
@@ -883,17 +837,15 @@ END
     cp -rf nand-droid/* $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH/
 
     cd $TOP
-    echo `date +"%Y-%m-%d %H:%M:%S"` Done build  $xmod, 0 error >>$CONFIG_LOGDIR/progress.log
-    recho_time_consumed $tm_a "The repo build $xmod"
     if [ -f android/nand-droid/root.image -a -f android/nand-droid/system.image -a -f android/nand-droid/data.image ]; then
         build_fail=
-        update_indexlog "nfsdroid:0:$CONFIG_LOGDIR/nfsdroid.log" $CONFIG_INDEXLOG
-        update_indexlog "$xmod:0:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+        update_indexlog "nfs_droid:0:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
+        update_indexlog "nand_droid:0:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
     else
         CONFIG_BUILD_PUBLISH=
         build_fail="yes"
-        update_indexlog "nfsdroid:1:$CONFIG_LOGDIR/nfsdroid.log" $CONFIG_INDEXLOG
-        update_indexlog "$xmod:1:$CONFIG_LOGDIR/$xmod.log" $CONFIG_INDEXLOG
+        update_indexlog "nfs_droid:1:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
+        update_indexlog "nand_droid:1:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
         nr_totalerror=$((nr_totalerror+1))
         nr_totalerror=$((nr_totalerror+1))
     fi
@@ -936,8 +888,8 @@ generate_email
 upload_web_report
 [ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android $CONFIG_PKGDIR/src-$CONFIG_DATEH
 upload_packages
-upload_logs
 send_email
-upload_install_sw_media
 unlock_job
+upload_logs &
+upload_install_sw_media &
 remove_outofdate_files  &
