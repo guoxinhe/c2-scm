@@ -19,6 +19,7 @@ cd $TOP
 CONFIG_BUILDTOP=$TOP
 CONFIG_MAKEFILE=Makefile
 CONFIG_GENHTML=`pwd`/scm/html_generate.cgi
+SDK_VERSION_ALL=`make -f $CONFIG_MAKEFILE SDK_VERSION_ALL`
 CONFIG_ARCH=`make -f $CONFIG_MAKEFILE SDK_TARGET_ARCH`  #jazz2 jzz2t jazz2l
 CONFIG_PKGDIR=`make -f $CONFIG_MAKEFILE PKG_DIR`
 CONFIG_TREEPREFIX=sdkdev               #sdkdev sdkrel anddev andrel, etc, easy to understand
@@ -28,8 +29,8 @@ CONFIG_KERNEL=`make -f $CONFIG_MAKEFILE SDK_KERNEL_VERSION`
 CONFIG_LIBC=uClibc-0.9.27
 CONFIG_BRANCH_C2SDK=master  #one of: master, devel, etc.
 CONFIG_BRANCH_ANDROID=devel  #one of: master, devel, etc.
-CONFIG_CHECKOUT_C2SDK=checkout-c2sdk-tags.sh
-CONFIG_CHECKOUT_ANDROID=checkout-android-tags.sh
+CONFIG_CHECKOUT_C2SDK=c2-$SDK_VERSION_ALL-c2sdk-tags.sh
+CONFIG_CHECKOUT_ANDROID=c2-$SDK_VERSION_ALL-android-tags.sh
 CONFIG_PROJECT=SDK    #one of: SDK, android
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
@@ -604,7 +605,6 @@ upload_logs()
 
 upload_packages()
 {
-    SDK_VERSION_ALL=`make -f $CONFIG_MAKEFILE SDK_VERSION_ALL`
     if [ $CONFIG_BUILD_PUBLISH ]; then
         for sver in $CONFIG_PKGSERVERS; do
             [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
@@ -633,7 +633,7 @@ upload_packages()
 
 upload_install_sw_media()
 {
-    PKG_NAME_BIN_SW_MEDIA=c2-`make -f $CONFIG_MAKEFILE SDK_VERSION_ALL`-sw_media-bin.tar.gz
+    PKG_NAME_BIN_SW_MEDIA=c2-$SDK_VERSION_ALL-sw_media-bin.tar.gz
     #this only appears in ssh, no local enabled.
     if [ $CONFIG_BUILD_PUBLISHC2LOCAL ]; then
         for sver in $CONFIG_C2LOCALSERVERS; do
@@ -792,6 +792,7 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
 	rm android/env.sh
         echo `date +"%Y-%m-%d %H:%M:%S"` sw_media: reset android env.sh >>$CONFIG_LOGDIR/progress.log
     fi
+    upload_install_sw_media &
 fi
 
 if [ $CONFIG_BUILD_UBOOT ]; then
@@ -891,5 +892,4 @@ upload_packages
 send_email
 unlock_job
 upload_logs &
-upload_install_sw_media &
 remove_outofdate_files  &
