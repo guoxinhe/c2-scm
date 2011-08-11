@@ -1417,3 +1417,86 @@ test_usrudisk: $(mission_usrudisk)
 help_usrudisk: sdk_folders mktest
 	@echo targets: $(mission_usrudisk) clean_usrudisk test_usrudisk help_usrudisk
 
+mission_nfs_droid := 	src_get_nfs_droid  \
+		src_package_nfs_droid \
+		src_install_nfs_droid \
+		src_config_nfs_droid \
+		src_build_nfs_droid \
+		bin_package_nfs_droid \
+		bin_install_nfs_droid
+mission_modules += mission_nfs_droid
+mission_targets += $(mission_nfs_droid)
+.PHONY: $(mission_nfs_droid) clean_nfs_droid help_nfs_droid test_nfs_droid
+src_get_nfs_droid:     sdk_folders
+	@echo $@ done
+src_package_nfs_droid: sdk_folders
+	@echo $@ done
+src_install_nfs_droid: sdk_folders
+	@mkdir -p $(TEST_ROOT_DIR)/build_nfs_droid/nfs_droid
+	@cp android/build/tools/make-nfs-droid-fs-usr  $(TEST_ROOT_DIR)/build_nfs_droid/nfs_droid/
+	@sed -i 's/sudo//g' $(TEST_ROOT_DIR)/build_nfs_droid/nfs_droid/make-nfs-droid-fs-usr
+	@echo $@ done
+src_config_nfs_droid:  sdk_folders
+	@rm -rf android/nfs-droid
+	@mkdir -p android/nfs-droid
+	@echo $@ done
+src_build_nfs_droid:   sdk_folders
+	@cd android ; $(TEST_ROOT_DIR)/build_nfs_droid/nfs_droid/make-nfs-droid-fs-usr -m -f -t $(SDK_TARGET_ARCH)
+	@cd android ; cp -f build/tools/gen-nfs-burn-code.sh nfs-droid/
+	@echo $@ done
+bin_package_nfs_droid: sdk_folders
+	@cd android ; tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-nfs-droid.tar.gz nfs-droid
+	@echo $@ done
+bin_install_nfs_droid: sdk_folders
+	@echo $@ done
+clean_nfs_droid:
+	@rm -rf android/nfs-droid
+	@mkdir -p android/nfs-droid
+	@echo $@ done
+help_nfs_droid:
+	@echo $@ done
+test_nfs_droid: $(mission_nfs_droid)
+	@echo $@ done
+
+mission_nand_droid := 	src_get_nand_droid  \
+		src_package_nand_droid \
+		src_install_nand_droid \
+		src_config_nand_droid \
+		src_build_nand_droid \
+		bin_package_nand_droid \
+		bin_install_nand_droid
+mission_modules += mission_nand_droid
+mission_targets += $(mission_nand_droid)
+.PHONY: $(mission_nand_droid) clean_nand_droid help_nand_droid test_nand_droid
+src_get_nand_droid:     sdk_folders
+	@echo $@ done
+src_package_nand_droid: sdk_folders
+	@echo $@ done
+src_install_nand_droid: sdk_folders
+	@mkdir -p $(TEST_ROOT_DIR)/build_nand_droid/nand_droid
+	@cp android/build/tools/make-nand-droid-fs  $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/
+	@sed -i 's/sudo//g' $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/make-nand-droid-fs
+	@echo $@ done
+src_config_nand_droid:  sdk_folders
+	@rm -rf android/nand-droid
+	@mkdir -p android/nand-droid
+	@echo $@ done
+src_build_nand_droid:   sdk_folders
+	@cd android ; $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/make-nand-droid-fs -t $(SDK_TARGET_ARCH)
+	@cd android ; cp -f build/tools/gen-uboot-burn-code.sh  nand-droid/
+	@cd android ; cp -f kernel/vmlinux.bin                  nand-droid/
+	@echo $@ done
+bin_package_nand_droid: sdk_folders
+	@#cd android ; tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-nand-droid.tar.gz nand-droid
+	@echo $@ done
+bin_install_nand_droid: sdk_folders
+	@echo $@ done
+clean_nand_droid:
+	@rm -rf android/nand-droid
+	@mkdir -p android/nand-droid
+	@echo $@ done
+help_nand_droid:
+	@echo $@ done
+test_nand_droid: $(mission_nand_droid)
+	@echo $@ done
+
