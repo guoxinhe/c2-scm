@@ -124,7 +124,7 @@ fi
 
 
 #---------------------------------------------------------------
-jobtimeout=6000
+jobtimeout=9000 #new job need about  2.5hours
 lock=`pwd`/${0##*/}.lock
 unlock_job()
 {
@@ -149,6 +149,7 @@ lock_job()
   fi
   rm -rf $lock.log
   echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >$lock
+  trap unlock_job EXIT
 }
 remove_outofdate_files()
 {(
@@ -939,4 +940,4 @@ upload_logs
 send_email
 upload_install_sw_media
 unlock_job
-remove_outofdate_files
+remove_outofdate_files  &
