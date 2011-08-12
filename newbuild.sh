@@ -168,6 +168,7 @@ remove_outofdate_files()
         fi
     done
 
+    outofdate=$((86400*28)); #86400 = 24*60*60
     cd ${CONFIG_RESULT%/*}
     for i in `ls`; do
         burn=`stat -c%Z $i`
@@ -250,7 +251,7 @@ recho_time_consumed()
         tm_h=$((tm_h%24))
     fi
     shift
-    echo "$@" "$tm_c seconds / $tm_days $tm_h:$tm_m:$tm_s (age)."
+    echo "$@" "$tm_c seconds / $tm_days $tm_h:$tm_m:$tm_s (duration)."
 }
 addto_buildfail()
 {
@@ -772,6 +773,7 @@ prepare_runtime_files
 checkout_from_repositories
 create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
 create_repo_checkout_script `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
+[ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android             $CONFIG_PKGDIR/src-$CONFIG_DATEH &
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
     [ -h local.rules.mk ] && rm local.rules.mk
@@ -821,13 +823,13 @@ if [ $CONFIG_BUILD_ANDROIDNAND ]; then
     modules="nand_droid"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     build_modules_x_steps
-    cat <<END >>nand-droid/run
+    cat <<END >>android/nand-droid/run
 
 NAND burn guide:
-burn zvmlinux.bin ->NAND +  1MB
-burn root.image   ->NAND + 16MB
-burn system.image ->NAND +112MB
-burn data.image   ->NAND +368MB
+burn zvmlinux.bin ->NAND + offset   1MB
+burn root.image   ->NAND + offset  16MB
+burn system.image ->NAND + offset 112MB
+burn data.image   ->NAND + offset 368MB
 
 ref c2 wiki: https://access.c2micro.com/index.php/Android#Local_build_and_driver_update
 
@@ -887,7 +889,6 @@ checkadd_fail_send_list
 generate_web_report
 generate_email
 upload_web_report
-[ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android $CONFIG_PKGDIR/src-$CONFIG_DATEH
 upload_packages
 send_email
 unlock_job
