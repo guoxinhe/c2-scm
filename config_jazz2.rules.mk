@@ -1487,7 +1487,11 @@ src_build_nand_droid:   sdk_folders
 	@cd android ; cp -f kernel/vmlinux.bin                  nand-droid/
 	@echo $@ done
 bin_package_nand_droid: sdk_folders
-	@#cd android ; tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-nand-droid.tar.gz nand-droid
+	@cd android ; tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-nand-droid.tar.gz \
+		nand-droid/data.image    \
+		nand-droid/root.image    \
+		nand-droid/system.image  \
+		nand-droid/zvmlinux.bin
 	@echo $@ done
 bin_install_nand_droid: sdk_folders
 	@echo $@ done
