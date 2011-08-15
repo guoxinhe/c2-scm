@@ -37,15 +37,14 @@ CONFIG_HOSTNAME=$(hostname)
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
 CONFIG_WEBSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/$CONFIG_USER/$CONFIG_WEBFILE
-                #build@10.0.5.193:/home/build/public_html/$CONFIG_WEBFILE
-                     #hguo@10.16.5.166:/var/www/html/hguo/$CONFIG_WEBFILE
+                              #build@10.0.5.193:/home/build/public_html/$CONFIG_WEBFILE
 "
 CONFIG_LOGSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/$CONFIG_USER/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
-                #build@10.0.5.193:/home/build/public_html/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
-                     #hguo@10.16.5.166:/var/www/html/hguo/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+                              #build@10.0.5.193:/home/build/public_html/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
 "
 CONFIG_PKGSERVERS="            build@10.16.13.195:/sdk-b2/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATEH
                               #build@10.16.13.195:/sdk-b1/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATEH
+                                 #build@10.16.13.200:/sdk/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATEH
 "
 CONFIG_C2LOCALSERVERS="        build@10.16.13.200:/c2/local/c2/sw_media/$CONFIG_DATE-android
 "
@@ -95,6 +94,7 @@ CONFIG_BUILD_PUBLISHC2LOCAL=1
 #command line parse
 while [ $# -gt 0 ] ; do
     case $1 in
+    --cp-server) CONFIG_PKGSERVERS=`echo $CONFIG_PKGSERVERS | sed s,#build@10.16.13.200,build@10.16.13.200,g`;shift;;
     --noco)      CONFIG_BUILD_CHECKOUT= ; shift;;
     --help | -h)      CONFIG_BUILD_HELP=y ; shift;;
     --set)
