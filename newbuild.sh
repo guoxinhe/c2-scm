@@ -834,6 +834,7 @@ burn data.image   ->NAND + offset 368MB
 ref c2 wiki: https://access.c2micro.com/index.php/Android#Local_build_and_driver_update
 
 END
+    cd android
     cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   nand-droid/
     cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID nand-droid/
     mkdir -p $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH
