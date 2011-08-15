@@ -2,18 +2,18 @@
 #set -ex
 #basic settings auto detect, all name with prefix CONFIG_ is reported to web
 #---------------------------------------------------------------
+CONFIG_SCRIPT=`readlink -f $0`
+TOP=${CONFIG_SCRIPT%/*}
+cd $TOP
+
 CONFIG_DATE=`date +%y%m%d`
 CONFIG_DATEH=`date +%y%m%d.%H`
 CONFIG_MYIP=`/sbin/ifconfig eth0|sed -n 's/.*inet addr:\([^ ]*\).*/\1/p'`
-CONFIG_SCRIPT=`readlink -f $0`
 CONFIG_STARTTIME=`date`
 CONFIG_STARTTID=`date +%s`
-TOP=${CONFIG_SCRIPT%/*}
 if [ -t 1 -o -t 2 ]; then
 CONFIG_TTY=y
-[ "${0:0:2}" = "./" ] && TOP=`pwd`
 fi
-cd $TOP
 
 #---------------------------------------------------------------
 CONFIG_BUILDTOP=$TOP
@@ -32,13 +32,15 @@ CONFIG_BRANCH_ANDROID=devel  #one of: master, devel, etc.
 CONFIG_CHECKOUT_C2SDK=c2-$SDK_VERSION_ALL-c2sdk-tags.sh
 CONFIG_CHECKOUT_ANDROID=c2-$SDK_VERSION_ALL-android-tags.sh
 CONFIG_PROJECT=SDK    #one of: SDK, android
+CONFIG_USER=$(whoami)
+CONFIG_HOSTNAME=$(hostname)
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
-CONFIG_WEBSERVERS="build@10.16.13.195:/var/www/html/build/$CONFIG_WEBFILE
+CONFIG_WEBSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/build/$CONFIG_WEBFILE
                 #build@10.0.5.193:/home/build/public_html/$CONFIG_WEBFILE
                      #hguo@10.16.5.166:/var/www/html/hguo/$CONFIG_WEBFILE
 "
-CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+CONFIG_LOGSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/build/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
                 #build@10.0.5.193:/home/build/public_html/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
                      #hguo@10.16.5.166:/var/www/html/hguo/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
 "
@@ -144,12 +146,12 @@ lock_job()
     else
         echo "an active task is running for $age seconds: `cat $lock`"
 	echo "close it before restart: $lock"
-	echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$, lock age: $age, life: $jobtimeout" >>$lock.log
+	echo "`date` $CONFIG_USER@$CONFIG_HOSTNAME `readlink -f $0` tid:$$, lock age: $age, life: $jobtimeout" >>$lock.log
         exit 1
     fi
   fi
   rm -rf $lock.log
-  echo "`date` $(whoami)@$(hostname) `readlink -f $0` tid:$$ " >$lock
+  echo "`date` $CONFIG_USER@$CONFIG_HOSTNAME `readlink -f $0` tid:$$ " >$lock
   trap unlock_job EXIT
 }
 remove_outofdate_files()
@@ -479,7 +481,7 @@ export SDKENV_Setting="<pre>Makefile settings:
 build script settings:
 `cat $CONFIG_LOGDIR/env.sh`
 </pre>"
-export SDKENV_Server="`whoami` on $CONFIG_MYIP(`hostname`)"
+export SDKENV_Server="$CONFIG_USER on $CONFIG_MYIP($CONFIG_HOSTNAME)"
 export SDKENV_Script="`readlink -f $0`"
 export SDKENV_URLPRE=http://`echo ${CONFIG_LOGSERVER%/*} | sed -e 's,/var/www/html,,g' -e 's,^.*@,,g'`
 export SDKENV_URLPRE=${SDKENV_URLPRE##*/}
@@ -541,7 +543,7 @@ generate_email()
     #echo "Check broken log history:  http://10.16.13.196/${USER}/blog"
     echo ""
     echo "Regards,"
-    echo "`whoami`,`hostname`($CONFIG_MYIP)"
+    echo "$CONFIG_USER,$CONFIG_HOSTNAME($CONFIG_MYIP)"
     echo "`readlink -f $0`"
     date
   ) >$CONFIG_EMAILFILE 2>&1
