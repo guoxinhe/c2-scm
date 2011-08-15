@@ -36,11 +36,11 @@ CONFIG_USER=$(whoami)
 CONFIG_HOSTNAME=$(hostname)
 CONFIG_WEBFILE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily.html"
 CONFIG_WEBTITLE="${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}-sdk_daily build"
-CONFIG_WEBSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/build/$CONFIG_WEBFILE
+CONFIG_WEBSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/$CONFIG_USER/$CONFIG_WEBFILE
                 #build@10.0.5.193:/home/build/public_html/$CONFIG_WEBFILE
                      #hguo@10.16.5.166:/var/www/html/hguo/$CONFIG_WEBFILE
 "
-CONFIG_LOGSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/build/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
+CONFIG_LOGSERVERS="$CONFIG_USER@$CONFIG_MYIP:/var/www/html/$CONFIG_USER/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
                 #build@10.0.5.193:/home/build/public_html/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
                      #hguo@10.16.5.166:/var/www/html/hguo/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
 "
