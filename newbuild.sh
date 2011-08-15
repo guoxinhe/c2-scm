@@ -42,8 +42,8 @@ CONFIG_LOGSERVERS="build@10.16.13.195:/var/www/html/build/${CONFIG_ARCH}_${CONFI
                 #build@10.0.5.193:/home/build/public_html/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
                      #hguo@10.16.5.166:/var/www/html/hguo/${CONFIG_ARCH}_${CONFIG_TREEPREFIX}_${HOSTNAME}_logs/$CONFIG_DATE.log
 "
-CONFIG_PKGSERVERS="            build@10.16.13.195:/sdk-b2/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATE
-                              #build@10.16.13.195:/sdk-b1/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATE
+CONFIG_PKGSERVERS="            build@10.16.13.195:/sdk-b2/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATEH
+                              #build@10.16.13.195:/sdk-b1/${CONFIG_ARCH}/android-daily/android-${CONFIG_ARCH}-$CONFIG_DATEH
 "
 CONFIG_C2LOCALSERVERS="        build@10.16.13.200:/c2/local/c2/sw_media/$CONFIG_DATE-android
 "
@@ -613,19 +613,13 @@ upload_packages()
             p=${sver##*:}
             ip=`echo $sver | sed -e 's,.*@\(.*\):.*,\1,g'`
             if [ "$ip" = "$CONFIG_MYIP" ];then
-                mkdir -p $p/c2sdk-${CONFIG_DATEH}
-                echo "cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/"
-                cp -rf $CONFIG_PKGDIR/*${CONFIG_DATEH}* $p/
-                cp -rf $CONFIG_PKGDIR/c2-$SDK_VERSION_ALL-*.tar.gz $p/c2sdk-${CONFIG_DATEH}/
-                cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   $p/c2sdk-${CONFIG_DATEH}/
-                cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID $p/c2sdk-${CONFIG_DATEH}/
+                mkdir -p $p
+                echo "cp -rf $CONFIG_PKGDIR/* $p/"
+                cp -rf $CONFIG_PKGDIR/* $p/
             else
-                ssh $h mkdir -p $p/c2sdk-${CONFIG_DATEH}
-                echo "scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/"
-                scp -r $CONFIG_PKGDIR/*${CONFIG_DATEH}* $sver/
-                scp -r $CONFIG_PKGDIR/c2-$SDK_VERSION_ALL-*.tar.gz $sver/c2sdk-${CONFIG_DATEH}/
-                scp -r $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK       $sver/c2sdk-${CONFIG_DATEH}/
-                scp -r $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID     $sver/c2sdk-${CONFIG_DATEH}/
+                ssh $h mkdir -p $p
+                echo "scp -r $CONFIG_PKGDIR/* $sver/"
+                scp -r $CONFIG_PKGDIR/* $sver/
             fi
         done
         echo publish package done.
@@ -773,7 +767,7 @@ prepare_runtime_files
 checkout_from_repositories
 create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
 create_repo_checkout_script `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
-[ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android             $CONFIG_PKGDIR/src-$CONFIG_DATEH &
+[ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android             $CONFIG_PKGDIR/src-android &
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
     [ -h local.rules.mk ] && rm local.rules.mk
@@ -837,8 +831,8 @@ END
     cd android
     cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   nand-droid/
     cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID nand-droid/
-    mkdir -p $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH
-    cp -rf nand-droid/* $CONFIG_PKGDIR/nand-droid-$CONFIG_DATEH/
+    mkdir -p $CONFIG_PKGDIR/nand-droid
+    cp -rf nand-droid/* $CONFIG_PKGDIR/nand-droid/
 
     cd $TOP
     if [ -f android/nand-droid/root.image -a -f android/nand-droid/system.image -a -f android/nand-droid/data.image ]; then
