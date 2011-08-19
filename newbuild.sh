@@ -50,9 +50,10 @@ CONFIG_C2LOCALSERVERS="        build@10.16.13.200:/c2/local/c2/sw_media/$CONFIG_
 "
 CONFIG_LOGSERVER=`echo $CONFIG_LOGSERVERS |awk '{print $1}'`
 CONFIG_MAILLIST=hguo@c2micro.com
-CONFIG_RESULT=$TOP/build_result/$CONFIG_DATE
-CONFIG_LOGDIR=$CONFIG_RESULT.log
-CONFIG_INDEXLOG=$CONFIG_RESULT.txt
+CONFIG_RESULTDIR=$TOP/build_result
+CONFIG_RESULT=$CONFIG_RESULTDIR/$CONFIG_DATE
+CONFIG_LOGDIR=$CONFIG_RESULTDIR/$CONFIG_DATE.log
+CONFIG_INDEXLOG=$CONFIG_RESULTDIR/$CONFIG_DATE.txt
 CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
 CONFIG_EMAILFILE=$CONFIG_LOGDIR/email.txt
 CONFIG_EMAILTITLE="$CONFIG_ARCH $CONFIG_TREEPREFIX daily build pass"
@@ -171,7 +172,7 @@ remove_outofdate_files()
     done
 
     outofdate=$((86400*28)); #86400 = 24*60*60
-    cd ${CONFIG_RESULT%/*}
+    cd ${CONFIG_RESULTDIR}
     for i in `ls`; do
         burn=`stat -c%Z $i`
         now=`date +%s`
@@ -467,19 +468,16 @@ list_fail_url_tail()
 
 generate_web_report()
 {
-#set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
+#set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.log;
 #generate web report
 #these exports are used by html_generate.cgi
-export SDK_RESULTS_DIR=${CONFIG_RESULT%/*}
+export SDK_RESULTS_DIR=${CONFIG_RESULTDIR}
 export SDKENV_Title=$CONFIG_WEBTITLE
 export SDKENV_Project="${CONFIG_ARCH} ${CONFIG_TREEPREFIX} daily build on $HOSTNAME"
 export SDKENV_Overview="<pre>Project start on $CONFIG_STARTTIME, report on `date`
 `recho_time_consumed $CONFIG_STARTTID On report time:`</pre>"
-export SDKENV_Setting="<pre>Makefile settings:
-`make -f $CONFIG_MAKEFILE lsvar`
-
-build script settings:
-`cat $CONFIG_LOGDIR/env.sh`
+export SDKENV_Setting="<pre>
+`cat $CONFIG_LOGDIR/env.log`
 </pre>"
 export SDKENV_Server="$CONFIG_USER on $CONFIG_MYIP($CONFIG_HOSTNAME)"
 export SDKENV_Script="`readlink -f $0`"
@@ -540,6 +538,10 @@ generate_email()
     echo ""
     echo "For more reports: http://10.16.13.196/build/allinone.htm"
     echo "    or https://access.c2micro.com/~build/allinone.htm"
+    echo ""
+    echo "For monitor runtime build or rebuild the project: click one of"
+    echo "    http://10.16.13.195/build/build.cgi"
+    echo "    http://10.16.13.196/build/build.cgi"
     #echo "Check broken log history:  http://10.16.13.196/${USER}/blog"
     echo ""
     echo "Regards,"
@@ -757,15 +759,21 @@ prepare_runtime_files()
     softlink $CONFIG_INDEXLOG r
     softlink $CONFIG_LOGDIR   l
     softlink $CONFIG_RESULT   i
+    softlink $CONFIG_INDEXLOG $CONFIG_RESULTDIR/r
+    softlink $CONFIG_LOGDIR   $CONFIG_RESULTDIR/l
+    softlink $CONFIG_RESULT   $CONFIG_RESULTDIR/i
     #action parse
-    set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >$CONFIG_LOGDIR/env.sh;
+    echo "Makefile settings:------------------------------------"  >$CONFIG_LOGDIR/env.log
+    make -f $CONFIG_MAKEFILE lsvar >>$CONFIG_LOGDIR/env.log
+    echo "Build script settings:--------------------------------" >>$CONFIG_LOGDIR/env.log
+    set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >>$CONFIG_LOGDIR/env.log;
 }
 
 # let's go!
 #---------------------------------------------------------------
 lock_job
 prepare_runtime_files
-[ "$CONFIG_TTY" = "y" ] && cat $CONFIG_LOGDIR/env.sh
+[ "$CONFIG_TTY" = "y" ] && cat $CONFIG_LOGDIR/env.log
 checkout_from_repositories
 create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
 create_repo_checkout_script `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
