@@ -66,13 +66,13 @@ CONFIG_BUILD_DOTAG=
 CONFIG_BUILD_CLEAN=1
 CONFIG_BUILD_SDK=
 CONFIG_BUILD_CHECKOUT=1
-CONFIG_BUILD_PKGSRC=1
+CONFIG_BUILD_PKGSRC=
 CONFIG_BUILD_PKGBIN=1
 CONFIG_BUILD_DEVTOOLS=
 CONFIG_BUILD_SPI=
 CONFIG_BUILD_DIAG=
 CONFIG_BUILD_JTAG=
-CONFIG_BUILD_UBOOT=
+CONFIG_BUILD_UBOOT=1
 CONFIG_BUILD_C2GOODIES=
 CONFIG_BUILD_QT=
 CONFIG_BUILD_DOC=
@@ -86,11 +86,11 @@ CONFIG_BUILD_USRUDISK=
 CONFIG_BUILD_ANDROIDNAND=1
 CONFIG_BUILD_ANDROIDNFS=1
 CONFIG_BUILD_XXX=
-CONFIG_BUILD_PUBLISH=1
+CONFIG_BUILD_PUBLISH=
 CONFIG_BUILD_PUBLISHLOG=1
 CONFIG_BUILD_PUBLISHHTML=1
-CONFIG_BUILD_PUBLISHEMAIL=1
-CONFIG_BUILD_PUBLISHC2LOCAL=1
+CONFIG_BUILD_PUBLISHEMAIL=
+CONFIG_BUILD_PUBLISHC2LOCAL=
 
 #command line parse
 while [ $# -gt 0 ] ; do
@@ -321,7 +321,7 @@ create_repo_checkout_script()
     BR=$2
     checkout_script=$3
 
-    pushd $c2androiddir
+    pushd $c2androiddir >/dev/null 2>&1
     #create checkout script of this build code
     echo '#!/bin/sh'                 >$checkout_script
     echo ""                         >>$checkout_script
@@ -333,7 +333,7 @@ create_repo_checkout_script()
         echo 'popd'; echo ' ';" >>$checkout_script
     sed -i -e "s,$c2androiddir/,,g"   $checkout_script
     chmod 755                         $checkout_script
-    popd
+    popd >/dev/null 2>&1
 }
 
 get_module_cosh()
@@ -346,7 +346,7 @@ get_module_cosh()
     local project_list="$@";
     local use_repo=
 
-    pushd $mysrc
+    pushd $mysrc >/dev/null 2>&1
     if [ "$project_list" = "" ]; then
         if [ -f .repo/project.list ]; then
             project_list=`cat .repo/project.list`
@@ -384,7 +384,7 @@ get_module_cosh()
         done
         echo "pushd $pad; git checkout $id; popd" >>$mycosh
     done
-    popd
+    popd >/dev/null 2>&1
 }
 get_module_coid()
 {
@@ -393,7 +393,7 @@ get_module_coid()
     shift
     local project_list="$@"
 
-    pushd $mysrc
+    pushd $mysrc >/dev/null 2>&1
     if [ "$project_list" = "" ]; then
         if [ -f .repo/project.list ]; then
             project_list=`cat .repo/project.list`
@@ -433,7 +433,7 @@ get_module_coid()
         echo "The last check out id of module $mysrc is: $update_id"
     fi
     echo -en "$update_id"
-    popd
+    popd >/dev/null 2>&1
 }
 
 save_checkout_history()
@@ -452,6 +452,7 @@ save_build_history()
 {
     local mymod=$1;
     cp $CONFIG_RESULTDIR/history/$mymod/last_coid $CONFIG_RESULTDIR/history/$mymod/last_built
+    echo "`date`: build done" >>$CONFIG_RESULTDIR/history/$mymod/last/progress.log
 }
 check_build_history()
 {
@@ -917,6 +918,7 @@ save_checkout_history "sw_media" "source/sw_media"     "$CONFIG_BRANCH_C2SDK"
 save_checkout_history "uboot"    "source/u-boot-1.3.0" "$CONFIG_BRANCH_C2SDK"
 save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
 
+cd $TOP
 [ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android             $CONFIG_PKGDIR/src-android &
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
@@ -924,7 +926,6 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
     ln -s jazz2t.rules.mk local.rules.mk
     setup_build_sw_media_for_android_env_jazz2t
 
-    local r;
     modules="sw_mediaandroid"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     r=`grep ^sw_mediaandroid: $CONFIG_INDEXLOG`
@@ -946,6 +947,7 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
         echo `date +"%Y-%m-%d %H:%M:%S"` sw_media: modify android using prebuilt/sw_media >>$CONFIG_LOGDIR/progress.log
         upload_install_sw_media &
         r="updated";
+        save_build_history sw_media
     fi
     fi
     if [ "$r" != "updated" ]; then
@@ -954,7 +956,6 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
 fi
 
 if [ $CONFIG_BUILD_UBOOT ]; then
-    local r;
     modules="uboot"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     r=`grep ^uboot: $CONFIG_INDEXLOG`
@@ -974,6 +975,7 @@ if [ $CONFIG_BUILD_UBOOT ]; then
         tar xzf $CONFIG_PKGDIR/c2-*-u-boot-bin.tar.gz -C android/prebuilt/u-boot
         echo `date +"%Y-%m-%d %H:%M:%S"` u-boot: extracted to prebuilt/u-boot/ >>$CONFIG_LOGDIR/progress.log
         r="updated";
+        save_build_history uboot
     fi
     fi
     if [ "$r" != "updated" ]; then

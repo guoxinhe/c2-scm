@@ -108,7 +108,7 @@ lsvars:
 	@echo $(varlist)
 $(varlist):
 	@echo $($@)
-
+mktest:
 
 help: lsmod lsop lstest lsall
 	@echo Global defined variables: $(varlist)
