@@ -922,43 +922,61 @@ save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
 if [ $CONFIG_BUILD_SWMEDIA ]; then
     [ -h local.rules.mk ] && rm local.rules.mk
     ln -s jazz2t.rules.mk local.rules.mk
+    setup_build_sw_media_for_android_env_jazz2t
+
+    local r;
     modules="sw_mediaandroid"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
-    setup_build_sw_media_for_android_env_jazz2t
+    r=`grep ^sw_mediaandroid: $CONFIG_INDEXLOG`
+    if [ "$r" != "" ]; then
+        r=`check_build_history sw_media`
+        if [ "$r" = "built" ]; then
+        steps="help"
+        fi
+    fi
     build_modules_x_steps
 
     r=`grep ^sw_mediaandroid:0 $CONFIG_INDEXLOG`
     if [ "$r" != "" ]; then
+    if [ "$steps" != "help" ]; then
         rm -rf android/prebuilt/sw_media
         mkdir -p android/prebuilt/sw_media
         tar xzf $CONFIG_PKGDIR/c2-*-sw_media*bin*.tar.gz -C android/prebuilt/sw_media
         sed -i "s,SW_MEDIA_PATH=.*,SW_MEDIA_PATH=`readlink -f android/prebuilt/sw_media`,g"   android/env.sh
         echo `date +"%Y-%m-%d %H:%M:%S"` sw_media: modify android using prebuilt/sw_media >>$CONFIG_LOGDIR/progress.log
-    else
-	rm android/env.sh
-        echo `date +"%Y-%m-%d %H:%M:%S"` sw_media: reset android env.sh >>$CONFIG_LOGDIR/progress.log
+        upload_install_sw_media &
+        r="updated";
     fi
-    upload_install_sw_media &
+    fi
+    if [ "$r" != "updated" ]; then
+        echo `date +"%Y-%m-%d %H:%M:%S"` no new sw_media used. >>$CONFIG_LOGDIR/progress.log
+    fi
 fi
 
 if [ $CONFIG_BUILD_UBOOT ]; then
     local r;
-    r=`check_build_history uboot`
     modules="uboot"
-    if [ "$r" = "built" ]; then
-    steps="help"
-    else
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    r=`grep ^uboot: $CONFIG_INDEXLOG`
+    if [ "$r" != "" ]; then
+        r=`check_build_history uboot`
+        if [ "$r" = "built" ]; then
+        steps="help"
+        fi
     fi
     build_modules_x_steps
 
     r=`grep ^uboot:0 $CONFIG_INDEXLOG`
     if [ "$r" != "" ]; then
+    if [ "$steps" != "help" ]; then
         rm -rf   android/prebuilt/u-boot
         mkdir -p android/prebuilt/u-boot
         tar xzf $CONFIG_PKGDIR/c2-*-u-boot-bin.tar.gz -C android/prebuilt/u-boot
         echo `date +"%Y-%m-%d %H:%M:%S"` u-boot: extracted to prebuilt/u-boot/ >>$CONFIG_LOGDIR/progress.log
-    else
+        r="updated";
+    fi
+    fi
+    if [ "$r" != "updated" ]; then
         echo `date +"%Y-%m-%d %H:%M:%S"` no new u-boot used. >>$CONFIG_LOGDIR/progress.log
     fi
 fi
