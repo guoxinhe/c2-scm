@@ -314,6 +314,7 @@ checkout_from_repositories()
         popd
     fi
 }
+
 create_repo_checkout_script()
 {
     c2androiddir=$1
@@ -333,6 +334,140 @@ create_repo_checkout_script()
     sed -i -e "s,$c2androiddir/,,g"   $checkout_script
     chmod 755                         $checkout_script
     popd
+}
+
+get_module_cosh()
+{
+    local mysrc=`readlink -f $1`;
+    local mybranch="$2";
+    local mycosh="$3";
+    local mydbg=
+    shift 3;
+    local project_list="$@";
+    local use_repo=
+
+    pushd $mysrc
+    if [ "$project_list" = "" ]; then
+        if [ -f .repo/project.list ]; then
+            project_list=`cat .repo/project.list`
+            use_repo="yes";
+        else
+            if [ -d .git ]; then
+                project_list="."
+            else
+                if [ "$mydbg" = "on" ]; then
+                              find . -name \.git -type d | sed -e 's,/.git,,g' -e 's,^./,,g'
+                fi
+                project_list=`find . -name \.git -type d | sed -e 's,/.git,,g' -e 's,^./,,g'`
+            fi
+        fi
+    fi
+    if [ "$project_list" = "" ]; then
+        return 0
+    fi
+
+    mkdir -p ${mycosh%/*}
+    echo "#!/bin/sh"  >$mycosh
+    echo "#autocreated script, checkout git by hash ids" >>$mycosh
+    echo "#please update code and switch to target branch before run this" >>$mycosh
+    echo "#branch name: $mybranch" >>$mycosh
+    if [ "$use_repo" = "yes" ]; then
+    echo "repo start $mybranch --all" >>$mycosh
+    fi
+    chmod 755 $mycosh
+    for pi in $project_list; do
+        cd $mysrc/$pi;
+        id=`git log -n 1 | grep ^commit\ | sed 's/commit //g'`;
+        pad="$pi";
+        while [ ${#pad} -lt 20 ]; do
+            pad="$pad ";
+        done
+        echo "pushd $pad; git checkout $id; popd" >>$mycosh
+    done
+    popd
+}
+get_module_coid()
+{
+    local mysrc=`readlink -f $1`
+    local mydbg=
+    shift
+    local project_list="$@"
+
+    pushd $mysrc
+    if [ "$project_list" = "" ]; then
+        if [ -f .repo/project.list ]; then
+            project_list=`cat .repo/project.list`
+        else
+            if [ -d .git ]; then
+                project_list="."
+            else
+                if [ "$mydbg" = "on" ]; then
+                              find . -name \.git -type d | sed -e 's,/.git,,g' -e 's,^./,,g'
+                fi
+                project_list=`find . -name \.git -type d | sed -e 's,/.git,,g' -e 's,^./,,g'`
+            fi
+        fi
+    fi
+    if [ "$project_list" = "" ]; then
+        echo -en "1000000000_10000000_1000000000000000000000000000000000000000"
+        return 0
+    fi
+
+    new_revid=0;
+    new_revts=0;
+    new_revpt=".";
+    for pi in $project_list; do
+        cd $mysrc/$pi;
+        revid=`git log -n 1 | grep ^commit\ | sed 's/commit //g'`;
+        revts=`git log -n 1 --pretty=format:%ct`;
+        if [ $revts -gt $new_revts ]; then
+            new_revid=$revid
+            new_revts=$revts
+            new_revpt=$pi
+        fi
+    done
+    revid=$new_revid;
+    pathid=`echo $new_revpt | /usr/bin/md5sum | awk '{printf $1}'`00000000;
+    update_id=${new_revts}_${pathid:0:8}_${revid};
+    if [ "$mydbg" = "on" ]; then
+        echo "The last check out id of module $mysrc is: $update_id"
+    fi
+    echo -en "$update_id"
+    popd
+}
+
+save_checkout_history()
+{
+    local mymod=$1;
+    local mysrc=$2;
+    local mybrc=$3
+    coid=`get_module_coid $mysrc`;
+    mkdir -p $CONFIG_RESULTDIR/history/$mymod/$coid;
+    get_module_cosh $mysrc $mybrc  $CONFIG_RESULTDIR/history/$mymod/$coid/coid.sh
+    echo $coid >$CONFIG_RESULTDIR/history/$mymod/last_coid
+    [ -h $CONFIG_RESULTDIR/history/$mymod/last ] && rm $CONFIG_RESULTDIR/history/$mymod/last
+    ln -s $coid $CONFIG_RESULTDIR/history/$mymod/last
+}
+save_build_history()
+{
+    local mymod=$1;
+    cp $CONFIG_RESULTDIR/history/$mymod/last_coid $CONFIG_RESULTDIR/history/$mymod/last_built
+}
+check_build_history()
+{
+    local mymod=$1;
+    if [ ! -f $CONFIG_RESULTDIR/history/$mymod/last_coid ]; then
+        return 0;
+    fi
+    if [ ! -f $CONFIG_RESULTDIR/history/$mymod/last_built ]; then
+        return 0;
+    fi
+    last_coid=`cat $CONFIG_RESULTDIR/history/$mymod/last_coid`
+    last_built=`cat $CONFIG_RESULTDIR/history/$mymod/last_built`
+    if [ "$last_coid" != "$last_built" ]; then
+        return 0;
+    fi
+    echo -en "built"
 }
 
 package_repo_source_code(){(
@@ -777,6 +912,11 @@ prepare_runtime_files
 checkout_from_repositories
 create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
 create_repo_checkout_script `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
+
+save_checkout_history "sw_media" "source/sw_media"     "$CONFIG_BRANCH_C2SDK"
+save_checkout_history "uboot"    "source/u-boot-1.3.0" "$CONFIG_BRANCH_C2SDK"
+save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
+
 [ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android             $CONFIG_PKGDIR/src-android &
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
@@ -802,8 +942,14 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
 fi
 
 if [ $CONFIG_BUILD_UBOOT ]; then
+    local r;
+    r=`check_build_history uboot`
     modules="uboot"
+    if [ "$r" = "built" ]; then
+    steps="help"
+    else
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    fi
     build_modules_x_steps
 
     r=`grep ^uboot:0 $CONFIG_INDEXLOG`
