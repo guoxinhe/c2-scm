@@ -379,7 +379,7 @@ get_module_cosh()
         cd $mysrc/$pi;
         id=`git log -n 1 | grep ^commit\ | sed 's/commit //g'`;
         pad="$pi";
-        while [ ${#pad} -lt 20 ]; do
+        while [ ${#pad} -lt 40 ]; do
             pad="$pad ";
         done
         echo "pushd $pad; git checkout $id; popd" >>$mycosh
@@ -389,6 +389,7 @@ get_module_cosh()
 get_module_coid()
 {
     local mysrc=`readlink -f $1`
+    local mymod=$2;
     local mydbg=
     shift
     local project_list="$@"
@@ -429,6 +430,12 @@ get_module_coid()
     revid=$new_revid;
     pathid=`echo $new_revpt | /usr/bin/md5sum | awk '{printf $1}'`00000000;
     update_id=${new_revts}_${pathid:0:8}_${revid};
+    if [ "$mymod" != "" ]; then
+    if test -f $CONFIG_RESULTDIR/history/$mymod/coid.sh ; then
+    pathid=`cat $CONFIG_RESULTDIR/history/$mymod/coid.sh | /usr/bin/md5sum | awk '{printf $1}'`;
+    update_id=${new_revts}_${pathid};
+    fi
+    fi
     if [ "$mydbg" = "on" ]; then
         echo "The last check out id of module $mysrc is: $update_id"
     fi
@@ -440,32 +447,46 @@ save_checkout_history()
 {
     local mymod=$1;
     local mysrc=$2;
-    local mybrc=$3
-    coid=`get_module_coid $mysrc`;
+    local mybrc=$3;
+    local coid=;
+
+    get_module_cosh $mysrc $mybrc  $CONFIG_RESULTDIR/history/$mymod/coid.sh
+    coid=`get_module_coid $mysrc $mymod`;
+    echo $coid >$CONFIG_RESULTDIR/history/$mymod/coid
     mkdir -p $CONFIG_RESULTDIR/history/$mymod/$coid;
-    get_module_cosh $mysrc $mybrc  $CONFIG_RESULTDIR/history/$mymod/$coid/coid.sh
-    echo $coid >$CONFIG_RESULTDIR/history/$mymod/last_coid
+    cp $CONFIG_RESULTDIR/history/$mymod/coid    $CONFIG_RESULTDIR/history/$mymod/$coid/
+    cp $CONFIG_RESULTDIR/history/$mymod/coid.sh $CONFIG_RESULTDIR/history/$mymod/$coid/
+
+    #for user only
     [ -h $CONFIG_RESULTDIR/history/$mymod/last ] && rm $CONFIG_RESULTDIR/history/$mymod/last
     ln -s $coid $CONFIG_RESULTDIR/history/$mymod/last
 }
 save_build_history()
 {
     local mymod=$1;
-    cp $CONFIG_RESULTDIR/history/$mymod/last_coid $CONFIG_RESULTDIR/history/$mymod/last_built
-    echo "`date`: build done" >>$CONFIG_RESULTDIR/history/$mymod/last/progress.log
+    local coid=`cat $CONFIG_RESULTDIR/history/$mymod/coid`;
+    
+    mkdir -p $CONFIG_RESULTDIR/history/$mymod/built
+    cp $CONFIG_RESULTDIR/history/$mymod/$coid/coid.sh $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh
+    echo "`date`: build done" >>$CONFIG_RESULTDIR/history/$mymod/$coid/progress.log
 }
 check_build_history()
 {
+    #return: 0: still not build yet
+    #else will echo "built", means already built this module
     local mymod=$1;
-    if [ ! -f $CONFIG_RESULTDIR/history/$mymod/last_coid ]; then
+    local coid=`cat $CONFIG_RESULTDIR/history/$mymod/coid`;
+    if [ ! -f $CONFIG_RESULTDIR/history/$mymod/coid ]; then
         return 0;
     fi
-    if [ ! -f $CONFIG_RESULTDIR/history/$mymod/last_built ]; then
+    if [ ! -f $CONFIG_RESULTDIR/history/$mymod/coid.sh ]; then
         return 0;
     fi
-    last_coid=`cat $CONFIG_RESULTDIR/history/$mymod/last_coid`
-    last_built=`cat $CONFIG_RESULTDIR/history/$mymod/last_built`
-    if [ "$last_coid" != "$last_built" ]; then
+    if [ ! -f $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh ]; then
+        return 0;
+    fi
+    diff -q $CONFIG_RESULTDIR/history/$mymod/coid.sh $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh >dev/null
+    if [ $? -ne 0 ]; then
         return 0;
     fi
     echo -en "built"
@@ -932,6 +953,7 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
     if [ "$r" != "" ]; then
         r=`check_build_history sw_media`
         if [ "$r" = "built" ]; then
+        echo `date +"%Y-%m-%d %H:%M:%S"` $modules already built, jump rebuild  >>$CONFIG_LOGDIR/progress.log
         steps="help"
         fi
     fi
@@ -962,6 +984,7 @@ if [ $CONFIG_BUILD_UBOOT ]; then
     if [ "$r" != "" ]; then
         r=`check_build_history uboot`
         if [ "$r" = "built" ]; then
+        echo `date +"%Y-%m-%d %H:%M:%S"` $modules already built, jump rebuild  >>$CONFIG_LOGDIR/progress.log
         steps="help"
         fi
     fi
