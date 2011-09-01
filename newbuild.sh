@@ -314,26 +314,17 @@ checkout_from_repositories()
         popd
     fi
 }
-
-create_repo_checkout_script()
+clean_source_code()
 {
-    c2androiddir=$1
-    BR=$2
-    checkout_script=$3
+    [ $CONFIG_BUILD_CLEAN ] || return 0
+        pushd `readlink -f source`
+        repo forall -c "git reset --hard; git clean -f -d -x"
+        popd
 
-    pushd $c2androiddir >/dev/null 2>&1
-    #create checkout script of this build code
-    echo '#!/bin/sh'                 >$checkout_script
-    echo ""                         >>$checkout_script
-    echo "repo start --all $BR"     >>$checkout_script
-    echo ""                         >>$checkout_script
-    repo forall -c "echo pushd \$(pwd);
-        echo -en 'git checkout ';
-        git  log -n 1 | grep ^commit\ | sed 's/commit //g';
-        echo 'popd'; echo ' ';" >>$checkout_script
-    sed -i -e "s,$c2androiddir/,,g"   $checkout_script
-    chmod 755                         $checkout_script
-    popd >/dev/null 2>&1
+        pushd `readlink -f android`
+        repo forall -c "git reset --hard; git clean -f -d -x"
+        rm -rf out nfs-droid nand-droid
+        popd
 }
 
 get_module_cosh()
@@ -391,7 +382,7 @@ get_module_coid()
     local mysrc=`readlink -f $1`
     local mymod=$2;
     local mydbg=
-    shift
+    shift 2
     local project_list="$@"
 
     pushd $mysrc >/dev/null 2>&1
@@ -417,8 +408,9 @@ get_module_coid()
     new_revid=0;
     new_revts=0;
     new_revpt=".";
+
     for pi in $project_list; do
-        cd $mysrc/$pi;
+        pushd $mysrc/$pi >/dev/null 2>&1
         revid=`git log -n 1 | grep ^commit\ | sed 's/commit //g'`;
         revts=`git log -n 1 --pretty=format:%ct`;
         if [ $revts -gt $new_revts ]; then
@@ -426,7 +418,9 @@ get_module_coid()
             new_revts=$revts
             new_revpt=$pi
         fi
+        popd >/dev/null 2>&1
     done
+
     revid=$new_revid;
     pathid=`echo $new_revpt | /usr/bin/md5sum | awk '{printf $1}'`00000000;
     update_id=${new_revts}_${pathid:0:8}_${revid};
@@ -439,7 +433,7 @@ get_module_coid()
     if [ "$mydbg" = "on" ]; then
         echo "The last check out id of module $mysrc is: $update_id"
     fi
-    echo -en "$update_id"
+    echo -en "$update_id" >$CONFIG_RESULTDIR/history/$mymod/coid
     popd >/dev/null 2>&1
 }
 
@@ -451,8 +445,8 @@ save_checkout_history()
     local coid=;
 
     get_module_cosh $mysrc $mybrc  $CONFIG_RESULTDIR/history/$mymod/coid.sh
-    coid=`get_module_coid $mysrc $mymod`;
-    echo $coid >$CONFIG_RESULTDIR/history/$mymod/coid
+    get_module_coid $mysrc $mymod;
+    coid=`cat $CONFIG_RESULTDIR/history/$mymod/coid`;
     mkdir -p $CONFIG_RESULTDIR/history/$mymod/$coid;
     cp $CONFIG_RESULTDIR/history/$mymod/coid    $CONFIG_RESULTDIR/history/$mymod/$coid/
     cp $CONFIG_RESULTDIR/history/$mymod/coid.sh $CONFIG_RESULTDIR/history/$mymod/$coid/
@@ -485,7 +479,7 @@ check_build_history()
     if [ ! -f $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh ]; then
         return 0;
     fi
-    diff -q $CONFIG_RESULTDIR/history/$mymod/coid.sh $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh >dev/null
+    diff -q $CONFIG_RESULTDIR/history/$mymod/coid.sh $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh >/dev/null 2>&1
     if [ $? -ne 0 ]; then
         return 0;
     fi
@@ -932,12 +926,14 @@ lock_job
 prepare_runtime_files
 [ "$CONFIG_TTY" = "y" ] && cat $CONFIG_LOGDIR/env.log
 checkout_from_repositories
-create_repo_checkout_script `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
-create_repo_checkout_script `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
+get_module_cosh `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
+get_module_cosh `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
 
 save_checkout_history "sw_media" "source/sw_media"     "$CONFIG_BRANCH_C2SDK"
 save_checkout_history "uboot"    "source/u-boot-1.3.0" "$CONFIG_BRANCH_C2SDK"
 save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
+
+clean_source_code
 
 cd $TOP
 [ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android             $CONFIG_PKGDIR/src-android &
