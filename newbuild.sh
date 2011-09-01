@@ -987,11 +987,11 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
     r=`grep ^sw_mediaandroid:0 $CONFIG_INDEXLOG`
     if [ "$r" != "" ]; then
     if [ "$steps" != "help" ]; then
-        rm -rf android/prebuilt/sw_media
-        mkdir -p android/prebuilt/sw_media
-        tar xzf $CONFIG_PKGDIR/c2-*-sw_media*bin*.tar.gz -C android/prebuilt/sw_media
-        sed -i "s,SW_MEDIA_PATH=.*,SW_MEDIA_PATH=`readlink -f android/prebuilt/sw_media`,g"   android/env.sh
-        echo `date +"%Y-%m-%d %H:%M:%S"` sw_media: modify android using prebuilt/sw_media >>$CONFIG_LOGDIR/progress.log
+        rm -rf android/c2sdkbuilt/sw_media
+        mkdir -p android/c2sdkbuilt/sw_media
+        tar xzf $CONFIG_PKGDIR/c2-*-sw_media*bin*.tar.gz -C android/c2sdkbuilt/sw_media
+        sed -i "s,SW_MEDIA_PATH=.*,SW_MEDIA_PATH=`readlink -f android/c2sdkbuilt/sw_media`,g"   android/env.sh
+        echo `date +"%Y-%m-%d %H:%M:%S"` sw_media: modify android using c2sdkbuilt/sw_media >>$CONFIG_LOGDIR/progress.log
         upload_install_sw_media &
         r="updated";
         save_build_history sw_media
@@ -1018,10 +1018,10 @@ if [ $CONFIG_BUILD_UBOOT ]; then
     r=`grep ^uboot:0 $CONFIG_INDEXLOG`
     if [ "$r" != "" ]; then
     if [ "$steps" != "help" ]; then
-        rm -rf   android/prebuilt/u-boot
-        mkdir -p android/prebuilt/u-boot
-        tar xzf $CONFIG_PKGDIR/c2-*-u-boot-bin.tar.gz -C android/prebuilt/u-boot
-        echo `date +"%Y-%m-%d %H:%M:%S"` u-boot: extracted to prebuilt/u-boot/ >>$CONFIG_LOGDIR/progress.log
+        rm -rf   android/c2sdkbuilt/u-boot
+        mkdir -p android/c2sdkbuilt/u-boot
+        tar xzf $CONFIG_PKGDIR/c2-*-u-boot-bin.tar.gz -C android/c2sdkbuilt/u-boot
+        echo `date +"%Y-%m-%d %H:%M:%S"` u-boot: extracted to c2sdkbuilt/u-boot/ >>$CONFIG_LOGDIR/progress.log
         r="updated";
         save_build_history uboot
     fi
