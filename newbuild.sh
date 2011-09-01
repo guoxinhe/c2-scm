@@ -520,6 +520,7 @@ package_repo_source_code(){(
         *)
             cd $rdir/$i
             git archive --format=tar --prefix=$i/ HEAD | gzip > $p/$pn.tar.gz
+                    ;;
         esac
     done
     cd $mytop
@@ -885,6 +886,22 @@ setup_build_sw_media_for_android_env_jazz2()
     export BOARD_TARGET=C2_CC289; #add this for safe build jazz2-android-sw_media
 }
 
+setup_build_sw_media_for_android_env_jazz2l()
+{
+    [ -d android ] || echo "Error, no android project folder found"
+    export ANDROID_HOME=`readlink -f android`
+    export ANDROID_BUILD=1
+    #next added by Ben Cang.
+    export UPNP_SUPPORT=1
+    export D_EN_RTP=Y
+    #next added by Westwood
+    export PATH=$CONFIG_C2GCC_PATH:$PATH
+    export TARGET_ARCH=JAZZ2L;
+    export BUILD_TARGET=TARGET_LINUX_C2;
+    export BUILD=RELEASE;
+    export BOARD_TARGET=C2_CC289; #add this for safe build jazz2t-android-sw_media
+}
+
 setup_build_sw_media_for_android_env_jazz2t()
 {
     [ -d android ] || echo "Error, no android project folder found"
@@ -940,8 +957,20 @@ cd $TOP
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
     [ -h local.rules.mk ] && rm local.rules.mk
+    case $CONFIG_ARCH in
+    jazz2t*)
     ln -s jazz2t.rules.mk local.rules.mk
     setup_build_sw_media_for_android_env_jazz2t
+        ;;
+    jazz2l*)
+        ln -s jazz2l.rules.mk local.rules.mk
+        setup_build_sw_media_for_android_env_jazz2l
+        ;;
+    jazz2* | *)
+        ln -s jazz2.rules.mk local.rules.mk
+        setup_build_sw_media_for_android_env_jazz2
+        ;;
+    esac
 
     modules="sw_mediaandroid"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
