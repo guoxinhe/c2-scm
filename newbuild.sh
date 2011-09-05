@@ -1125,8 +1125,8 @@ for modules in $all_modules; do
         steps=""
         fi
     fi
-    build_modules_x_steps
     if [ "$steps" != "" ]; then
+        build_modules_x_steps
         save_build_history $modules
     fi
 done
