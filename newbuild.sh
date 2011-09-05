@@ -443,9 +443,13 @@ save_checkout_history()
     local mysrc=$2;
     local mybrc=$3;
     local coid=;
-
-    get_module_cosh $mysrc $mybrc  $CONFIG_RESULTDIR/history/$mymod/coid.sh
-    get_module_coid $mysrc $mymod;
+    shift 3
+    local all_projects="$@"
+    if [ ! -d $mysrc ]; then
+        return 0;
+    fi
+    get_module_cosh $mysrc $mybrc $CONFIG_RESULTDIR/history/$mymod/coid.sh $all_projects;
+    get_module_coid $mysrc $mymod $all_projects;
     coid=`cat $CONFIG_RESULTDIR/history/$mymod/coid`;
     mkdir -p $CONFIG_RESULTDIR/history/$mymod/$coid;
     cp $CONFIG_RESULTDIR/history/$mymod/coid    $CONFIG_RESULTDIR/history/$mymod/$coid/
@@ -832,6 +836,8 @@ modules=xxx           #for place holder
 steps=help            #for place holder
 build_modules_x_steps()
 {
+    local xmod;
+    local s;
     for xmod in ${modules}; do
         nr_merr=0
         tm_module=`date +%s`
@@ -1094,6 +1100,36 @@ if [ "$modules" != "" ]; then
         echo can not build facudisk or usrudisk, depend steps: c2box uboot kernel
     fi
 fi
+
+all_modules="sw_media qt470 kernel kernelnand uboot vivante hdmi c2box jtag diag c2_goodies"
+    #                     xxx        source home folder    branch name             [proj list]
+    save_checkout_history devtools   source/devtools              $CONFIG_BRANCH_C2SDK
+    save_checkout_history sw_media   source/sw_media              $CONFIG_BRANCH_C2SDK
+    save_checkout_history qt470      source/sw/Qt                 $CONFIG_BRANCH_C2SDK
+    save_checkout_history kernel     source/kernel.sdk/linux-2.6  $CONFIG_BRANCH_C2SDK
+    save_checkout_history kernelnand source/kernel.sdk/linux-2.6  $CONFIG_BRANCH_C2SDK
+    save_checkout_history uboot      source/u-boot-1.3.0          $CONFIG_BRANCH_C2SDK
+    save_checkout_history vivante    source/sw/bsp/vivante        $CONFIG_BRANCH_C2SDK
+    save_checkout_history hdmi       source/sw/bsp/hdmi/jazz2hdmi $CONFIG_BRANCH_C2SDK
+    save_checkout_history c2box      source/sw_c2apps             $CONFIG_BRANCH_C2SDK
+    save_checkout_history jtag       source/sw/jtag               $CONFIG_BRANCH_C2SDK
+    save_checkout_history diag       source/sw/prom/diag          $CONFIG_BRANCH_C2SDK
+    save_checkout_history c2_goodies source/sw/c2_goodies         $CONFIG_BRANCH_C2SDK
+for modules in $all_modules; do
+    steps="src_get src_package src_install src_config src_build bin_package bin_install "
+    r=`grep ^$modules: $CONFIG_INDEXLOG`
+    if [ "$r" != "" ]; then #have already first built today
+        r=`check_build_history $modules`
+        if [ "$r" = "built" ]; then
+        echo `date +"%Y-%m-%d %H:%M:%S"` $modules already built, jump rebuild  >>$CONFIG_LOGDIR/progress.log
+        steps=""
+        fi
+    fi
+    build_modules_x_steps
+    if [ "$steps" != "" ]; then
+        save_build_history $modules
+    fi
+done
 
 if [ $CONFIG_BUILD_XXX ]; then  #script debug code
     modules="xxx"
