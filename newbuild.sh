@@ -1070,6 +1070,9 @@ END
         update_indexlog "nfs_droid:0:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
         update_indexlog "nand_droid:0:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
 
+        cp $TOP/android/out/host/linux-x86/bin/mkyaffs2            $TOP/nand-droid/
+        cp $TOP/android/c2sdkbuilt/u-boot/u-boot-utilities/mkimage $TOP/nand-droid/
+        cp $TOP/android/build/tools/gen-nand-packages.sh           $TOP/nand-droid/
         #for ndk-r5b jazz2t only
         cd android/ndk-r5b
         ./build/tools/release-ndk.sh          -t3o $TOP/android/out/target/product/jazz2t
