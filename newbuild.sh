@@ -1069,6 +1069,21 @@ END
         build_fail=
         update_indexlog "nfs_droid:0:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
         update_indexlog "nand_droid:0:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
+
+        #for ndk-r5b jazz2t only
+        cd android/ndk-r5b
+        ./build/tools/release-ndk.sh          -t3o $TOP/android/out/target/product/jazz2t
+        cp $TOP/android-ndk-r5b-c2-linux.tar.bz2   $TOP/nand-droid/android-ndk-r5b-c2-linux.tar.bz2
+
+        ./build/tools/release-ndk.sh -pu      -t3o $TOP/android/out/target/product/jazz2t
+        cp $TOP/android-ndk-r5b-c2-linux.tar.bz2   $TOP/nand-droid/android-ndk-r5b-c2-linux-premium.tar.bz2
+
+        ./build/tools/release-ndk.sh -win     -t3o $TOP/android/out/target/product/jazz2t
+        cp $TOP/android-ndk-r5b-c2-windows.tar.bz2 $TOP/nand-droid/android-ndk-r5b-c2-windows.tar.bz2
+
+        cd $TOP
+        cp $TOP/android/out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar \
+           $TOP/android/nand-droid/android.jar
     else
         CONFIG_BUILD_PUBLISH=
         build_fail="yes"
