@@ -1430,6 +1430,27 @@ mission_targets += $(mission_nfs_droid)
 src_get_nfs_droid:     sdk_folders
 	@echo $@ done
 src_package_nfs_droid: sdk_folders
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers.src.tar.gz \
+			hardware/c2micro/alsa_sound       \
+			hardware/c2micro/c2_avd_drv       \
+			hardware/c2micro/c2_dtv_drv       \
+			hardware/c2micro/c2_hdmi_rx_drv   \
+			hardware/c2micro/gfx2d_gc300      \
+			hardware/c2micro/libcopybit       \
+			hardware/c2micro/libgralloc 
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-C2Launcher2.src.tar.gz \
+			packages/apps/C2Launcher2 \
+			--exclude=.git
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-FileBrowser.src.tar.gz \
+			packages/apps/FileBrowser \
+			--exclude=.git
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-MediaOpenPlayer.src.tar.gz \
+			packages/apps/MediaOpenPlayer \
+			--exclude=.git
 	@echo $@ done
 src_install_nfs_droid: sdk_folders
 	@mkdir -p $(TEST_ROOT_DIR)/build_nfs_droid/nfs_droid
@@ -1476,6 +1497,10 @@ src_install_nand_droid: sdk_folders
 	@mkdir -p $(TEST_ROOT_DIR)/build_nand_droid/nand_droid
 	@cp android/build/tools/make-nand-droid-fs  $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/
 	@sed -i 's/sudo//g' $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/make-nand-droid-fs
+	@echo "cd $(TOP_DIR)/android"                                            >> $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/make-nand-droid-fs
+	@echo "build/tools/make-nand-droid-update-package -t $(SDK_TARGET_ARCH)" >> $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/make-nand-droid-fs
+	@echo "cd $(TOP_DIR)/android"                                            >> $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/make-nand-droid-fs
+	@echo "build/tools/make-nand-droid-fs-recovery -t $(SDK_TARGET_ARCH)"    >> $(TEST_ROOT_DIR)/build_nand_droid/nand_droid/make-nand-droid-fs
 	@echo $@ done
 src_config_nand_droid:  sdk_folders
 	@rm -rf android/nand-droid
