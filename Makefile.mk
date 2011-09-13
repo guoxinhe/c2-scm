@@ -110,5 +110,12 @@ $(varlist):
 	@echo $($@)
 mktest:
 
-help: lsmod lsop lstest lsall
-	@echo Global defined variables: $(varlist)
+help:
+	@echo "make lsmod     -- list all supported modules"
+	@echo "make lsop      -- list all supported operations"
+	@echo "make lstest    -- list all supported tests"
+	@echo "make lsall     -- list all supported module targets"
+	@echo "make lsmk      -- list all included files"
+	@echo "make lsvar     -- list all defined global variables and value"
+	@echo "make lsvars    -- list all defined global variables only"
+	@echo "all auto folders: $(sdkautodirs)"
