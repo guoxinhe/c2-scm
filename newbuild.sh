@@ -434,6 +434,7 @@ get_module_coid()
         echo "The last check out id of module $mysrc is: $update_id"
     fi
     echo -en "$update_id" >$CONFIG_RESULTDIR/history/$mymod/coid
+    touch $CONFIG_RESULTDIR/history
     popd >/dev/null 2>&1
 }
 
@@ -458,6 +459,7 @@ save_checkout_history()
     #for user only
     [ -h $CONFIG_RESULTDIR/history/$mymod/last ] && rm $CONFIG_RESULTDIR/history/$mymod/last
     ln -s $coid $CONFIG_RESULTDIR/history/$mymod/last
+    touch $CONFIG_RESULTDIR/history
 }
 save_build_history()
 {
@@ -467,6 +469,7 @@ save_build_history()
     mkdir -p $CONFIG_RESULTDIR/history/$mymod/built
     cp $CONFIG_RESULTDIR/history/$mymod/$coid/coid.sh $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh
     echo "`date`: build done" >>$CONFIG_RESULTDIR/history/$mymod/$coid/progress.log
+    touch $CONFIG_RESULTDIR/history
 }
 check_build_history()
 {
@@ -1070,9 +1073,9 @@ END
         update_indexlog "nfs_droid:0:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
         update_indexlog "nand_droid:0:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
 
-        cp $TOP/android/out/host/linux-x86/bin/mkyaffs2            $TOP/nand-droid/
-        cp $TOP/android/c2sdkbuilt/u-boot/u-boot-utilities/mkimage $TOP/nand-droid/
-        cp $TOP/android/build/tools/gen-nand-packages.sh           $TOP/nand-droid/
+        cp $TOP/android/out/host/linux-x86/bin/mkyaffs2            $TOP/android/nand-droid/
+        cp $TOP/android/c2sdkbuilt/u-boot/u-boot-utilities/mkimage $TOP/android/nand-droid/
+        cp $TOP/android/build/tools/gen-nand-packages.sh           $TOP/android/nand-droid/
         #for ndk-r5b jazz2t only
         cd android/ndk-r5b
         ./build/tools/release-ndk.sh          -t3o $TOP/android/out/target/product/jazz2t
