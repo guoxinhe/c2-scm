@@ -1432,7 +1432,7 @@ src_get_nfs_droid:     sdk_folders
 src_package_nfs_droid: sdk_folders
 	@cd android ;\
 		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-alsa.src.tar.gz       hardware/c2micro/alsa_sound     ;\
-		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-adv.src.tar.gz        hardware/c2micro/c2_avd_drv     ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-avd.src.tar.gz        hardware/c2micro/c2_avd_drv     ;\
 		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-dtv.src.tar.gz        hardware/c2micro/c2_dtv_drv     ;\
 		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-hdmi.src.tar.gz       hardware/c2micro/c2_hdmi_rx_drv ;\
 		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-gfx.src.tar.gz        hardware/c2micro/gfx2d_gc300    ;\
