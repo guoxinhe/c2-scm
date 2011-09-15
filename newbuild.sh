@@ -1061,13 +1061,8 @@ burn data.image   ->NAND + offset 368MB
 ref c2 wiki: https://access.c2micro.com/index.php/Android#Local_build_and_driver_update
 
 END
-    cd android
-    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   nand-droid/
-    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID nand-droid/
-    mkdir -p $CONFIG_PKGDIR/nand-droid
-    cp -rf nand-droid/* $CONFIG_PKGDIR/nand-droid/
-
     cd $TOP
+    #check build result
     if [ -f android/nand-droid/root.image -a -f android/nand-droid/system.image -a -f android/nand-droid/data.image ]; then
         build_fail=
         update_indexlog "nfs_droid:0:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
@@ -1098,8 +1093,12 @@ END
         nr_totalerror=$((nr_totalerror+1))
         nr_totalerror=$((nr_totalerror+1))
     fi
-    #check build result
     #package build files
+    mkdir -p $CONFIG_PKGDIR/nand-droid
+    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   $TOP/android/nand-droid/
+    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID $TOP/android/nand-droid/
+    cp -rf $TOP/android/nand-droid/* $CONFIG_PKGDIR/nand-droid/
+
     nr_totalmodule=$((nr_totalmodule))
 fi
 
