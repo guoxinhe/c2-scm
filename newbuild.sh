@@ -58,37 +58,39 @@ CONFIG_HTMLFILE=$CONFIG_LOGDIR/web.html
 CONFIG_EMAILFILE=$CONFIG_LOGDIR/email.txt
 CONFIG_EMAILTITLE="$CONFIG_ARCH $CONFIG_TREEPREFIX daily build pass"
 CONFIG_PATH=$CONFIG_C2GCC_PATH:$PATH
-CONFIG_DEBUG=
-CONFIG_BUILD_DRY=
 CONFIG_BUILD_HELP=
-CONFIG_BUILD_LOCAL=
-CONFIG_BUILD_DOTAG=
 CONFIG_BUILD_CLEAN=1
 CONFIG_BUILD_SDK=
 CONFIG_BUILD_CHECKOUT=1
 CONFIG_BUILD_PKGSRC=
 CONFIG_BUILD_PKGBIN=1
+CONFIG_BUILD_XXX=
+
+CONFIG_BUILD_ANDROID=1
+CONFIG_BUILD_PKGANDROIDSRC=
+CONFIG_BUILD_UBOOT=1
+CONFIG_BUILD_SWMEDIA=1
+CONFIG_BUILD_ANDROIDNAND=1
+CONFIG_BUILD_ANDROIDNFS=1
+
+CONFIG_BUILD_OLDSDK=
 CONFIG_BUILD_DEVTOOLS=
 CONFIG_BUILD_SPI=
 CONFIG_BUILD_DIAG=
 CONFIG_BUILD_JTAG=
-CONFIG_BUILD_UBOOT=1
 CONFIG_BUILD_C2GOODIES=
 CONFIG_BUILD_QT=
 CONFIG_BUILD_DOC=
 CONFIG_BUILD_KERNEL=
 CONFIG_BUILD_HDMI=
-CONFIG_BUILD_SWMEDIA=1
 CONFIG_BUILD_VIVANTE=
 CONFIG_BUILD_C2APPS=
 CONFIG_BUILD_FACUDISK=
 CONFIG_BUILD_USRUDISK=
-CONFIG_BUILD_ANDROIDNAND=1
-CONFIG_BUILD_ANDROIDNFS=1
-CONFIG_BUILD_XXX=
+
 CONFIG_BUILD_PUBLISH=
-CONFIG_BUILD_PUBLISHLOG=1
-CONFIG_BUILD_PUBLISHHTML=1
+CONFIG_BUILD_PUBLISHLOG=
+CONFIG_BUILD_PUBLISHHTML=
 CONFIG_BUILD_PUBLISHEMAIL=
 CONFIG_BUILD_PUBLISHC2LOCAL=
 
@@ -300,7 +302,7 @@ checkout_from_repositories()
         echo "ereport: `date` repo forall -c 'git branch'"
         repo forall -c "git branch"
         popd
-
+    if [ $CONFIG_BUILD_ANDROID ]; then
         pushd `readlink -f android`
         BR=$CONFIG_BRANCH_ANDROID
         echo "ereport: `date` repo start --all $BR"
@@ -313,6 +315,7 @@ checkout_from_repositories()
         repo forall -c "git branch"
         popd
     fi
+    fi
 }
 clean_source_code()
 {
@@ -321,10 +324,12 @@ clean_source_code()
         repo forall -c "git reset --hard; git clean -f -d -x"
         popd
 
+    if [ $CONFIG_BUILD_ANDROID ]; then
         pushd `readlink -f android`
         repo forall -c "git reset --hard; git clean -f -d -x"
         rm -rf out nfs-droid nand-droid
         popd
+    fi
 }
 
 get_module_cosh()
@@ -354,6 +359,7 @@ get_module_cosh()
         fi
     fi
     if [ "$project_list" = "" ]; then
+        popd >/dev/null 2>&1
         return 0
     fi
 
@@ -402,6 +408,7 @@ get_module_coid()
     fi
     if [ "$project_list" = "" ]; then
         echo -en "1000000000_10000000_1000000000000000000000000000000000000000"
+        popd >/dev/null 2>&1
         return 0
     fi
 
@@ -948,23 +955,32 @@ prepare_runtime_files()
 
 # let's go!
 #---------------------------------------------------------------
+cd $TOP
 lock_job
 prepare_runtime_files
 [ "$CONFIG_TTY" = "y" ] && cat $CONFIG_LOGDIR/env.log
 checkout_from_repositories
-get_module_cosh `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
-get_module_cosh `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
-
-save_checkout_history "sw_media" "source/sw_media"     "$CONFIG_BRANCH_C2SDK"
-save_checkout_history "uboot"    "source/u-boot-1.3.0" "$CONFIG_BRANCH_C2SDK"
-save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
-
 clean_source_code
 
+if [ $CONFIG_BUILD_ANDROID ]; then
 cd $TOP
-[ $CONFIG_BUILD_PKGSRC ] && package_repo_source_code android             $CONFIG_PKGDIR/src-android &
+get_module_cosh `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
+cd $TOP
+get_module_cosh `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
+cd $TOP
+save_checkout_history "sw_media" "source/sw_media"     "$CONFIG_BRANCH_C2SDK"
+cd $TOP
+save_checkout_history "uboot"    "source/u-boot-1.3.0" "$CONFIG_BRANCH_C2SDK"
+cd $TOP
+save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
+
+if [ $CONFIG_BUILD_PKGANDROIDSRC ]; then 
+     cd $TOP
+     package_repo_source_code android $CONFIG_PKGDIR/src-android &
+fi
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then
+    cd $TOP
     [ -h local.rules.mk ] && rm local.rules.mk
     case $CONFIG_ARCH in
     jazz2t*)
@@ -1012,6 +1028,7 @@ if [ $CONFIG_BUILD_SWMEDIA ]; then
 fi
 
 if [ $CONFIG_BUILD_UBOOT ]; then
+    cd $TOP
     modules="uboot"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     r=`grep ^uboot: $CONFIG_INDEXLOG`
@@ -1041,12 +1058,14 @@ if [ $CONFIG_BUILD_UBOOT ]; then
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNFS ]; then
+    cd $TOP
     modules="nfs_droid"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     build_modules_x_steps
 fi
 
 if [ $CONFIG_BUILD_ANDROIDNAND ]; then
+    cd $TOP
     modules="nand_droid"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     build_modules_x_steps
@@ -1101,26 +1120,10 @@ END
 
     nr_totalmodule=$((nr_totalmodule))
 fi
+fi  #CONFIG_BUILD_ANDROID 
 
-modules=
-[ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
-[ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
-steps="src_get src_package src_install src_config src_build bin_package bin_install "
-if [ "$modules" != "" ]; then
-    dep_fail=0
-    r=`grep ^c2box:0 $CONFIG_INDEXLOG`
-    j=`grep ^uboot:0 $CONFIG_INDEXLOG`
-    k=`grep ^kernel:0 $CONFIG_INDEXLOG`
-    [ "$r" = "" ] && dep_fail=$((dep_fail+1))
-    [ "$j" = "" ] && dep_fail=$((dep_fail+1))
-    [ "$k" = "" ] && dep_fail=$((dep_fail+1))
-    if [ $dep_fail -eq 0 ]; then
-        build_modules_x_steps
-    else
-        echo can not build facudisk or usrudisk, depend steps: c2box uboot kernel
-    fi
-fi
-
+if [ $CONFIG_BUILD_OLDSDK ]; then
+cd $TOP
 all_modules="sw_media qt470 kernel kernelnand uboot vivante hdmi c2box jtag diag c2_goodies"
     #                     xxx        source home folder    branch name             [proj list]
     save_checkout_history devtools   source/devtools              $CONFIG_BRANCH_C2SDK
@@ -1150,6 +1153,26 @@ for modules in $all_modules; do
         save_build_history $modules
     fi
 done
+  
+modules=
+[ $CONFIG_BUILD_FACUDISK ] && modules="$modules facudisk"
+[ $CONFIG_BUILD_USRUDISK ] && modules="$modules usrudisk"
+steps="src_get src_package src_install src_config src_build bin_package bin_install "
+if [ "$modules" != "" ]; then
+    dep_fail=0
+    r=`grep ^c2box:0 $CONFIG_INDEXLOG`
+    j=`grep ^uboot:0 $CONFIG_INDEXLOG`
+    k=`grep ^kernel:0 $CONFIG_INDEXLOG`
+    [ "$r" = "" ] && dep_fail=$((dep_fail+1))
+    [ "$j" = "" ] && dep_fail=$((dep_fail+1))
+    [ "$k" = "" ] && dep_fail=$((dep_fail+1))
+    if [ $dep_fail -eq 0 ]; then
+        build_modules_x_steps
+    else
+        echo can not build facudisk or usrudisk, depend steps: c2box uboot kernel
+    fi
+fi
+fi #CONFIG_BUILD_OLDSDK
 
 if [ $CONFIG_BUILD_XXX ]; then  #script debug code
     modules="xxx"
