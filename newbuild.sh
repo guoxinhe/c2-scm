@@ -962,16 +962,13 @@ prepare_runtime_files
 checkout_from_repositories
 clean_source_code
 
-if [ $CONFIG_BUILD_ANDROID ]; then
 cd $TOP
 get_module_cosh `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
+if [ $CONFIG_BUILD_ANDROID ]; then
 cd $TOP
 get_module_cosh `readlink -f android` $CONFIG_BRANCH_ANDROID $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID
-cd $TOP
 save_checkout_history "sw_media" "source/sw_media"     "$CONFIG_BRANCH_C2SDK"
-cd $TOP
 save_checkout_history "uboot"    "source/u-boot-1.3.0" "$CONFIG_BRANCH_C2SDK"
-cd $TOP
 save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
 
 if [ $CONFIG_BUILD_PKGANDROIDSRC ]; then 
