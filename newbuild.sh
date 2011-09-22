@@ -289,7 +289,7 @@ addto_resultfail()
     export FAILLIST_RESULT
 }
 checkout_from_repositories()
-{
+{(
     if [ $CONFIG_BUILD_CHECKOUT ];then
         pushd `readlink -f source`
         BR=$CONFIG_BRANCH_C2SDK
@@ -316,9 +316,9 @@ checkout_from_repositories()
         popd
     fi
     fi
-}
+)}
 clean_source_code()
-{
+{(
     [ $CONFIG_BUILD_CLEAN ] || return 0
         pushd `readlink -f source`
         repo forall -c "git reset --hard; git clean -f -d -x"
@@ -330,10 +330,10 @@ clean_source_code()
         rm -rf out nfs-droid nand-droid
         popd
     fi
-}
+)}
 
 get_module_cosh()
-{
+{(
     local mysrc=`readlink -f $1`;
     local mybranch="$2";
     local mycosh="$3";
@@ -382,9 +382,9 @@ get_module_cosh()
         echo "pushd $pad; git checkout $id; popd" >>$mycosh
     done
     popd >/dev/null 2>&1
-}
+)}
 get_module_coid()
-{
+{(
     local mysrc=`readlink -f $1`
     local mymod=$2;
     local mydbg=
@@ -443,10 +443,10 @@ get_module_coid()
     echo -en "$update_id" >$CONFIG_RESULTDIR/history/$mymod/coid
     touch $CONFIG_RESULTDIR/history
     popd >/dev/null 2>&1
-}
+)}
 
 save_checkout_history()
-{
+{(
     local mymod=$1;
     local mysrc=$2;
     local mybrc=$3;
@@ -467,9 +467,9 @@ save_checkout_history()
     [ -h $CONFIG_RESULTDIR/history/$mymod/last ] && rm $CONFIG_RESULTDIR/history/$mymod/last
     ln -s $coid $CONFIG_RESULTDIR/history/$mymod/last
     touch $CONFIG_RESULTDIR/history
-}
+)}
 save_build_history()
-{
+{(
     local mymod=$1;
     local coid=`cat $CONFIG_RESULTDIR/history/$mymod/coid`;
     
@@ -477,9 +477,9 @@ save_build_history()
     cp $CONFIG_RESULTDIR/history/$mymod/$coid/coid.sh $CONFIG_RESULTDIR/history/$mymod/built/$coid.sh
     echo "`date`: build done" >>$CONFIG_RESULTDIR/history/$mymod/$coid/progress.log
     touch $CONFIG_RESULTDIR/history
-}
+)}
 check_build_history()
-{
+{(
     #return: 0: still not build yet
     #else will echo "built", means already built this module
     local mymod=$1;
@@ -498,7 +498,7 @@ check_build_history()
         return 0;
     fi
     echo -en "built"
-}
+)}
 
 package_repo_source_code(){(
     mytop=`pwd`
@@ -515,7 +515,7 @@ package_repo_source_code(){(
         pn=`echo $i | sed s,/,_,g`
         [ "$CONFIG_TTY" = "y" ] && echo Create: $pn.tar.gz
         case $i in
-        prebuilt)
+        (prebuilt)
             cd $rdir
             tar czf  $p/$pn.tar.gz\
                     --exclude=.git* --exclude=CVS* \
@@ -531,7 +531,7 @@ package_repo_source_code(){(
                     --exclude=u-boot*        \
                     prebuilt;
                     ;;
-        *)
+        (*)
             cd $rdir/$i
             git archive --format=tar --prefix=$i/ HEAD | gzip > $p/$pn.tar.gz
                     ;;
@@ -718,7 +718,7 @@ generate_email()
 }
 
 upload_web_report()
-{
+{(
   if [ $CONFIG_BUILD_PUBLISHHTML ]; then
     for sver in $CONFIG_WEBSERVERS; do
         [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
@@ -739,10 +739,10 @@ upload_web_report()
     done
     echo publish web done.
   fi
-}
+)}
 
 upload_logs()
-{
+{(
   if [ $CONFIG_BUILD_PUBLISHLOG ]; then
     unix2dos -q $CONFIG_LOGDIR/*
     for sver in $CONFIG_LOGSERVERS; do
@@ -772,10 +772,10 @@ upload_logs()
     done
     echo publish log done.
   fi
-}
+)}
 
 upload_packages()
-{
+{(
     if [ $CONFIG_BUILD_PUBLISH ]; then
         for sver in $CONFIG_PKGSERVERS; do
             [ "${sver:0:1}" = "#" ] && continue; #comment line, invalid
@@ -794,10 +794,10 @@ upload_packages()
         done
         echo publish package done.
     fi
-}
+)}
 
 upload_install_sw_media()
-{
+{(
     PKG_NAME_BIN_SW_MEDIA=c2-$SDK_VERSION_ALL-sw_media-bin.tar.gz
     #this only appears in ssh, no local enabled.
     if [ $CONFIG_BUILD_PUBLISHC2LOCAL ]; then
@@ -822,10 +822,10 @@ upload_install_sw_media()
         done
     fi
     echo publish sw_media package to ${p%/*} done.
-}
+)}
 
 send_email()
-{
+{(
     echo email title "$CONFIG_EMAILTITLE"
     if [ $CONFIG_BUILD_PUBLISHEMAIL ]; then
         echo "send to: $CONFIG_MAILLIST"
@@ -835,7 +835,7 @@ send_email()
         cat $CONFIG_EMAILFILE | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com
     fi
     echo send mail done.
-}
+)}
 
 #set -ex
 nr_failurl=0          #set in list_fail_url_tail
@@ -934,7 +934,7 @@ setup_build_sw_media_for_android_env_jazz2t()
     export BOARD_TARGET=C2_CC302; #add this for safe build jazz2t-android-sw_media
 }
 prepare_runtime_files()
-{
+{(
     make -f $CONFIG_MAKEFILE sdk_folders
     mkdir -p $CONFIG_RESULT $CONFIG_LOGDIR
     touch $CONFIG_INDEXLOG
@@ -951,7 +951,7 @@ prepare_runtime_files()
     make -f $CONFIG_MAKEFILE lsvar >>$CONFIG_LOGDIR/env.log
     echo "Build script settings:--------------------------------" >>$CONFIG_LOGDIR/env.log
     set | grep CONFIG_ | sed -e 's/'\''//g' -e 's/'\"'//g' -e 's/ \+/ /g' >>$CONFIG_LOGDIR/env.log;
-}
+)}
 
 # let's go!
 #---------------------------------------------------------------
