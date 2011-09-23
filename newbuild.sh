@@ -959,8 +959,8 @@ cd $TOP
 lock_job
 prepare_runtime_files
 [ "$CONFIG_TTY" = "y" ] && cat $CONFIG_LOGDIR/env.log
-checkout_from_repositories
-clean_source_code
+clean_source_code             >>$CONFIG_LOGDIR/checkout.log 2>&1
+checkout_from_repositories    >>$CONFIG_LOGDIR/checkout.log 2>&1
 
 cd $TOP
 get_module_cosh `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
