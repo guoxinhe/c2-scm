@@ -1056,66 +1056,22 @@ fi
 
 if [ $CONFIG_BUILD_ANDROIDNFS ]; then
     cd $TOP
-    modules="nfs_droid"
+    modules="droidkernel droidbin droidnfs droidnand droidndk"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     build_modules_x_steps
-fi
-
-if [ $CONFIG_BUILD_ANDROIDNAND ]; then
-    cd $TOP
-    modules="nand_droid"
-    steps="src_get src_package src_install src_config src_build bin_package bin_install "
-    build_modules_x_steps
-    cat <<END >>android/nand-droid/run
-
-NAND burn guide:
-burn zvmlinux.bin ->NAND + offset   1MB
-burn root.image   ->NAND + offset  16MB
-burn system.image ->NAND + offset 112MB
-burn data.image   ->NAND + offset 368MB
-
-ref c2 wiki: https://access.c2micro.com/index.php/Android#Local_build_and_driver_update
-
-END
-    cd $TOP
     #check build result
     if [ -f android/nand-droid/root.image -a -f android/nand-droid/system.image -a -f android/nand-droid/data.image ]; then
         build_fail=
-        update_indexlog "nfs_droid:0:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
-        update_indexlog "nand_droid:0:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
-
-        cp $TOP/android/out/host/linux-x86/bin/mkyaffs2            $TOP/android/nand-droid/
-        cp $TOP/android/c2sdkbuilt/u-boot/u-boot-utilities/mkimage $TOP/android/nand-droid/
-        cp $TOP/android/build/tools/gen-nand-packages.sh           $TOP/android/nand-droid/
-        #for ndk-r5b jazz2t only
-        cd android/ndk-r5b
-        ./build/tools/release-ndk.sh          -t3o $TOP/android/out/target/product/jazz2t
-        cp $TOP/android/android-ndk-r5b-c2-linux.tar.bz2   $CONFIG_PKGDIR/android-ndk-r5b-c2-linux.tar.bz2
-
-        ./build/tools/release-ndk.sh -pu      -t3o $TOP/android/out/target/product/jazz2t
-        cp $TOP/android/android-ndk-r5b-c2-linux.tar.bz2   $CONFIG_PKGDIR/android-ndk-r5b-c2-linux-premium.tar.bz2
-
-        ./build/tools/release-ndk.sh -win     -t3o $TOP/android/out/target/product/jazz2t
-        cp $TOP/android/android-ndk-r5b-c2-windows.tar.bz2 $CONFIG_PKGDIR/android-ndk-r5b-c2-windows.tar.bz2
-
-        cd $TOP
-        cp $TOP/android/out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar \
-           $CONFIG_PKGDIR/android.jar
     else
         CONFIG_BUILD_PUBLISH=
         build_fail="yes"
-        update_indexlog "nfs_droid:1:$CONFIG_LOGDIR/nfs_droid.log" $CONFIG_INDEXLOG
         update_indexlog "nand_droid:1:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
         nr_totalerror=$((nr_totalerror+1))
         nr_totalerror=$((nr_totalerror+1))
     fi
     #package build files
     mkdir -p $CONFIG_PKGDIR/nand-droid
-    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK   $TOP/android/nand-droid/
-    cp $CONFIG_PKGDIR/$CONFIG_CHECKOUT_ANDROID $TOP/android/nand-droid/
     cp -rf $TOP/android/nand-droid/* $CONFIG_PKGDIR/nand-droid/
-
-    nr_totalmodule=$((nr_totalmodule))
 fi
 fi  #CONFIG_BUILD_ANDROID 
 

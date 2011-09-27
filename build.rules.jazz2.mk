@@ -1727,3 +1727,52 @@ help_droidnand:
 test_droidnand: $(mission_droidnand)
 	@echo $@ done
 
+# example code
+mission_droidndk := 	src_get_droidndk  \
+			src_package_droidndk \
+			src_install_droidndk \
+			src_config_droidndk \
+			src_build_droidndk \
+			bin_package_droidndk \
+			bin_install_droidndk
+mission_modules += mission_droidndk
+mission_targets += $(mission_droidndk)
+.PHONY: $(mission_droidndk) clean_droidndk help_droidndk test_droidndk
+src_get_droidndk:     sdk_folders
+	@echo $@ done
+src_package_droidndk: sdk_folders
+	@echo $@ done
+src_install_droidndk: sdk_folders
+	@echo $@ done
+src_config_droidndk:  sdk_folders
+	@echo $@ done
+src_build_droidndk1:   sdk_folders
+	cd android/ndk-r5b ;\
+		./build/tools/release-ndk.sh -to $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
+		$(PKG_DIR)/android-ndk-r5b-c2-linux.tar.bz2
+src_build_droidndk2:   sdk_folders
+	cd android/ndk-r5b ;\
+		./build/tools/release-ndk.sh -win -to $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+	cp $(TOP_DIR)/android/android-ndk-r5b-c2-windows.tar.bz2 
+		$(PKG_DIR)/android-ndk-r5b-c2-windows.tar.bz2
+src_build_droidndk3:   sdk_folders
+	cd android/ndk-r5b ;\
+		./build/tools/release-ndk.sh -pu -to $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
+		$(PKG_DIR)/android-ndk-r5b-c2-linux-premium.tar.bz2
+src_build_droidndk:   sdk_folders  src_build_droidndk1 src_build_droidndk2 src_build_droidndk3
+	cp $(TOP_DIR)/android/out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar \
+		$(PKG_DIR)/android.jar
+	@echo $@ done
+bin_package_droidndk: sdk_folders
+	@echo $@ done
+bin_install_droidndk: sdk_folders
+	@echo $@ done
+clean_droidndk:
+	@echo $@ done
+help_droidndk:
+	@echo $@ done
+test_droidndk: $(mission_droidndk)
+	@echo $@ done
+
