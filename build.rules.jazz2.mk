@@ -1534,6 +1534,50 @@ test_nand_droid: $(mission_nand_droid)
 	@echo $@ done
 
 # example code
+mission_c2sdksrc := 	src_get_c2sdksrc  \
+			src_package_c2sdksrc \
+			src_install_c2sdksrc \
+			src_config_c2sdksrc \
+			src_build_c2sdksrc \
+			bin_package_c2sdksrc \
+			bin_install_c2sdksrc
+mission_modules += mission_c2sdksrc
+mission_targets += $(mission_c2sdksrc)
+.PHONY: $(mission_c2sdksrc) clean_c2sdksrc help_c2sdksrc test_c2sdksrc
+source/.repo/repo/repo:
+	@mkdir -p source;
+	@cd source; mkdir -p .repo; git clone ssh://git.bj.c2micro.com/mentor-mirror/build/repo.git .repo/repo
+	@cd source; yes "" | repo init -u ssh://git.bj.c2micro.com/c2sdk/manifests.git -b ${CONFIG_BRANCH_C2SDK} -m sw_media.xml
+	@cd source; repo sync
+	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all
+	@echo "$@ done"
+source/reposync: source/.repo/repo/repo
+	@cd source; repo forall -c "git reset --hard; git clean -dfx";
+	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all;
+	@cd source; repo sync;
+	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all;
+src_get_c2sdksrc:     sdk_folders source/reposync
+	@echo $@ done
+src_package_c2sdksrc: sdk_folders
+	@echo $@ done
+src_install_c2sdksrc: sdk_folders
+	@echo $@ done
+src_config_c2sdksrc:  sdk_folders
+	@echo $@ done
+src_build_c2sdksrc:   sdk_folders
+	@echo $@ done
+bin_package_c2sdksrc: sdk_folders
+	@echo $@ done
+bin_install_c2sdksrc: sdk_folders
+	@echo $@ done
+clean_c2sdksrc:
+	@echo $@ done
+help_c2sdksrc:
+	@echo $@ done
+test_c2sdksrc: $(mission_c2sdksrc)
+	@echo $@ done
+
+# example code
 mission_droidsrc := 	src_get_droidsrc  \
 			src_package_droidsrc \
 			src_install_droidsrc \
@@ -1545,30 +1589,18 @@ mission_modules += mission_droidsrc
 mission_targets += $(mission_droidsrc)
 .PHONY: $(mission_droidsrc) clean_droidsrc help_droidsrc test_droidsrc
 android/.repo/repo/repo:
-	mkdir -p android;
-	cd android; mkdir -p .repo; git clone ssh://git.bj.c2micro.com/mentor-mirror/build/repo.git .repo/repo
-	cd android; yes "" | repo init -u ssh://git.bj.c2micro.com/mentor-mirror/build/manifests.git -b ${CONFIG_BRANCH_ANDROID} -m default.xml
-	cd android; repo sync
-	cd android; repo start ${CONFIG_BRANCH_ANDROID} --all
+	@mkdir -p android;
+	@cd android; mkdir -p .repo; git clone ssh://git.bj.c2micro.com/mentor-mirror/build/repo.git .repo/repo
+	@cd android; yes "" | repo init -u ssh://git.bj.c2micro.com/mentor-mirror/build/manifests.git -b ${CONFIG_BRANCH_ANDROID} -m default.xml
+	@cd android; repo sync
+	@cd android; repo start ${CONFIG_BRANCH_ANDROID} --all
 	@echo "$@ done"
 android/reposync: android/.repo/repo/repo
 	@cd android; repo forall -c "git reset --hard; git clean -dfx";
 	@cd android; repo start ${CONFIG_BRANCH_ANDROID} --all;
 	@cd android; repo sync;
 	@cd android; repo start ${CONFIG_BRANCH_ANDROID} --all;
-source/.repo/repo/repo:
-	mkdir -p source;
-	cd source; mkdir -p .repo; git clone ssh://git.bj.c2micro.com/mentor-mirror/build/repo.git .repo/repo
-	cd source; yes "" | repo init -u ssh://git.bj.c2micro.com/c2sdk/manifests.git -b ${CONFIG_BRANCH_C2SDK} -m sw_media.xml
-	cd source; repo sync
-	cd source; repo start ${CONFIG_BRANCH_C2SDK} --all
-	@echo "$@ done"
-source/reposync: source/.repo/repo/repo
-	@cd source; repo forall -c "git reset --hard; git clean -dfx";
-	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all;
-	@cd source; repo sync;
-	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all;
-src_get_droidsrc:     sdk_folders android/reposync source/reposync
+src_get_droidsrc:     sdk_folders android/reposync
 	@echo $@ done
 src_package_droidsrc: sdk_folders
 	@cd android ;\

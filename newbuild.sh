@@ -959,8 +959,11 @@ cd $TOP
 lock_job
 prepare_runtime_files
 [ "$CONFIG_TTY" = "y" ] && cat $CONFIG_LOGDIR/env.log
-clean_source_code             >>$CONFIG_LOGDIR/checkout.log 2>&1
-checkout_from_repositories    >>$CONFIG_LOGDIR/checkout.log 2>&1
+#clean_source_code             >>$CONFIG_LOGDIR/checkout.log 2>&1
+#checkout_from_repositories    >>$CONFIG_LOGDIR/checkout.log 2>&1
+modules="droidsrc c2sdksrc"
+steps="src_get src_package src_install src_config src_build bin_package bin_install"
+build_modules_x_steps
 
 cd $TOP
 get_module_cosh `readlink -f source`  $CONFIG_BRANCH_C2SDK   $CONFIG_PKGDIR/$CONFIG_CHECKOUT_C2SDK
