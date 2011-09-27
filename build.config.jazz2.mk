@@ -37,6 +37,9 @@ TEMP_DIR			:= $(TOP_DIR)/temp
 PKG_DIR				:= $(TOP_DIR)/$(SDK_VERSION_ALL)
 TAR_EXCLUDEFLAGS		:= --exclude=CVS --exclude=CVSROOT --exclude=.git --exclude=.repo
 
+CONFIG_BRANCH_ANDROID 		:= devel
+CONFIG_BRANCH_C2SDK 		:= master
+
 ifneq ($(CVS_TAG),)
 CHECKOUT_OPTION         := -r $(CVS_TAG)
 endif

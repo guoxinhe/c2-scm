@@ -27,8 +27,8 @@ CONFIG_C2GCC_PATH=`readlink -f c2/daily/bin`
 CONFIG_C2GCC_VERSION=`$CONFIG_C2GCC_PATH/c2-linux-gcc --version`
 CONFIG_KERNEL=`make -f $CONFIG_MAKEFILE SDK_KERNEL_VERSION`
 CONFIG_LIBC=uClibc-0.9.27
-CONFIG_BRANCH_C2SDK=master  #one of: master, devel, etc.
-CONFIG_BRANCH_ANDROID=devel  #one of: master, devel, etc.
+CONFIG_BRANCH_C2SDK=`make -f $CONFIG_MAKEFILE CONFIG_BRANCH_C2SDK`  #one of: master, devel, etc.
+CONFIG_BRANCH_ANDROID=`make -f $CONFIG_MAKEFILE CONFIG_BRANCH_ANDROID`  #one of: master, devel, etc.
 CONFIG_CHECKOUT_C2SDK=c2-$SDK_VERSION_ALL-c2sdk-tags.sh
 CONFIG_CHECKOUT_ANDROID=c2-$SDK_VERSION_ALL-android-tags.sh
 CONFIG_PROJECT=SDK    #one of: SDK, android
@@ -973,7 +973,7 @@ save_checkout_history "android"  "android"             "$CONFIG_BRANCH_C2SDK"
 
 if [ $CONFIG_BUILD_PKGANDROIDSRC ]; then 
      cd $TOP
-     package_repo_source_code android $CONFIG_PKGDIR/src-android &
+     package_repo_source_code android $CONFIG_PKGDIR/android-source &
 fi
 
 if [ $CONFIG_BUILD_SWMEDIA ]; then

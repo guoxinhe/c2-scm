@@ -1533,3 +1533,197 @@ help_nand_droid:
 test_nand_droid: $(mission_nand_droid)
 	@echo $@ done
 
+
+CONFIG_BRANCH_ANDROID := devel
+CONFIG_BRANCH_C2SDK := master
+varlist += CONFIG_BRANCH_ANDROID  CONFIG_BRANCH_C2SDK
+
+# example code
+mission_droidsrc := 	src_get_droidsrc  \
+			src_package_droidsrc \
+			src_install_droidsrc \
+			src_config_droidsrc \
+			src_build_droidsrc \
+			bin_package_droidsrc \
+			bin_install_droidsrc
+mission_modules += mission_droidsrc
+mission_targets += $(mission_droidsrc)
+.PHONY: $(mission_droidsrc) clean_droidsrc help_droidsrc test_droidsrc
+android/.repo/repo/repo:
+	mkdir -p android;
+	cd android; mkdir -p .repo; git clone ssh://git.bj.c2micro.com/mentor-mirror/build/repo.git .repo/repo
+	cd android; yes "" | repo init -u ssh://git.bj.c2micro.com/mentor-mirror/build/manifests.git -b ${CONFIG_BRANCH_ANDROID} -m default.xml
+	cd android; repo sync
+	cd android; repo start ${CONFIG_BRANCH_ANDROID} --all
+	@echo "$@ done"
+android/reposync: android/.repo/repo/repo
+	@cd android; repo forall -c "git reset --hard; git clean -dfx";
+	@cd android; repo start ${CONFIG_BRANCH_ANDROID} --all;
+	@cd android; repo sync;
+	@cd android; repo start ${CONFIG_BRANCH_ANDROID} --all;
+source/.repo/repo/repo:
+	mkdir -p source;
+	cd source; mkdir -p .repo; git clone ssh://git.bj.c2micro.com/mentor-mirror/build/repo.git .repo/repo
+	cd source; yes "" | repo init -u ssh://git.bj.c2micro.com/c2sdk/manifests.git -b ${CONFIG_BRANCH_C2SDK} -m sw_media.xml
+	cd source; repo sync
+	cd source; repo start ${CONFIG_BRANCH_C2SDK} --all
+	@echo "$@ done"
+source/reposync: source/.repo/repo/repo
+	@cd source; repo forall -c "git reset --hard; git clean -dfx";
+	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all;
+	@cd source; repo sync;
+	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all;
+src_get_droidsrc:     sdk_folders android/reposync source/reposync
+	@echo $@ done
+src_package_droidsrc: sdk_folders
+	@echo $@ done
+src_install_droidsrc: sdk_folders
+	@echo $@ done
+src_config_droidsrc:  sdk_folders
+	@echo $@ done
+src_build_droidsrc:   sdk_folders
+	@echo $@ done
+bin_package_droidsrc: sdk_folders
+	@echo $@ done
+bin_install_droidsrc: sdk_folders
+	@echo $@ done
+clean_droidsrc:
+	@echo $@ done
+help_droidsrc:
+	@echo $@ done
+test_droidsrc: $(mission_droidsrc)
+	@echo $@ done
+
+# example code
+mission_droidkernel := 	src_get_droidkernel  \
+			src_package_droidkernel \
+			src_install_droidkernel \
+			src_config_droidkernel \
+			src_build_droidkernel \
+			bin_package_droidkernel \
+			bin_install_droidkernel
+mission_modules += mission_droidkernel
+mission_targets += $(mission_droidkernel)
+.PHONY: $(mission_droidkernel) clean_droidkernel help_droidkernel test_droidkernel
+src_get_droidkernel:     sdk_folders
+	@echo $@ done
+src_package_droidkernel: sdk_folders
+	@echo $@ done
+src_install_droidkernel: sdk_folders
+	@echo $@ done
+src_config_droidkernel:  sdk_folders
+	@echo $@ done
+src_build_droidkernel:   sdk_folders
+	#cd android; ./build/tools/make-kernel -m -t $(SDK_TARGET_ARCH)
+	cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-kernel -m -t $(SDK_TARGET_ARCH)
+	@echo $@ done
+bin_package_droidkernel: sdk_folders
+	@echo $@ done
+bin_install_droidkernel: sdk_folders
+	@echo $@ done
+clean_droidkernel:
+	@echo $@ done
+help_droidkernel:
+	@echo $@ done
+test_droidkernel: $(mission_droidkernel)
+	@echo $@ done
+
+# example code
+mission_droidbin := 	src_get_droidbin  \
+			src_package_droidbin \
+			src_install_droidbin \
+			src_config_droidbin \
+			src_build_droidbin \
+			bin_package_droidbin \
+			bin_install_droidbin
+mission_modules += mission_droidbin
+mission_targets += $(mission_droidbin)
+.PHONY: $(mission_droidbin) clean_droidbin help_droidbin test_droidbin
+src_get_droidbin:     sdk_folders
+	@echo $@ done
+src_package_droidbin: sdk_folders
+	@echo $@ done
+src_install_droidbin: sdk_folders
+	@echo $@ done
+src_config_droidbin:  sdk_folders
+	@echo $@ done
+src_build_droidbin:   sdk_folders
+	cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-android -f -t $(SDK_TARGET_ARCH)
+	@echo $@ done
+bin_package_droidbin: sdk_folders
+	@echo $@ done
+bin_install_droidbin: sdk_folders
+	@echo $@ done
+clean_droidbin:
+	@echo $@ done
+help_droidbin:
+	@echo $@ done
+test_droidbin: $(mission_droidbin)
+	@echo $@ done
+
+# example code
+mission_droidnfs := 	src_get_droidnfs  \
+			src_package_droidnfs \
+			src_install_droidnfs \
+			src_config_droidnfs \
+			src_build_droidnfs \
+			bin_package_droidnfs \
+			bin_install_droidnfs
+mission_modules += mission_droidnfs
+mission_targets += $(mission_droidnfs)
+.PHONY: $(mission_droidnfs) clean_droidnfs help_droidnfs test_droidnfs
+src_get_droidnfs:     sdk_folders
+	@echo $@ done
+src_package_droidnfs: sdk_folders
+	@echo $@ done
+src_install_droidnfs: sdk_folders
+	@echo $@ done
+src_config_droidnfs:  sdk_folders
+	@echo $@ done
+src_build_droidnfs:   sdk_folders
+	cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-nfs-droid -f -t $(SDK_TARGET_ARCH)
+	@echo $@ done
+bin_package_droidnfs: sdk_folders
+	@echo $@ done
+bin_install_droidnfs: sdk_folders
+	@echo $@ done
+clean_droidnfs:
+	@echo $@ done
+help_droidnfs:
+	@echo $@ done
+test_droidnfs: $(mission_droidnfs)
+	@echo $@ done
+
+# example code
+mission_droidnand := 	src_get_droidnand  \
+			src_package_droidnand \
+			src_install_droidnand \
+			src_config_droidnand \
+			src_build_droidnand \
+			bin_package_droidnand \
+			bin_install_droidnand
+mission_modules += mission_droidnand
+mission_targets += $(mission_droidnand)
+.PHONY: $(mission_droidnand) clean_droidnand help_droidnand test_droidnand
+src_get_droidnand:     sdk_folders
+	@echo $@ done
+src_package_droidnand: sdk_folders
+	@echo $@ done
+src_install_droidnand: sdk_folders
+	@echo $@ done
+src_config_droidnand:  sdk_folders
+	@echo $@ done
+src_build_droidnand:   sdk_folders
+	cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-nand-droid -f -t $(SDK_TARGET_ARCH)
+	@echo $@ done
+bin_package_droidnand: sdk_folders
+	@echo $@ done
+bin_install_droidnand: sdk_folders
+	@echo $@ done
+clean_droidnand:
+	@echo $@ done
+help_droidnand:
+	@echo $@ done
+test_droidnand: $(mission_droidnand)
+	@echo $@ done
+

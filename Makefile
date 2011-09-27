@@ -12,9 +12,12 @@ TEMP_DIR			:= $(TOP_DIR)/temp
 SW_MEDIA_PATH                   := $(TEST_ROOT_DIR)/sw_media_installed
 QT_INSTALL_DIR                  := /build/jazz2/dev/sdk/test_root/QtopiaCore-4.7.0-generic
 TAR_EXCLUDEFLAGS		:= --exclude=CVS --exclude=CVSROOT --exclude=.git --exclude=.repo
+CONFIG_BRANCH_ANDROID 		:= devel
+CONFIG_BRANCH_C2SDK 		:= master
 varlist += TODAY TOP_DIR SDK_TARGET_ARCH SDK_VERSION_ALL PKG_DIR TEST_ROOT_DIR SOURCE_DIR TEMP_DIR \
 	SDK_GCC_VERSION		SDK_TARGET_GCC_ARCH			\
 	SDK_KERNEL_VERSION	LINUXDIR                LINUX_CONFIG	\
+	CONFIG_BRANCH_ANDROID  CONFIG_BRANCH_C2SDK			\
 	SDK_QT_VERSION		QTINSTALL_NAME		PATH
 mklist :=
 MYINCFILE := build.config.mk
