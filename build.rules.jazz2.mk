@@ -1533,11 +1533,6 @@ help_nand_droid:
 test_nand_droid: $(mission_nand_droid)
 	@echo $@ done
 
-
-CONFIG_BRANCH_ANDROID := devel
-CONFIG_BRANCH_C2SDK := master
-varlist += CONFIG_BRANCH_ANDROID  CONFIG_BRANCH_C2SDK
-
 # example code
 mission_droidsrc := 	src_get_droidsrc  \
 			src_package_droidsrc \
@@ -1576,6 +1571,26 @@ source/reposync: source/.repo/repo/repo
 src_get_droidsrc:     sdk_folders android/reposync source/reposync
 	@echo $@ done
 src_package_droidsrc: sdk_folders
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-alsa.src.tar.gz       hardware/c2micro/alsa_sound     ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-avd.src.tar.gz        hardware/c2micro/c2_avd_drv     ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-dtv.src.tar.gz        hardware/c2micro/c2_dtv_drv     ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-hdmi.src.tar.gz       hardware/c2micro/c2_hdmi_rx_drv ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-gfx.src.tar.gz        hardware/c2micro/gfx2d_gc300    ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-libcopybit.src.tar.gz hardware/c2micro/libcopybit     ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-drivers-libgralloc.src.tar.gz hardware/c2micro/libgralloc     ;
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-C2Launcher2.src.tar.gz \
+			packages/apps/C2Launcher2 \
+			--exclude=.git
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-FileBrowser.src.tar.gz \
+			packages/apps/FileBrowser \
+			--exclude=.git
+	@cd android ;\
+		tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-MediaOpenPlayer.src.tar.gz \
+			packages/apps/MediaOpenPlayer \
+			--exclude=.git
 	@echo $@ done
 src_install_droidsrc: sdk_folders
 	@echo $@ done
@@ -1679,15 +1694,21 @@ src_package_droidnfs: sdk_folders
 src_install_droidnfs: sdk_folders
 	@echo $@ done
 src_config_droidnfs:  sdk_folders
+	@rm -rf android/nfs-droid
+	@mkdir -p android/nfs-droid
 	@echo $@ done
 src_build_droidnfs:   sdk_folders
-	cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-nfs-droid -f -t $(SDK_TARGET_ARCH)
+	@cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-nfs-droid -f -t $(SDK_TARGET_ARCH)
+	@cd android; cp -f build/tools/gen-nfs-burn-code.sh nfs-droid/
 	@echo $@ done
 bin_package_droidnfs: sdk_folders
+	@cd android ; tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-nfs-droid.tar.gz nfs-droid
 	@echo $@ done
 bin_install_droidnfs: sdk_folders
 	@echo $@ done
 clean_droidnfs:
+	@rm -rf android/nfs-droid
+	@mkdir -p android/nfs-droid
 	@echo $@ done
 help_droidnfs:
 	@echo $@ done
@@ -1712,11 +1733,27 @@ src_package_droidnand: sdk_folders
 src_install_droidnand: sdk_folders
 	@echo $@ done
 src_config_droidnand:  sdk_folders
+	@rm -rf android/nand-droid
+	@mkdir -p android/nand-droid
 	@echo $@ done
 src_build_droidnand:   sdk_folders
-	cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-nand-droid -f -t $(SDK_TARGET_ARCH)
+	@cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-nand-droid -f -t $(SDK_TARGET_ARCH)
+	@cd android; ./build/tools/make-nand-droid-update-package -t $(SDK_TARGET_ARCH)
+	@cd android; ./build/tools/make-nand-droid-fs-recovery -t $(SDK_TARGET_ARCH)
+	@cd android; cp -f build/tools/gen-uboot-burn-code.sh  nand-droid/
+	@cd android; cp -f kernel/vmlinux.bin                  nand-droid/
 	@echo $@ done
 bin_package_droidnand: sdk_folders
+	@cd android ; tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-nand-droid.tar.gz \
+		nand-droid/data.img    \
+		nand-droid/root.img    \
+		nand-droid/system.img  \
+		nand-droid/kernel.img
+	@cd android ; tar czf $(PKG_DIR)/c2-$(SDK_VERSION_ALL)-nand-droid.image.tar.gz \
+		nand-droid/data.image    \
+		nand-droid/root.image    \
+		nand-droid/system.image  \
+		nand-droid/zvmlinux.bin
 	@echo $@ done
 bin_install_droidnand: sdk_folders
 	@echo $@ done
