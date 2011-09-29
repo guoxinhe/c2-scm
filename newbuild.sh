@@ -97,6 +97,11 @@ CONFIG_BUILD_PUBLISHC2LOCAL=
 #command line parse
 while [ $# -gt 0 ] ; do
     case $1 in
+    --only-build) shift;;
+    --stop-build) shift;;
+    --kill-running) CONFIG_KILLRUNNING=y; shift;;
+    --byuser)       CONFIG_REMOTEUSER=$2; shift 2;;
+    --byip)         CONFIG_REMOTEIP=$2; shift 2;;
     --cp-server) CONFIG_PKGSERVERS=`echo $CONFIG_PKGSERVERS | sed s,#build@10.16.13.200,build@10.16.13.200,g`;shift;;
     --noco)      CONFIG_BUILD_CHECKOUT= ; shift;;
     --help | -h)      CONFIG_BUILD_HELP=y ; shift;;
@@ -140,6 +145,35 @@ unlock_job()
 lock_job()
 {
   if [ -f $lock ]; then
+    runpid=$(cat $lock | sed -e 's,.*tid:\(.*\),\1,g')
+    if test "$CONFIG_KILLRUNNING" = "y" ; then
+    if test "$CONFIG_REMOTEUSER" != "" ; then
+    if test "$CONFIG_REMOTEIP"   != "" ; then
+    if test -x /home/hguo/sdk/bash_treepid.sh ; then
+        /home/hguo/sdk/bash_treepid.sh $runpid -v --kill
+        sleep 1;
+        CONFIG_EMAILTITLE="$(date) $CONFIG_REMOTEUSER on $CONFIG_REMOTEIP killed $CONFIG_SCRIPT"
+        echo $runpid killed.
+        (
+        echo "$CONFIG_EMAILTITLE"
+        echo by: $CONFIG_REMOTEUSER
+        echo from machine: $CONFIG_REMOTEIP
+        echo time: $(date)
+        echo killed target script: $CONFIG_MYIP@$CONFIG_SCRIPT
+        echo be killed pid: $runpid
+        echo
+        echo ""
+        echo "Regards,"
+        echo "$CONFIG_USER,$CONFIG_HOSTNAME($CONFIG_MYIP)"
+        echo "`readlink -f $0`"
+        date
+        ) | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com $KILL_REPORTTO
+        rm -rf $lock
+        exit 0
+    fi
+    fi
+    fi
+    fi
     burn=`stat -c%Z $lock`
     now=`date +%s`
     age=$((now-burn))
