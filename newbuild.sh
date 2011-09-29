@@ -615,6 +615,9 @@ checkadd_fail_send_list()
             uboot*       ) addto_send $blame_uboot      ;;
             facudisk*    ) addto_send $blame_facudisk   ;;
             usrudisk*    ) addto_send $blame_usrudisk   ;;
+            *src         ) addto_send hguo              ;;
+            *ndk         ) addto_send saladwang         ;;
+            droid*|*droid) addto_send android_devel android_repo atv;;
             xxx*         ) addto_send $blame_xxx        ;;
             *)  	  ;;
             esac
