@@ -169,10 +169,10 @@ lock_job()
         date
         ) | mail -s"$CONFIG_EMAILTITLE" hguo@c2micro.com $KILL_REPORTTO
         rm -rf $lock
+    fi
+    fi
+    fi
         exit 0
-    fi
-    fi
-    fi
     fi
     burn=`stat -c%Z $lock`
     now=`date +%s`
