@@ -762,6 +762,9 @@ src_install_uboot: sdk_folders
 src_config_uboot: sdk_folders
 	@echo start $@
 	@echo $@ done
+#src_build_uboot: override PATH:=/c2/local/c2/daily-jazz2t-32/bin:${PATH}
+#src_build_uboot: override PATH:=$(realpath android/prebuilt/linux-x86/toolchain/c2-4.3.5/bin):${PATH}
+src_build_uboot: override PATH:=$(realpath android/prebuilt/linux-x86/toolchain/c2-4.0.3/bin):${PATH}
 src_build_uboot: sdk_folders
 	@echo start $@
 	@cd $(TEST_ROOT_DIR)/build_uboot/$(GIT_SRC_UBOOT); \
@@ -1770,8 +1773,6 @@ src_config_droidnand:  sdk_folders
 	@echo $@ done
 src_build_droidnand:   sdk_folders
 	@cd android; ./build/tools/make-nfs-droid-fs-usr --only-build-nand-droid -f -t $(SDK_TARGET_ARCH)
-	@cd android; ./build/tools/make-nand-droid-update-package -t $(SDK_TARGET_ARCH)
-	@cd android; ./build/tools/make-nand-droid-fs-recovery -t $(SDK_TARGET_ARCH)
 	@cd android; cp -f build/tools/gen-uboot-burn-code.sh  nand-droid/
 	@cd android; cp -f kernel/vmlinux.bin                  nand-droid/
 	@echo $@ done
@@ -1796,6 +1797,132 @@ help_droidnand:
 test_droidnand: $(mission_droidnand)
 	@echo $@ done
 
+
+# example code
+mission_droidupdate := 	src_get_droidupdate  \
+			src_package_droidupdate \
+			src_install_droidupdate \
+			src_config_droidupdate \
+			src_build_droidupdate \
+			bin_package_droidupdate \
+			bin_install_droidupdate
+mission_modules += mission_droidupdate
+mission_targets += $(mission_droidupdate)
+.PHONY: $(mission_droidupdate) clean_droidupdate help_droidupdate test_droidupdate
+src_get_droidupdate:     sdk_folders
+	@echo $@ done
+src_package_droidupdate: sdk_folders
+	@echo $@ done
+src_install_droidupdate: sdk_folders
+	@echo $@ done
+src_config_droidupdate:  sdk_folders
+	@echo $@ done
+src_build_droidupdate:   sdk_folders
+	@cd android; ./build/tools/make-nand-droid-update-package -t $(SDK_TARGET_ARCH)
+	@echo $@ done
+bin_package_droidupdate: sdk_folders
+	@echo $@ done
+bin_install_droidupdate: sdk_folders
+	@echo $@ done
+clean_droidupdate:
+	@echo $@ done
+help_droidupdate:
+	@echo $@ done
+test_droidupdate: $(mission_droidupdate)
+	@echo $@ done
+
+# example code
+mission_droidrecovery := 	src_get_droidrecovery  \
+			src_package_droidrecovery \
+			src_install_droidrecovery \
+			src_config_droidrecovery \
+			src_build_droidrecovery \
+			bin_package_droidrecovery \
+			bin_install_droidrecovery
+mission_modules += mission_droidrecovery
+mission_targets += $(mission_droidrecovery)
+.PHONY: $(mission_droidrecovery) clean_droidrecovery help_droidrecovery test_droidrecovery
+src_get_droidrecovery:     sdk_folders
+	@echo $@ done
+src_package_droidrecovery: sdk_folders
+	@echo $@ done
+src_install_droidrecovery: sdk_folders
+	@echo $@ done
+src_config_droidrecovery:  sdk_folders
+	@echo $@ done
+src_build_droidrecovery:   sdk_folders
+	@cd android; ./build/tools/make-nand-droid-fs-recovery -t $(SDK_TARGET_ARCH)
+	@echo $@ done
+bin_package_droidrecovery: sdk_folders
+	@echo $@ done
+bin_install_droidrecovery: sdk_folders
+	@echo $@ done
+clean_droidrecovery:
+	@echo $@ done
+help_droidrecovery:
+	@echo $@ done
+test_droidrecovery: $(mission_droidrecovery)
+	@echo $@ done
+
+
+# example code
+mission_droidsdk := 	src_get_droidsdk  \
+			src_package_droidsdk \
+			src_install_droidsdk \
+			src_config_droidsdk \
+			src_build_droidsdk \
+			bin_package_droidsdk \
+			bin_install_droidsdk
+mission_modules += mission_droidsdk
+mission_targets += $(mission_droidsdk)
+.PHONY: $(mission_droidsdk) clean_droidsdk help_droidsdk test_droidsdk
+src_get_droidsdk:     sdk_folders
+	@echo $@ done
+src_package_droidsdk: sdk_folders
+	@echo $@ done
+src_install_droidsdk: sdk_folders
+	@echo $@ done
+src_config_droidsdk:  sdk_folders
+	@echo $@ done
+src_build_droidsdk:   sdk_folders
+	cp -f $(TOP_DIR)/android/out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar \
+		$(PKG_DIR)/android.jar
+	@echo $@ done
+bin_package_droidsdk: sdk_folders
+	@echo $@ done
+bin_install_droidsdk: sdk_folders
+	@echo $@ done
+clean_droidsdk:
+	@echo $@ done
+help_droidsdk:
+	@echo $@ done
+test_droidsdk: $(mission_droidsdk)
+	@echo $@ done
+
+ifeq ($(SDK_TARGET_ARCH),jazz2)
+    NDKFLAGS := -to
+endif
+ifeq ($(SDK_TARGET_ARCH),jazz2t)
+    NDKFLAGS := -t3o
+endif
+ifeq ($(SDK_TARGET_ARCH),jazz2l)
+    NDKFLAGS := -tlo
+endif
+src_build_droidndk1:   sdk_folders
+	cd android/ndk-r5b ;\
+		./build/tools/release-ndk.sh      $(NDKFLAGS) $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
+		$(PKG_DIR)/android-ndk-r5b-c2-linux.tar.bz2
+src_build_droidndk2:   sdk_folders
+	cd android/ndk-r5b ;\
+		./build/tools/release-ndk.sh -win $(NDKFLAGS) $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+	cp $(TOP_DIR)/android/android-ndk-r5b-c2-windows.tar.bz2 \
+		$(PKG_DIR)/android-ndk-r5b-c2-windows.tar.bz2
+src_build_droidndk3:   sdk_folders
+	cd android/ndk-r5b ;\
+		./build/tools/release-ndk.sh -pu  $(NDKFLAGS) $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
+		$(PKG_DIR)/android-ndk-r5b-c2-linux-premium.tar.bz2
 # example code
 mission_droidndk := 	src_get_droidndk  \
 			src_package_droidndk \
@@ -1815,24 +1942,7 @@ src_install_droidndk: sdk_folders
 	@echo $@ done
 src_config_droidndk:  sdk_folders
 	@echo $@ done
-src_build_droidndk1:   sdk_folders
-	cd android/ndk-r5b ;\
-		./build/tools/release-ndk.sh -to $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
-	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
-		$(PKG_DIR)/android-ndk-r5b-c2-linux.tar.bz2
-src_build_droidndk2:   sdk_folders
-	cd android/ndk-r5b ;\
-		./build/tools/release-ndk.sh -win -to $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
-	cp $(TOP_DIR)/android/android-ndk-r5b-c2-windows.tar.bz2 \
-		$(PKG_DIR)/android-ndk-r5b-c2-windows.tar.bz2
-src_build_droidndk3:   sdk_folders
-	cd android/ndk-r5b ;\
-		./build/tools/release-ndk.sh -pu -to $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
-	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
-		$(PKG_DIR)/android-ndk-r5b-c2-linux-premium.tar.bz2
 src_build_droidndk:   sdk_folders  src_build_droidndk1 src_build_droidndk2 src_build_droidndk3
-	cp $(TOP_DIR)/android/out/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates/classes.jar \
-		$(PKG_DIR)/android.jar
 	@echo $@ done
 bin_package_droidndk: sdk_folders
 	@echo $@ done

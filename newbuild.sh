@@ -1098,7 +1098,7 @@ fi
 
 if [ $CONFIG_BUILD_ANDROIDNFS ]; then
     cd $TOP
-    modules="droidkernel droidbin droidnfs droidnand droidndk"
+    modules="droidkernel droidbin droidnfs droidnand droidupdate droidrecovery droidsdk droidndk"
     steps="src_get src_package src_install src_config src_build bin_package bin_install "
     build_modules_x_steps
     #check build result
