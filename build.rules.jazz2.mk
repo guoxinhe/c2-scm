@@ -1818,7 +1818,7 @@ src_install_droidupdate: sdk_folders
 src_config_droidupdate:  sdk_folders
 	@echo $@ done
 src_build_droidupdate:   sdk_folders
-	@cd android; ./build/tools/make-nand-droid-update-package -t $(SDK_TARGET_ARCH)
+	@cd android; . ./env.sh $(SDK_TARGET_ARCH); ./build/tools/make-nand-droid-update-package -t $(SDK_TARGET_ARCH)
 	@echo $@ done
 bin_package_droidupdate: sdk_folders
 	@echo $@ done
@@ -1851,7 +1851,7 @@ src_install_droidrecovery: sdk_folders
 src_config_droidrecovery:  sdk_folders
 	@echo $@ done
 src_build_droidrecovery:   sdk_folders
-	@cd android; ./build/tools/make-nand-droid-fs-recovery -t $(SDK_TARGET_ARCH)
+	@cd android; . ./env.sh $(SDK_TARGET_ARCH); ./build/tools/make-nand-droid-fs-recovery -t $(SDK_TARGET_ARCH)
 	@echo $@ done
 bin_package_droidrecovery: sdk_folders
 	@echo $@ done
