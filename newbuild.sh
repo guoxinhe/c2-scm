@@ -1107,7 +1107,6 @@ if [ $CONFIG_BUILD_ANDROIDNFS ]; then
     else
         CONFIG_BUILD_PUBLISH=
         build_fail="yes"
-        update_indexlog "nand_droid:1:$CONFIG_LOGDIR/nand_droid.log" $CONFIG_INDEXLOG
         nr_totalerror=$((nr_totalerror+1))
         nr_totalerror=$((nr_totalerror+1))
     fi
