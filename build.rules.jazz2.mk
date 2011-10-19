@@ -1670,6 +1670,7 @@ src_build_droidkernel:   sdk_folders
 bin_package_droidkernel: sdk_folders
 	@echo $@ done
 bin_install_droidkernel: sdk_folders
+	cp -f -t $(TOP_DIR)/c2/   $(TOP_DIR)/android/kernel/*vmlinux.bin
 	@echo $@ done
 clean_droidkernel:
 	@echo $@ done
