@@ -2,10 +2,7 @@
 
 #goes to target folder and clone a repo from local, otherwise will from website.
 if [ ! -d .repo ]; then
-mkdir -p .repo;
-cd .repo;
-git clone ssh://git.bj.c2micro.com/c2sdk/repo.git;
-cd ..;
+mkdir -p .repo; git clone ssh://git.bj.c2micro.com/c2sdk/repo.git .repo/repo
 fi
 
 BR=${1:-master}
