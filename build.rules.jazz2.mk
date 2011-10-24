@@ -1550,7 +1550,7 @@ mission_targets += $(mission_c2sdksrc)
 source/.repo/repo/repo:
 	@mkdir -p source;
 	@cd source; mkdir -p .repo; git clone ssh://git.bj.c2micro.com/mentor-mirror/build/repo.git .repo/repo
-	@cd source; yes "" | repo init -u ssh://git.bj.c2micro.com/c2sdk/manifests.git -b ${CONFIG_BRANCH_C2SDK} -m sw_media.xml
+	@cd source; yes "" | repo init -u ssh://git.bj.c2micro.com/c2sdk/manifests.git -b ${CONFIG_BRANCH_C2SDK} -m android.xml
 	@cd source; repo sync
 	@cd source; repo start ${CONFIG_BRANCH_C2SDK} --all
 	@echo "$@ done"
