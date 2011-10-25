@@ -1911,17 +1911,23 @@ ifeq ($(SDK_TARGET_ARCH),jazz2l)
 endif
 src_build_droidndk1:   sdk_folders
 	cd android/ndk-r5b ;\
-		./build/tools/release-ndk.sh      $(NDKFLAGS) $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+		./build/tools/release-ndk.sh      $(NDKFLAGS) \
+		$(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH) \
+		 -b ${CONFIG_BRANCH_ANDROID}
 	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
 		$(PKG_DIR)/android-ndk-r5b-c2-linux.tar.bz2
 src_build_droidndk2:   sdk_folders
 	cd android/ndk-r5b ;\
-		./build/tools/release-ndk.sh -win $(NDKFLAGS) $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+		./build/tools/release-ndk.sh -win $(NDKFLAGS) \
+		$(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH) \
+		 -b ${CONFIG_BRANCH_ANDROID}
 	cp $(TOP_DIR)/android/android-ndk-r5b-c2-windows.tar.bz2 \
 		$(PKG_DIR)/android-ndk-r5b-c2-windows.tar.bz2
 src_build_droidndk3:   sdk_folders
 	cd android/ndk-r5b ;\
-		./build/tools/release-ndk.sh -pu  $(NDKFLAGS) $(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH);
+		./build/tools/release-ndk.sh -pu  $(NDKFLAGS) \
+		$(TOP_DIR)/android/out/target/product/$(SDK_TARGET_ARCH) \
+		 -b ${CONFIG_BRANCH_ANDROID}
 	cp $(TOP_DIR)/android/android-ndk-r5b-c2-linux.tar.bz2   \
 		$(PKG_DIR)/android-ndk-r5b-c2-linux-premium.tar.bz2
 # example code
